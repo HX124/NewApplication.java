@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style type="text/tailwindcss">
+    @layer utilities {
+      /* 激活态：加深背景+纯白粗体文字，提升对比度 */
+      .sidebar-item-active {
+        @apply bg-[#2563EB] text-white font-medium border-r-4 border-yellow-400 !important;
+      }
+      /* 窄版菜单项：减少内边距和图标间距 */
+      .menu-item {
+        @apply px-4 py-3 cursor-pointer transition-all duration-200 text-gray-700 text-sm flex items-center rounded-l-lg;
+      }
+      /* hover态：极浅蓝，无激活态时生效 */
+      .menu-item:hover:not(.sidebar-item-active) {
+        @apply bg-[#EFF6FF] text-gray-900 translate-x-1;
+      }
+      /* 窄版分组标题：减少内边距 */
+      .menu-group-title {
+        @apply px-4 py-2 text-xs text-gray-500 uppercase tracking-wider mt-5 mb-2;
+      }
+      /* 激活态图标也改为白色，统一视觉 */
+      .sidebar-item-active i {
+        @apply text-white !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-[#F8FAFC] flex flex-col h-screen w-[180px]"> <!-- 固定180px宽度 -->
+<!-- 系统logo区域：窄版适配 -->
+<div class="py-3 text-center border-b border-[#E2E8F0] mb-2">
+  <div class="flex items-center justify-center gap-1.5"> <!-- 缩小图标文字间距 -->
+    <i class="fa-solid fa-database text-lg text-blue-600"></i> <!-- 缩小图标尺寸 -->
+    <span class="text-gray-800 text-base font-semibold">FMEA 知识库</span> <!-- 缩小文字尺寸 -->
+  </div>
+</div>
+
+<!-- 导航菜单：窄版适配，减少内边距 -->
+<nav class="flex-1 overflow-y-auto px-1"> <!-- 缩小左右内边距 -->
+  <!-- 菜单分组1：基础资源库 -->
+  <h3 class="menu-group-title">基础资源库</h3>
+  <ul class="space-y-1 mb-2">
+    <!-- 首页（产品零件库） -->
+    <li>
+      <a href="javascript:;" data-page="product parts library.html" class="sidebar-item-active menu-item">
+        <i class="fa-solid fa-puzzle-piece w-4 h-4 mr-2 text-blue-600"></i> <!-- 缩小图标+减少间距 -->
+        产品零件库
+      </a>
+    </li>
+    <!-- 功能库 -->
+    <li>
+      <a href="javascript:;" data-page="function library.html" class="menu-item">
+        <i class="fa-solid fa-sitemap w-4 h-4 mr-2 text-blue-600"></i>
+        功能库
+      </a>
+    </li>
+    <!-- 特性库 -->
+    <li>
+      <a href="javascript:;" data-page="feature library.html" class="menu-item">
+        <i class="fa-solid fa-list-check w-4 h-4 mr-2 text-blue-600"></i>
+        特性库
+      </a>
+    </li>
+  </ul>
+
+  <!-- 菜单分组2：失效与措施库 -->
+  <h3 class="menu-group-title">失效与措施库</h3>
+  <ul class="space-y-1 mb-2">
+    <!-- 失效库 -->
+    <li>
+      <a href="javascript:;" data-page="invalid library.html" class="menu-item">
+        <i class="fa-solid fa-exclamation-circle w-4 h-4 mr-2 text-blue-600"></i>
+        失效库
+      </a>
+    </li>
+    <!-- 预防措施库 -->
+    <li>
+      <a href="javascript:;" data-page="preventive measures library.html" class="menu-item">
+        <i class="fa-solid fa-shield-virus w-4 h-4 mr-2 text-blue-600"></i>
+        预防措施库
+      </a>
+    </li>
+    <!-- 探测措施库 -->
+    <li>
+      <a href="javascript:;" data-page="detection measures library.html" class="menu-item">
+        <i class="fa-solid fa-magnifying-glass-plus w-4 h-4 mr-2 text-blue-600"></i>
+        探测措施库
+      </a>
+    </li>
+  </ul>
+
+  <!-- 菜单分组3：文档与标准库 -->
+  <h3 class="menu-group-title">文档与标准库</h3>
+  <ul class="space-y-1">
+    <!-- DVP库 -->
+    <li>
+      <a href="javascript:;" data-page="dvp library.html" class="menu-item">
+        <i class="fa-solid fa-table-cells w-4 h-4 mr-2 text-blue-600"></i>
+        DVP库
+      </a>
+    </li>
+    <!-- 技术标准库 -->
+    <li>
+      <a href="javascript:;" data-page="technical standards library.html" class="menu-item">
+        <i class="fa-solid fa-book-open-reader w-4 h-4 mr-2 text-blue-600"></i>
+        技术标准库
+      </a>
+    </li>
+  </ul>
+</nav>
+
+<script>
+  // 页面加载时检查当前URL并设置激活状态
+  document.addEventListener('DOMContentLoaded', function() {
+    // 从父窗口获取当前页面路径
+    try {
+      const currentPage = window.parent.document.getElementById('content-iframe')?.src || '';
+      if (currentPage) {
+        // 提取文件名
+        const pageName = currentPage.split('/').pop().split('.')[0] + '.html';
+        const targetMenu = document.querySelector(`.menu-item[data-page="${pageName}"]`);
+        if (targetMenu) {
+          // 移除所有激活态
+          document.querySelectorAll('.menu-item').forEach(link => {
+            link.classList.remove('sidebar-item-active');
+          });
+          // 添加当前激活态
+          targetMenu.classList.add('sidebar-item-active');
+        }
+      }
+    } catch (e) {
+      console.log('无法访问父窗口，使用默认激活状态');
+    }
+  });
+
+  // 菜单点击逻辑
+  document.querySelectorAll('.menu-item').forEach(item => {
+    item.addEventListener('click', function() {
+      const pageUrl = this.getAttribute('data-page');
+
+      // 发送消息切换主页面
+      window.parent.postMessage({
+        type: 'switchPage',
+        page: pageUrl
+      }, '*');
+    });
+  });
+
+  // 监听激活菜单指令（同步外部触发的页面切换）
+  window.addEventListener('message', function(e) {
+    if (e.data.type === 'activateMenu') {
+      const targetPage = e.data.page;
+      const targetMenu = document.querySelector(`.menu-item[data-page="${targetPage}"]`);
+      if (targetMenu) {
+        // 移除所有激活态
+        document.querySelectorAll('.menu-item').forEach(link => {
+          link.classList.remove('sidebar-item-active');
+        });
+        // 添加当前激活态
+        targetMenu.classList.add('sidebar-item-active');
+      }
+    }
+  });
+</script>
+</body>
+</html>

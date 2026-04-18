@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>功能可视化</title>
+  <link rel="stylesheet" href="../css/modal-form-common.css">
+  <link rel="stylesheet" href="../css/DFMEA-page-5.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+<div class="dfmea-container">
+  <div class="edit-container">
+    <div class="edit-tabs">
+      <button class="tab-btn active" onclick="showChart()"><i class="fas fa-project-diagram"></i> 功能树</button>
+      <button class="tab-btn" onclick="showTableFun()"><i class="fas fa-table"></i> 功能关系表</button>
+      <button class="tab-btn" onclick="showTableCha()"><i class="fas fa-th-list"></i> 特性清单</button>
+    </div>
+    <div class="edit-actions">
+      <button class="action-btn primary" onclick="exportData(this)"><i class="fas fa-paper-plane"></i> 导出功能树</button>
+    </div>
+  </div>
+  
+  <div class="content-box">
+    <div id="chart-section">
+      <div id="chart-container"></div>
+    </div>
+    
+    <div id="tablefun-section" class="hidden">
+      <div class="table-wrapper">
+        <table id="tablefun-container">
+          <thead>
+            <tr>
+              <th>上一较高级别</th>
+              <th>关注要素</th>
+              <th>下一较低级别或特性类型</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div id="tablecha-section" class="hidden">
+      <div class="table-wrapper">
+        <table id="tablecha-container">
+          <thead>
+            <tr>
+              <th>零件</th>
+              <th>特性编号</th>
+              <th>特性描述</th>
+              <th>特性分类</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 右键菜单 -->
+<div id="context-menu" class="context-menu">
+  <ul>
+    <li onclick="handleAddFun()"><i class="fas fa-plus-circle"></i> 新增功能</li>
+    <li onclick="handleAddCha()"><i class="fas fa-plus-square"></i> 新增特性</li>
+    <li onclick="handleEdit()"><i class="fas fa-edit"></i> 编辑</li>
+  </ul>
+</div>
+
+<!-- 弹窗 -->
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modal-title"></h3>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <form id="element-form">
+      <div class="modal-body">
+        <!-- 表单内容由JS动态生成 -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="modal-cancel" onclick="closeModal()">取消</button>
+        <button type="submit" class="modal-submit">确认</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 特性弹窗 -->
+<div id="characteristic-modal" class="modal" style="display: none;">
+  <div class="modal-content" style="width: 700px; max-width: 90%;">
+    <div class="modal-header">
+      <h3 id="characteristic-modal-title">新增特性</h3>
+      <button class="modal-close" onclick="closeCharacteristicModal()">&times;</button>
+    </div>
+    <form id="characteristic-form" onsubmit="handleCharacteristicFormSubmit(); return false;">
+      <div class="modal-body" style="padding: 20px;">
+        <div class="form-row" style="display: flex; gap: 15px; margin-bottom: 15px;">
+          <div class="form-item" style="flex: 1;">
+            <label style="display: block; margin-bottom: 5px; font-size: 14px; color: #666; font-weight: 500;">
+              特性编号 <span style="color: #F53F3F;">*</span>
+            </label>
+            <input type="text" id="char-code" class="modal-input" 
+                   placeholder="如：C001" required
+                   style="width: 100%; padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px;">
+          </div>
+          <div class="form-item" style="flex: 1;">
+            <label style="display: block; margin-bottom: 5px; font-size: 14px; color: #666; font-weight: 500;">
+              标准名称 <span style="color: #F53F3F;">*</span>
+            </label>
+            <input type="text" id="char-name" class="modal-input" 
+                   placeholder="请输入特性标准名称" required
+                   style="width: 100%; padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px;">
+          </div>
+        </div>
+
+        <div class="form-row" style="display: flex; gap: 15px; margin-bottom: 15px;">
+          <div class="form-item" style="flex: 1;">
+            <label style="display: block; margin-bottom: 5px; font-size: 14px; color: #666; font-weight: 500;">
+              特性类型 <span style="color: #F53F3F;">*</span>
+            </label>
+            <select id="char-type" class="modal-input" required
+                    onchange="toggleQuantitativeFields()"
+                    style="width: 100%; padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px;">
+              <option value="">请选择特性类型</option>
+              <option value="定量">定量</option>
+              <option value="定性">定性</option>
+            </select>
+          </div>
+          <div class="form-item" style="flex: 1;">
+            <label style="display: block; margin-bottom: 5px; font-size: 14px; color: #666; font-weight: 500;">
+              特殊特性分类 <span style="color: #F53F3F;">*</span>
+            </label>
+            <select id="char-class" class="modal-input" required
+                    style="width: 100%; padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px;">
+              <option value="">请选择分类</option>
+              <option value="安全特性">安全特性</option>
+              <option value="关键特性">关键特性</option>
+              <option value="重要特性">重要特性</option>
+              <option value="一般特性">一般特性</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row" style="display: flex; gap: 15px; margin-bottom: 15px;">
+          <div class="form-item" style="flex: 1;">
+            <label style="display: block; margin-bottom: 5px; font-size: 14px; color: #666; font-weight: 500;">
+              特殊特性符号
+            </label>
+            <input type="text" id="char-symbol" class="modal-input" 
+                   placeholder="如：🔴, 🟡, ⚪"
+                   style="width: 100%; padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px;">
+          </div>
+        </div>
+
+        <!-- 定量数据字段 -->
+        <div id="quantitative-fields" style="display: none; margin-bottom: 15px;">
+          <div class="form-row" style="display: flex; gap: 15px; margin-bottom: 15px;">
+            <div class="form-item" style="flex: 1;">
+              <label style="display: block; margin-bottom: 5px; font-size: 14px; color: #666; font-weight: 500;">
+                定量基准值
+              </label>
+              <input type="number" step="0.001" id="baseline-value" class="modal-input" 
+                     placeholder="请输入基准值"
+                     style="width: 100%; padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px;">
+            </div>
+            <div class="form-item" style="flex: 1;">
+              <label style="display: block; margin-bottom: 5px; font-size: 14px; color: #666; font-weight: 500;">
+                定量下限
+              </label>
+              <input type="number" step="0.001" id="lower-limit" class="modal-input" 
+                     placeholder="请输入下限值"
+                     style="width: 100%; padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px;">
+            </div>
+          </div>
+
+          <div class="form-row" style="display: flex; gap: 15px;">
+            <div class="form-item" style="flex: 1;">
+              <label style="display: block; margin-bottom: 5px; font-size: 14px; color: #666; font-weight: 500;">
+                定量上限
+              </label>
+              <input type="number" step="0.001" id="upper-limit" class="modal-input" 
+                     placeholder="请输入上限值"
+                     style="width: 100%; padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px;">
+            </div>
+            <div class="form-item" style="flex: 1;">
+              <label style="display: block; margin-bottom: 5px; font-size: 14px; color: #666; font-weight: 500;">
+                定量单位
+              </label>
+              <input type="text" id="unit" class="modal-input" 
+                     placeholder="如：mm, kg, °C"
+                     style="width: 100%; padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px;">
+            </div>
+          </div>
+        </div>
+
+        <!-- 定性规格字段 -->
+        <div class="form-item" style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-size: 14px; color: #666; font-weight: 500;">
+            定性规格/规格描述 <span style="color: #F53F3F;">*</span>
+          </label>
+          <textarea id="qualitative-spec" class="modal-textarea" required 
+                    placeholder="请输入定性规格或详细描述"
+                    oninput="autoResizeTextarea(this)"
+                    style="width: 100%; min-height: 80px; padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; resize: vertical;"></textarea>
+        </div>
+
+        <input type="hidden" id="selected-element-id">
+        <input type="hidden" id="char-id">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="modal-cancel" onclick="closeCharacteristicModal()">取消</button>
+        <button type="submit" class="modal-submit">确认</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<script src="..\js\DFMEA-page-5.js"></script>
+</body>
+</html>

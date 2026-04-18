@@ -1,0 +1,101 @@
+/* ===== 基础样式 ===== */
+body {
+  font-family: "Microsoft YaHei", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f7fa;
+  color: #333;
+  height: 100vh;
+  overflow-y: scroll;         /* 确保滚动区域 */
+}
+
+body::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari, Edge新版 */
+}
+
+/* ===== 布局样式 ===== */
+/* 内容区域 */
+.content-box {
+  flex: 1;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+#chart-container {
+  flex: 1;
+  width: 100%;
+  position: relative;
+  min-height: 600px;
+}
+
+/* ===== 特殊组件样式 ===== */
+/* 表格样式补充 */
+#table-container td {
+  font-weight: normal;
+}
+
+/* 父行样式 */
+.parent-row {
+  font-weight: 600;
+}
+
+/* 失效模式特殊样式 */
+.failure-text {
+  color: #FF0000;
+  font-size: 12px;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* 失效模式文本区域特殊样式（补充公共样式） */
+.failure-textarea {
+  border-left: 3px solid #FF0000;
+}
+
+.failure-textarea:focus {
+  border-left-color: #165DFF;
+}
+
+.failure-textarea.readonly {
+  background-color: #fff5f5;
+  border-left: 3px solid #ffcccc;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  
+  .chart-controls {
+    top: 10px;
+    right: 10px;
+    flex-direction: row;
+  }
+  
+  .chart-controls button {
+    width: 32px;
+    height: 32px;
+  }
+  
+  #table-container th,
+  #table-container td {
+    padding: 8px 10px;
+    min-width: 150px;
+  }
+}
+
+/* 表格适配小屏幕 */
+@media (max-width: 1024px) {
+  #table-container {
+    font-size: 13px;
+  }
+  
+  #table-container th,
+  #table-container td {
+    padding: 10px 12px;
+    min-width: 180px;
+  }
+}

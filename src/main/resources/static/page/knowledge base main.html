@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FMEA知识库管理系统</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- 配置Tailwind自定义工具类 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            success: '#00b42a',
+            warning: '#ff7d00',
+            danger: '#F53F3F',
+            gray: {
+              100: '#f5f7fa',
+              200: '#e6e6e6',
+              300: '#d9d9d9',
+              400: '#999',
+              500: '#666',
+              600: '#333',
+              700: '#2f4050',
+              800: '#2563EB',
+            }
+          },
+          fontFamily: {
+            sans: ['"Microsoft YaHei"', 'Arial', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans antialiased h-screen overflow-hidden">
+<div class="flex h-screen">
+  <!-- 侧边栏 -->
+  <aside class="w-[220px] bg-[#F8FAFC] border-r border-gray-200 transition-all duration-200 shrink-0">
+    <iframe src="knowledge base sidebar.html" class="w-full h-full border-0"></iframe>
+  </aside>
+
+  <!-- 主内容区 -->
+  <main class="flex-1 overflow-hidden">
+    <iframe id="content-iframe" src="product parts library.html" class="w-full h-full border-0"></iframe>
+  </main>
+</div>
+
+<script>
+  // 等待iframe加载完成后发送激活状态
+  document.addEventListener('DOMContentLoaded', function() {
+    const iframe = document.getElementById('content-iframe');
+
+    iframe.onload = function() {
+      // 发送当前页面激活状态到侧边栏
+      const sidebarIframe = document.querySelector('aside iframe');
+      if (sidebarIframe && sidebarIframe.contentWindow) {
+        const currentPage = iframe.src.split('/').pop();
+        sidebarIframe.contentWindow.postMessage({
+          type: 'activateMenu',
+          page: currentPage
+        }, '*');
+      }
+    };
+  });
+
+  // 监听iframe页面切换消息
+  window.addEventListener('message', function(e) {
+    if (e.data.type === 'switchPage') {
+      const iframe = document.getElementById('content-iframe');
+      iframe.src = e.data.page;
+
+      // 页面加载完成后同步侧边栏激活状态
+      iframe.onload = function() {
+        const sidebarIframe = document.querySelector('aside iframe');
+        if (sidebarIframe && sidebarIframe.contentWindow) {
+          sidebarIframe.contentWindow.postMessage({
+            type: 'activateMenu',
+            page: e.data.page
+          }, '*');
+        }
+      };
+    }
+  });
+</script>
+</body>
+</html>

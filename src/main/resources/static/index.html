@@ -1,0 +1,2108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FMEA数字化管理系统</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/index.css">
+</head>
+<body class="bg-gray-50 font-sans antialiased">
+<div class="flex h-screen overflow-hidden">
+  <!-- 侧边栏容器 -->
+  <aside class="w-[200px] bg-[#2f4050] flex flex-col text-white">
+    <iframe src="page/sidebar.html" class="flex-1"></iframe>
+  </aside>
+
+  <!-- 右侧内容区 -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <!-- 顶部导航栏 -->
+    <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-end px-6 relative">
+      <div class="flex items-center space-x-4">
+        <!-- 通知按钮 -->
+        <div class="relative">
+          <button
+                  class="text-gray-500 hover:text-[#165DFF] transition-colors relative"
+                  onclick="toggleNotificationDropdown()"
+                  title="通知"
+                  id="notification-btn"
+          >
+            <i class="fa-solid fa-bell text-xl"></i>
+            <!-- 未读通知角标 -->
+            <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center" id="notification-badge">
+              3
+            </span>
+          </button>
+
+          <!-- 通知下拉窗 -->
+          <div
+                  id="notification-dropdown"
+                  class="notification-dropdown absolute right-0 top-full mt-2 w-96 bg-white rounded-xl shadow-lg z-50 hidden border border-gray-200"
+          >
+            <!-- 通知头部 -->
+            <div class="p-4 border-b border-gray-100">
+              <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                  <i class="fa-solid fa-bell text-blue-600 mr-2"></i>
+                  <h3 class="font-bold text-gray-800 text-lg">通知中心</h3>
+                  <span class="ml-2 bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full" id="notification-header-badge">3 条未读</span>
+                </div>
+                <button
+                        class="text-gray-400 hover:text-gray-600"
+                        onclick="closeNotificationDropdown()"
+                >
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- 通知标签栏 -->
+            <div class="border-b border-gray-100 px-4">
+              <div class="flex space-x-4">
+                <button
+                        class="py-2 px-1 font-medium text-blue-600 border-b-2 border-blue-600 text-sm"
+                        onclick="switchNotificationTab('unread')"
+                        id="tab-unread"
+                >
+                  未读
+                </button>
+                <button
+                        class="py-2 px-1 font-medium text-gray-500 hover:text-gray-700 text-sm"
+                        onclick="switchNotificationTab('read')"
+                        id="tab-read"
+                >
+                  已读
+                </button>
+                <button
+                        class="py-2 px-1 font-medium text-gray-500 hover:text-gray-700 text-sm"
+                        onclick="switchNotificationTab('all')"
+                        id="tab-all"
+                >
+                  全部
+                </button>
+              </div>
+            </div>
+
+            <!-- 通知列表容器 -->
+            <div class="max-h-96 overflow-y-auto">
+              <!-- 搜索框 -->
+              <div class="p-4 border-b border-gray-100">
+                <div class="relative">
+                  <input
+                          type="text"
+                          placeholder="搜索通知..."
+                          class="w-full px-4 py-2 pl-10 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                          id="notification-search"
+                  >
+                  <i class="fa-solid fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                </div>
+              </div>
+
+              <!-- 通知列表 -->
+              <div id="notification-list">
+                <!-- 未读通知 -->
+                <div class="p-3 border-b border-gray-100 notification-item cursor-pointer hover:bg-blue-50"
+                     data-read="false"
+                     data-title="新的FMEA项目审核请求"
+                     data-content="张三提交了'发动机控制系统FMEA'项目，等待您的审核。"
+                     data-type="project"
+                     data-time="10分钟前"
+                     data-details="项目名称：发动机控制系统FMEA<br>提交人：张三<br>提交时间：2023-10-10 14:30<br>紧急程度：高<br>要求完成时间：2023-10-15"
+                     onclick="openNotificationDetail(this)">
+                  <div class="flex items-start">
+                    <div class="mr-3 mt-0.5">
+                      <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                    </div>
+                    <div class="flex-1">
+                      <div class="flex justify-between items-start">
+                        <h4 class="font-medium text-gray-800 text-sm">新的FMEA项目审核请求</h4>
+                        <span class="text-xs text-gray-500 ml-2">10分钟前</span>
+                      </div>
+                      <p class="text-gray-600 text-xs mt-1">张三提交了"发动机控制系统FMEA"项目，等待您的审核。</p>
+                      <div class="flex items-center mt-2">
+                        <span class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded mr-2">项目审核</span>
+                        <button class="text-xs text-blue-600 hover:text-blue-800" onclick="markAsRead(this, event)">标记为已读</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 系统通知 -->
+                <div class="p-3 border-b border-gray-100 notification-item cursor-pointer hover:bg-blue-50"
+                     data-read="false"
+                     data-title="系统维护提醒"
+                     data-content="系统将于今晚00:00-02:00进行维护升级，请提前保存工作。"
+                     data-type="system"
+                     data-time="2小时前"
+                     data-details="维护时间：今晚00:00-02:00<br>影响范围：全系统<br>建议操作：请提前保存所有工作，避免数据丢失"
+                     onclick="openNotificationDetail(this)">
+                  <div class="flex items-start">
+                    <div class="mr-3 mt-0.5">
+                      <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                    </div>
+                    <div class="flex-1">
+                      <div class="flex justify-between items-start">
+                        <h4 class="font-medium text-gray-800 text-sm">系统维护提醒</h4>
+                        <span class="text-xs text-gray-500 ml-2">2小时前</span>
+                      </div>
+                      <p class="text-gray-600 text-xs mt-1">系统将于今晚00:00-02:00进行维护升级，请提前保存工作。</p>
+                      <div class="flex items-center mt-2">
+                        <span class="text-xs px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded mr-2">系统通知</span>
+                        <button class="text-xs text-blue-600 hover:text-blue-800" onclick="markAsRead(this, event)">标记为已读</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 公告通知 -->
+                <div class="p-3 border-b border-gray-100 notification-item cursor-pointer"
+                     data-read="true"
+                     data-title="新版本发布"
+                     data-content="FMEA数字化管理系统 v2.1.0 已发布，新增多项功能。"
+                     data-type="announcement"
+                     data-time="1天前"
+                     data-details="版本号：v2.1.0<br>发布时间：2023-10-09<br>主要更新：<br>1. 新增FMEA模板管理功能<br>2. 优化风险分析算法<br>3. 增强团队协作功能"
+                     onclick="openNotificationDetail(this)">
+                  <div class="flex items-start">
+                    <div class="mr-3 mt-0.5">
+                      <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
+                    </div>
+                    <div class="flex-1">
+                      <div class="flex justify-between items-start">
+                        <h4 class="font-medium text-gray-600 text-sm">新版本发布</h4>
+                        <span class="text-xs text-gray-400 ml-2">1天前</span>
+                      </div>
+                      <p class="text-gray-500 text-xs mt-1">FMEA数字化管理系统 v2.1.0 已发布，新增多项功能。</p>
+                      <div class="flex items-center mt-2">
+                        <span class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded mr-2">公告</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 活动通知 -->
+                <div class="p-3 border-b border-gray-100 notification-item cursor-pointer"
+                     data-read="true"
+                     data-title="FMEA培训课程"
+                     data-content="本周五下午将举办FMEA高级应用培训，欢迎报名参加。"
+                     data-type="activity"
+                     data-time="2天前"
+                     data-details="活动名称：FMEA高级应用培训<br>时间：本周五下午 14:00-17:00<br>地点：线上会议（链接将通过邮件发送）<br>主讲人：李四（FMEA专家）<br>报名方式：请联系人力资源部"
+                     onclick="openNotificationDetail(this)">
+                  <div class="flex items-start">
+                    <div class="mr-3 mt-0.5">
+                      <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
+                    </div>
+                    <div class="flex-1">
+                      <div class="flex justify-between items-start">
+                        <h4 class="font-medium text-gray-600 text-sm">FMEA培训课程</h4>
+                        <span class="text-xs text-gray-400 ml-2">2天前</span>
+                      </div>
+                      <p class="text-gray-500 text-xs mt-1">本周五下午将举办FMEA高级应用培训，欢迎报名参加。</p>
+                      <div class="flex items-center mt-2">
+                        <span class="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded mr-2">活动</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 空状态提示 -->
+                <div id="empty-notification" class="hidden p-8 text-center">
+                  <i class="fa-regular fa-bell text-3xl text-gray-300 mb-3"></i>
+                  <p class="text-gray-500 text-sm">暂无通知</p>
+                  <p class="text-gray-400 text-xs mt-1">当有新的系统消息时，会在这里显示</p>
+                </div>
+              </div>
+
+              <!-- 通知底部操作 -->
+              <div class="p-4 border-t border-gray-100 bg-gray-50">
+                <div class="flex justify-between items-center">
+                  <button
+                          class="text-xs text-gray-600 hover:text-gray-800 font-medium"
+                          onclick="markAllAsRead()"
+                  >
+                    <i class="fa-solid fa-check-double mr-1"></i>
+                    全部标记为已读
+                  </button>
+                  <button
+                          class="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                          onclick="viewAllNotifications()"
+                  >
+                    <i class="fa-solid fa-list mr-1"></i>
+                    查看所有消息
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 帮助按钮 -->
+        <button
+                class="text-gray-500 hover:text-[#165DFF] transition-colors"
+                onclick="switchPage('help.html')"
+                title="帮助"
+        >
+          <i class="fa-solid fa-question-circle text-xl"></i>
+        </button>
+
+        <!-- 个人信息按钮 - 修改为打开账户设置弹窗 -->
+        <button
+                class="text-gray-500 hover:text-[#165DFF] transition-colors"
+                onclick="openAccountModal()"
+                title="个人信息"
+                id="owner-btn"
+        >
+          <i class="fa-solid fa-user text-xl"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- 右侧可变内容区 -->
+    <main class="flex-1 overflow-y-auto bg-gray-50">
+      <iframe id="content-iframe" src="page/home.html" class="w-full h-full"></iframe>
+    </main>
+  </div>
+</div>
+
+<!-- 账户设置弹窗 (小窗模式) -->
+<div class="account-modal-overlay" id="account-modal-overlay"></div>
+<div class="account-modal" id="account-modal">
+  <button class="account-close-btn" id="account-close-btn">&times;</button>
+
+  <!-- 头部 -->
+  <div class="account-header">
+    <h2 class="account-title">账户设置</h2>
+  </div>
+
+  <!-- 内容区域 -->
+  <div class="account-body">
+    <!-- 头像和昵称 -->
+    <div class="avatar-section">
+      <div class="avatar-img-container" onclick="changeAvatar()">
+        <img src="https://picsum.photos/80/80" alt="用户头像" class="avatar-img" id="user-avatar">
+        <div class="avatar-change-overlay">
+          <i class="fa-solid fa-camera"></i>
+        </div>
+      </div>
+      <!-- 昵称编辑区域 -->
+      <div class="setting-item" style="border: none; padding: 0; width: 100%;">
+        <div style="width: 100%; text-align: center;">
+          <div class="setting-label">昵称</div>
+          <div class="setting-value" style="justify-content: center;">
+            <div id="nickname-display" class="nickname-display"></div>
+            <input type="text" id="nickname-edit" class="nickname-edit" style="display: none;">
+            <button id="nickname-edit-btn" class="action-btn" style="margin-left: 10px;" onclick="toggleNicknameEdit()">修改</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 设置项列表 -->
+    <div class="setting-list">
+      <!-- 手机号 -->
+      <div class="setting-item">
+        <div class="setting-left">
+          <div class="setting-label">手机号</div>
+          <div class="setting-value" id="phone-value"></div>
+        </div>
+        <div class="setting-action">
+          <button id="phone-action-btn" class="action-btn action-btn-danger" onclick="togglePhoneBinding()">解除绑定</button>
+        </div>
+      </div>
+
+      <!-- 邮箱 -->
+      <div class="setting-item">
+        <div class="setting-left">
+          <div class="setting-label">邮箱</div>
+          <div class="setting-value" id="email-value"></div>
+        </div>
+        <div class="setting-action">
+          <button id="email-action-btn" class="action-btn action-btn-danger" onclick="toggleEmailBinding()">解除绑定</button>
+        </div>
+      </div>
+
+      <!-- 密码 -->
+      <div class="setting-item">
+        <div class="setting-left">
+          <div class="setting-label">密码</div>
+          <div class="setting-value">******</div>
+        </div>
+        <div class="setting-action">
+          <button class="action-btn" onclick="openPasswordModal()">更改密码</button>
+        </div>
+      </div>
+
+      <!-- 账户ID显示（小字） -->
+      <div class="account-id-display" id="account-id-display">
+        ID: UID-20231010-001
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 修改密码弹窗 -->
+<div class="password-modal-overlay" id="password-modal-overlay"></div>
+<div class="password-modal" id="password-modal">
+  <button class="password-close-btn" id="password-close-btn">&times;</button>
+
+  <!-- 头部 -->
+  <div class="password-header">
+    <h2 class="password-title">请设置登录密码</h2>
+  </div>
+
+  <!-- 内容区域 -->
+  <div class="password-body">
+    <form id="password-form">
+      <!-- 当前密码 -->
+      <div class="form-group">
+        <label class="form-label">请先输入当前密码</label>
+        <input type="password" class="form-input" id="current-password" placeholder="请输入当前密码">
+        <button type="button" class="password-toggle-btn" id="toggle-current-password">
+          <i class="fa-regular fa-eye"></i>
+        </button>
+      </div>
+
+      <!-- 新密码 -->
+      <div class="form-group" id="new-password-group">
+        <label class="form-label">新密码</label>
+        <input type="password" class="form-input" id="new-password" placeholder="密码需包含数字、字母、特殊字符(@$^_*#&)，长度最低为8位">
+        <button type="button" class="password-toggle-btn" id="toggle-new-password">
+          <i class="fa-regular fa-eye"></i>
+        </button>
+        <!-- 密码提示词 -->
+        <div id="new-password-hint" style="font-size: 0.8rem; color: #aaa; margin-top: 5px; display: none;">
+          密码必须包含数字、字母、特殊字符(@$^_*#&)，长度最低为8位
+        </div>
+      </div>
+
+      <!-- 确认新密码 -->
+      <div class="form-group" id="confirm-password-group">
+        <label class="form-label">请再次输入新密码</label>
+        <div style="position: relative;">
+          <input type="password" class="form-input" id="confirm-password" placeholder="请再次输入新密码">
+          <button type="button" class="password-toggle-btn" id="toggle-confirm-password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #aaa; cursor: pointer;">
+            <i class="fa-regular fa-eye"></i>
+          </button>
+        </div>
+        <!-- 确认密码提示词 -->
+        <div id="confirm-password-hint" style="font-size: 0.8rem; color: #ff4d4f; margin-top: 5px; display: none;">
+          ❌ 两次输入的密码不一致！
+        </div>
+      </div>
+
+      <div class="form-buttons">
+        <button type="button" class="btn-cancel" id="password-cancel-btn">取消</button>
+        <button type="submit" class="btn-submit">确定</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 绑定手机号弹窗 -->
+<div class="bind-modal-overlay" id="phone-bind-modal-overlay"></div>
+<div class="bind-modal" id="phone-bind-modal">
+  <button class="bind-close-btn" id="phone-bind-close-btn">&times;</button>
+
+  <!-- 头部 -->
+  <div class="bind-header">
+    <h2 class="bind-title">绑定手机号</h2>
+  </div>
+
+  <!-- 内容区域 -->
+  <div class="bind-body">
+    <form id="phone-bind-form">
+      <!-- 手机号输入 -->
+      <div class="form-group">
+        <label class="form-label">手机号</label>
+        <input type="tel" class="form-input" id="phone-input" placeholder="请输入手机号">
+      </div>
+
+      <!-- 验证码 -->
+      <div class="form-group">
+        <label class="form-label">验证码</label>
+        <div class="verification-code-group">
+          <input type="text" class="form-input verification-input" id="phone-code" placeholder="请输入验证码">
+          <button type="button" class="send-code-btn" id="send-phone-code-btn" onclick="sendPhoneVerificationCode()">获取验证码</button>
+        </div>
+      </div>
+
+      <div class="form-buttons">
+        <button type="button" class="btn-cancel" id="phone-bind-cancel-btn">取消</button>
+        <button type="submit" class="btn-submit">确定</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 绑定邮箱弹窗 -->
+<div class="bind-modal-overlay" id="email-bind-modal-overlay"></div>
+<div class="bind-modal" id="email-bind-modal">
+  <button class="bind-close-btn" id="email-bind-close-btn">&times;</button>
+
+  <!-- 头部 -->
+  <div class="bind-header">
+    <h2 class="bind-title">绑定邮箱</h2>
+  </div>
+
+  <!-- 内容区域 -->
+  <div class="bind-body">
+    <form id="email-bind-form">
+      <!-- 邮箱输入 -->
+      <div class="form-group">
+        <label class="form-label">邮箱地址</label>
+        <input type="email" class="form-input" id="email-input" placeholder="请输入邮箱地址">
+      </div>
+
+      <!-- 验证码 -->
+      <div class="form-group">
+        <label class="form-label">验证码</label>
+        <div class="verification-code-group">
+          <input type="text" class="form-input verification-input" id="email-code" placeholder="请输入验证码">
+          <button type="button" class="send-code-btn" id="send-email-code-btn" onclick="sendEmailVerificationCode()">获取验证码</button>
+        </div>
+      </div>
+
+      <div class="form-buttons">
+        <button type="button" class="btn-cancel" id="email-bind-cancel-btn">取消</button>
+        <button type="submit" class="btn-submit">确定</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 退出登录确认对话框（用于主页面） -->
+<div id="main-logout-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+    <div class="flex items-center mb-4">
+      <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+        <i class="fa-solid fa-right-from-bracket text-blue-600 text-xl"></i>
+      </div>
+      <div>
+        <h3 class="font-bold text-gray-800 text-lg">退出系统</h3>
+        <p class="text-gray-500 text-sm">您确定要退出FMEA管理系统吗？</p>
+      </div>
+    </div>
+
+    <p class="text-gray-600 mb-6">
+      退出后，您需要重新登录才能访问所有功能。未保存的数据可能会丢失。
+    </p>
+
+    <div class="flex justify-end space-x-3">
+      <button
+              id="main-cancel-logout-btn"
+              class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
+      >
+        取消
+      </button>
+      <button
+              id="main-confirm-logout-btn"
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+      >
+        确认退出
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 联系我们弹窗（用于主页面） -->
+<div id="main-contactModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 overflow-hidden">
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold text-gray-800">联系我们</h3>
+        <button id="main-closeContactModal" class="text-gray-500 hover:text-gray-700">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <div class="bg-blue-50 p-4 rounded-lg">
+          <div class="flex items-start">
+            <i class="fa-solid fa-envelope text-blue-500 mt-1 mr-3"></i>
+            <div>
+              <h4 class="font-medium text-gray-800">发送邮件</h4>
+              <p class="text-gray-600 text-sm mt-1">技术支持邮箱: support@fmearisk.com</p>
+              <p class="text-gray-600 text-sm">问题反馈邮箱: feedback@fmearisk.com</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-green-50 p-4 rounded-lg">
+          <div class="flex items-start">
+            <i class="fa-solid fa-phone text-green-500 mt-1 mr-3"></i>
+            <div>
+              <h4 class="font-medium text-gray-800">联系客服</h4>
+              <p class="text-gray-600 text-sm mt-1">客服热线: 400-123-4567</p>
+              <p class="text-gray-600 text-sm">工作时间: 工作日 9:00-18:00</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-purple-50 p-4 rounded-lg">
+          <div class="flex items-start">
+            <i class="fa-solid fa-ticket text-purple-500 mt-1 mr-3"></i>
+            <div>
+              <h4 class="font-medium text-gray-800">提交工单</h4>
+              <p class="text-gray-600 text-sm mt-1">填写详细问题描述，获得专业支持</p>
+              <button id="main-openTicketBtn" class="mt-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 text-sm font-medium">
+                <i class="fa-solid fa-plus mr-2"></i> 新建工单
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 系统设置弹窗（基础版本） -->
+<div id="system-settings-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 overflow-hidden">
+    <!-- 弹窗头部 -->
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex justify-between items-center">
+        <div>
+          <h3 class="text-xl font-bold text-gray-800">系统设置</h3>
+          <p class="text-gray-500 text-sm mt-1">配置您的系统偏好</p>
+        </div>
+        <button id="close-system-settings" class="text-gray-500 hover:text-gray-700">
+          <i class="fa-solid fa-times text-xl"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- 内容区域 -->
+    <div class="p-6">
+      <div class="space-y-6">
+        <!-- 主题设置 -->
+        <div>
+          <h4 class="text-sm font-semibold text-gray-800 mb-3">主题</h4>
+          <div class="grid grid-cols-3 gap-3">
+            <button class="theme-option border border-gray-300 rounded-lg p-3 flex flex-col items-center hover:border-blue-500 hover:bg-blue-50 transition-colors" data-theme="light">
+              <i class="fa-regular fa-sun text-xl text-yellow-500 mb-1"></i>
+              <span class="text-xs font-medium text-gray-800">浅色</span>
+            </button>
+            <button class="theme-option border border-gray-300 rounded-lg p-3 flex flex-col items-center hover:border-blue-500 hover:bg-blue-50 transition-colors" data-theme="dark">
+              <i class="fa-regular fa-moon text-xl text-gray-700 mb-1"></i>
+              <span class="text-xs font-medium text-gray-800">深色</span>
+            </button>
+            <button class="theme-option border-2 border-blue-500 bg-blue-50 rounded-lg p-3 flex flex-col items-center hover:border-blue-600 transition-colors" data-theme="system">
+              <i class="fa-solid fa-display text-xl text-blue-600 mb-1"></i>
+              <span class="text-xs font-medium text-gray-800">跟随系统</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 分隔线 -->
+        <div class="border-t border-gray-200 pt-6">
+          <h4 class="text-sm font-semibold text-gray-800 mb-3">语言</h4>
+          <div class="grid grid-cols-3 gap-3">
+            <button class="language-option border border-gray-300 rounded-lg p-3 hover:border-blue-500 hover:bg-blue-50 transition-colors" data-lang="zh">
+              <div class="flex flex-col items-center">
+                <i class="fa-solid fa-earth-asia text-lg text-gray-700 mb-1"></i>
+                <span class="text-xs font-medium text-gray-800">简体中文</span>
+              </div>
+            </button>
+            <button class="language-option border border-gray-300 rounded-lg p-3 hover:border-blue-500 hover:bg-blue-50 transition-colors" data-lang="en">
+              <div class="flex flex-col items-center">
+                <i class="fa-solid fa-earth-americas text-lg text-gray-700 mb-1"></i>
+                <span class="text-xs font-medium text-gray-800">English</span>
+              </div>
+            </button>
+            <button class="language-option border-2 border-blue-500 bg-blue-50 rounded-lg p-3 hover:border-blue-600 transition-colors" data-lang="system">
+              <div class="flex flex-col items-center">
+                <i class="fa-solid fa-display text-lg text-blue-600 mb-1"></i>
+                <span class="text-xs font-medium text-gray-800">跟随系统</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 弹窗底部 -->
+    <div class="p-6 border-t border-gray-200 bg-gray-50">
+      <div class="flex justify-end space-x-3">
+        <button id="cancel-settings" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium text-sm">
+          取消
+        </button>
+        <button id="save-settings" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm">
+          确定
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/password-validation.js"></script>
+<script>
+  let userData = {
+    id: '',
+    nickname: '',
+    phone: '',
+    email: '',
+    phoneBound: false,
+    emailBound: false
+  };
+
+  // 从后端获取并更新用户数据
+  async function fetchUserData() {
+    try {
+      // 从URL参数获取用户ID,若url没有则默认使用测试用户ID 1（开发阶段临时用）
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get('userId')||'1';
+
+      console.log('从URL获取的userId:', userId);
+
+      // 根据用户ID获取用户信息
+      const response = await fetch(`http://localhost:8088/user/${userId}`);
+      const result = await response.json();
+
+      if (result.code === 200 && result.data) {
+        const user = result.data;
+
+        // 更新全局 userData 对象
+        userData.id = user.userId;
+        userData.nickname = user.userName;
+
+        if (user.phone) {
+          userData.phone = user.phone;
+          userData.phoneBound = true;
+        } else {
+          userData.phone = '未绑定';
+          userData.phoneBound = false;
+        }
+
+        if (user.email) {
+          userData.email = user.email;
+          userData.emailBound = true;
+        } else {
+          userData.email = '未绑定';
+          userData.emailBound = false;
+        }
+
+        console.log('✅ 用户数据获取成功:', userData);
+
+        // 更新页面显示
+        updateUserDataDisplay();
+      } else {
+        console.error('获取用户数据失败:', result);
+        alert('获取用户信息失败，请重新登录');
+      }
+    } catch (error) {
+      console.error('❌ 获取用户数据失败:', error);
+      alert('网络错误，请检查连接');
+    }
+  }
+
+  // 账户设置弹窗元素
+  const accountModal = document.getElementById('account-modal');
+  const accountModalOverlay = document.getElementById('account-modal-overlay');
+  const accountCloseBtn = document.getElementById('account-close-btn');
+
+  // 修改密码弹窗
+  const passwordModal = document.getElementById('password-modal');
+  const passwordModalOverlay = document.getElementById('password-modal-overlay');
+  const passwordCloseBtn = document.getElementById('password-close-btn');
+  const passwordCancelBtn = document.getElementById('password-cancel-btn');
+
+  // 绑定手机号弹窗
+  const phoneBindModal = document.getElementById('phone-bind-modal');
+  const phoneBindModalOverlay = document.getElementById('phone-bind-modal-overlay');
+  const phoneBindCloseBtn = document.getElementById('phone-bind-close-btn');
+  const phoneBindCancelBtn = document.getElementById('phone-bind-cancel-btn');
+
+  // 绑定邮箱弹窗
+  const emailBindModal = document.getElementById('email-bind-modal');
+  const emailBindModalOverlay = document.getElementById('email-bind-modal-overlay');
+  const emailBindCloseBtn = document.getElementById('email-bind-close-btn');
+  const emailBindCancelBtn = document.getElementById('email-bind-cancel-btn');
+
+  // 打开账户设置弹窗
+  function openAccountModal() {
+    accountModal.style.display = 'block';
+    accountModalOverlay.style.display = 'block';
+    fetchUserData();
+  }
+
+  // 关闭账户设置弹窗
+  function closeAccountModal() {
+    accountModal.style.display = 'none';
+    accountModalOverlay.style.display = 'none';
+  }
+
+  // 更新用户数据显示
+  function updateUserDataDisplay() {
+    document.getElementById('nickname-display').textContent = userData.nickname;
+    document.getElementById('phone-value').textContent = userData.phone;
+    document.getElementById('email-value').textContent = userData.email;
+    document.getElementById('account-id-display').textContent = `ID: ${userData.id}`; // 更新ID显示
+
+    // 更新手机按钮状态
+    const phoneBtn = document.getElementById('phone-action-btn');
+    if (userData.phoneBound) {
+      phoneBtn.textContent = '解除绑定';
+      phoneBtn.className = 'action-btn action-btn-danger';
+    } else {
+      phoneBtn.textContent = '绑定';
+      phoneBtn.className = 'action-btn action-btn-primary';
+    }
+
+    // 更新邮箱按钮状态
+    const emailBtn = document.getElementById('email-action-btn');
+    if (userData.emailBound) {
+      emailBtn.textContent = '解除绑定';
+      emailBtn.className = 'action-btn action-btn-danger';
+    } else {
+      emailBtn.textContent = '绑定';
+      emailBtn.className = 'action-btn action-btn-primary';
+    }
+
+    // 检查必须绑定其中之一
+    if (!userData.phoneBound && !userData.emailBound) {
+      alert('警告：您必须至少绑定手机号或邮箱其中之一！');
+    }
+  }
+
+  // 切换昵称编辑状态
+  function toggleNicknameEdit() {
+    const display = document.getElementById('nickname-display');
+    const input = document.getElementById('nickname-edit');
+    const button = document.getElementById('nickname-edit-btn');
+
+    if (display.style.display !== 'none') {
+      // 切换到编辑模式
+      display.style.display = 'none';
+      input.style.display = 'block';
+      input.value = userData.nickname;
+      input.focus();
+      button.textContent = '保存';
+      button.onclick = saveNickname;
+    } else {
+      // 保存昵称
+      saveNickname();
+    }
+  }
+
+  // 保存昵称
+  async function saveNickname() {
+    const input = document.getElementById('nickname-edit');
+    const newNickname = input.value.trim();
+
+    if (!newNickname) {
+      alert('昵称不能为空！');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:8088/user', {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          userId: userData.id,
+          userName: newNickname,
+          phone: userData.phoneBound ? userData.phone : null,
+          email: userData.emailBound ? userData.email : null
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.code === 200) {
+        userData.nickname = newNickname;
+
+        // 切换回显示模式
+        const display = document.getElementById('nickname-display');
+        const button = document.getElementById('nickname-edit-btn');
+
+        display.style.display = 'block';
+        display.textContent = newNickname;
+        input.style.display = 'none';
+        button.textContent = '修改';
+        button.onclick = toggleNicknameEdit;
+
+        // 通知所有 iframe 刷新用户数据
+        const sidebarIframe = document.querySelector('aside iframe');
+        const contentIframe = document.getElementById('content-iframe');
+
+        if (sidebarIframe && sidebarIframe.contentWindow) {
+          sidebarIframe.contentWindow.postMessage({
+            type: 'refreshUserData',
+            userId: userData.id
+          }, '*');
+        }
+
+        if (contentIframe && contentIframe.contentWindow) {
+          contentIframe.contentWindow.postMessage({
+            type: 'refreshUserData',
+            userId: userData.id
+          }, '*');
+        }
+
+        alert('昵称修改成功！');
+      } else {
+        alert('昵称修改失败：' + result.message);
+      }
+    } catch (error) {
+      console.error('昵称修改失败:', error);
+      alert('网络错误，请稍后重试');
+    }
+  }
+
+  // 切换手机绑定状态
+  async function togglePhoneBinding() {
+    if (userData.phoneBound) {
+      // 解除绑定
+      if (confirm('确定要解除手机绑定吗？')) {
+        if (!userData.emailBound) {
+          alert('无法解除绑定：您必须至少绑定手机号或邮箱其中之一！');
+          return;
+        }
+
+        try {
+          const response = await fetch('http://localhost:8088/user/update', {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              userId: userData.id,
+              phone: null,
+              email: userData.emailBound ? userData.email : null
+            })
+          });
+
+          const result = await response.json();
+
+          if (result.code === 200) {
+            userData.phoneBound = false;
+            userData.phone = '未绑定';
+            updateUserDataDisplay();
+            alert('手机解绑成功！');
+          } else {
+            alert('解绑失败：' + result.message);
+          }
+        } catch (error) {
+          console.error('解绑失败:', error);
+          alert('网络错误，请稍后重试');
+        }
+      }
+    } else {
+      // 打开绑定手机弹窗
+      openPhoneBindModal();
+    }
+  }
+
+  // 切换邮箱绑定状态
+  async function toggleEmailBinding() {
+    if (userData.emailBound) {
+      // 解除绑定
+      if (confirm('确定要解除邮箱绑定吗？')) {
+        if (!userData.phoneBound) {
+          alert('无法解除绑定：您必须至少绑定手机号或邮箱其中之一！');
+          return;
+        }
+
+        try {
+          const response = await fetch('http://localhost:8088/user/update', {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              userId: userData.id,
+              phone: userData.phoneBound ? userData.phone : null,
+              email: null
+            })
+          });
+
+          const result = await response.json();
+
+          if (result.code === 200) {
+            userData.emailBound = false;
+            userData.email = '未绑定';
+            updateUserDataDisplay();
+            alert('邮箱解绑成功！');
+          } else {
+            alert('解绑失败：' + result.message);
+          }
+        } catch (error) {
+          console.error('解绑失败:', error);
+          alert('网络错误，请稍后重试');
+        }
+      }
+    } else {
+      // 打开绑定邮箱弹窗
+      openEmailBindModal();
+    }
+  }
+
+  // 验证手机号格式
+  function validatePhone(phone) {
+    const re = /^1[3-9]\d{9}$/;
+    return re.test(phone);
+  }
+
+  // 验证邮箱格式
+  function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  }
+
+  // 更换头像
+  function changeAvatar() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+
+    input.onchange = function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        if (file.size > 2 * 1024 * 1024) {
+          alert('图片大小不能超过2MB！');
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const avatar = document.getElementById('user-avatar');
+          avatar.src = e.target.result;
+          alert('头像更换成功！');
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    input.click();
+  }
+
+  // 打开修改密码弹窗时
+  function openPasswordModal() {
+    passwordModal.style.display = 'block';
+    passwordModalOverlay.style.display = 'block';
+
+    // 调用密码验证
+    initPasswordValidation(
+      'new-password',       // 密码框ID
+      'new-password-hint',  // 密码提示框ID
+      'confirm-password',   // 确认密码框ID
+      'confirm-password-hint' // 确认密码提示框ID
+    );
+  }
+
+  // 关闭修改密码弹窗
+  function closePasswordModal() {
+    passwordModal.style.display = 'none';
+    passwordModalOverlay.style.display = 'none';
+    document.getElementById('password-form').reset();
+  }
+
+  // 打开绑定手机弹窗
+  function openPhoneBindModal() {
+    phoneBindModal.style.display = 'block';
+    phoneBindModalOverlay.style.display = 'block';
+    document.getElementById('phone-input').value = '';
+    document.getElementById('phone-code').value = '';
+  }
+
+  // 关闭绑定手机弹窗
+  function closePhoneBindModal() {
+    phoneBindModal.style.display = 'none';
+    phoneBindModalOverlay.style.display = 'none';
+    document.getElementById('phone-bind-form').reset();
+  }
+
+  // 打开绑定邮箱弹窗
+  function openEmailBindModal() {
+    emailBindModal.style.display = 'block';
+    emailBindModalOverlay.style.display = 'block';
+    document.getElementById('email-input').value = '';
+    document.getElementById('email-code').value = '';
+  }
+
+  // 关闭绑定邮箱弹窗
+  function closeEmailBindModal() {
+    emailBindModal.style.display = 'none';
+    emailBindModalOverlay.style.display = 'none';
+    document.getElementById('email-bind-form').reset();
+  }
+
+  // 发送手机验证码
+  function sendPhoneVerificationCode() {
+    const phone = document.getElementById('phone-input').value.trim();
+
+    if (!phone) {
+      alert('请输入手机号！');
+      return;
+    }
+
+    if (!validatePhone(phone)) {
+      alert('请输入有效的手机号！');
+      return;
+    }
+
+    // 模拟发送验证码
+    const btn = document.getElementById('send-phone-code-btn');
+    let countdown = 60;
+    btn.disabled = true;
+    btn.textContent = `${countdown}秒后重发`;
+
+    const timer = setInterval(() => {
+      countdown--;
+      if (countdown <= 0) {
+        clearInterval(timer);
+        btn.disabled = false;
+        btn.textContent = '获取验证码';
+      } else {
+        btn.textContent = `${countdown}秒后重发`;
+      }
+    }, 1000);
+
+    alert('验证码已发送到您的手机，请注意查收！');
+  }
+
+  // 发送邮箱验证码
+  function sendEmailVerificationCode() {
+    const email = document.getElementById('email-input').value.trim();
+
+    if (!email) {
+      alert('请输入邮箱地址！');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      alert('请输入有效的邮箱地址！');
+      return;
+    }
+
+    // 模拟发送验证码
+    const btn = document.getElementById('send-email-code-btn');
+    let countdown = 60;
+    btn.disabled = true;
+    btn.textContent = `${countdown}秒后重发`;
+
+    const timer = setInterval(() => {
+      countdown--;
+      if (countdown <= 0) {
+        clearInterval(timer);
+        btn.disabled = false;
+        btn.textContent = '获取验证码';
+      } else {
+        btn.textContent = `${countdown}秒后重发`;
+      }
+    }, 1000);
+
+    alert('验证码已发送到您的邮箱，请注意查收！');
+  }
+
+  // 处理密码修改表单提交
+  document.getElementById('password-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const currentPassword = document.getElementById('current-password').value;
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+
+    // 验证当前密码
+    if (!currentPassword) {
+      alert('请输入当前密码！');
+      return;
+    }
+
+    // 验证新密码
+    const passwordRegex = /^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@$^_*#&])[a-zA-Z0-9@$^_*#&]{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      alert('密码必须包含数字、字母、特殊字符(@$^_*#&)，长度最低为8位！');
+      const input = document.getElementById('new-password');
+      input.focus();
+      input.blur();
+      return;
+    }
+
+    // 验证新密码与旧密码不能相同
+    if (newPassword === currentPassword) {
+      alert('新密码不能与当前密码相同！');
+      const input = document.getElementById('new-password');
+      input.focus();
+      input.blur();
+      return;
+    }
+
+    // 验证两次输入的新密码是否相同
+    if (newPassword !== confirmPassword) {
+      alert('两次输入的新密码不一致！');
+      const input = document.getElementById('confirm-password');
+      input.focus();
+      input.blur();
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:8088/user/password', {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          userId: userData.id,
+          currentPassword: currentPassword,
+          newPassword: newPassword
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.code === 200) {
+        alert('密码修改成功！');
+        closePasswordModal();
+      } else {
+        alert('密码修改失败：' + result.message);
+      }
+    } catch (error) {
+      console.error('密码修改失败:', error);
+      alert('网络错误，请稍后重试');
+    }
+  });
+
+  // 处理手机绑定表单提交
+  document.getElementById('phone-bind-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const phone = document.getElementById('phone-input').value.trim();
+    const code = document.getElementById('phone-code').value.trim();
+
+    if (!phone) {
+      alert('请输入手机号！');
+      return;
+    }
+
+    if (!validatePhone(phone)) {
+      alert('请输入有效的手机号！');
+      return;
+    }
+
+    if (!code) {
+      alert('请输入验证码！');
+      return;
+    }
+
+    if (code !== '123456') { // 模拟验证码验证
+      alert('验证码错误！');
+      return;
+    }
+
+    try {
+      // 调用后端接口更新手机号
+      const response = await fetch('http://localhost:8088/user', {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          userId: userData.id,
+          phone: phone,
+          email: userData.emailBound ? userData.email : null  // 保持邮箱不变
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.code === 200) {
+        // 绑定成功
+        userData.phone = phone;
+        userData.phoneBound = true;
+        updateUserDataDisplay();
+        closePhoneBindModal();
+        alert('手机绑定成功！');
+      } else {
+        alert('绑定失败：' + result.message);
+      }
+    } catch (error) {
+      console.error('绑定失败:', error);
+      alert('网络错误，请稍后重试');
+    }
+  });
+
+  // 处理邮箱绑定表单提交
+  document.getElementById('email-bind-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const email = document.getElementById('email-input').value.trim();
+    const code = document.getElementById('email-code').value.trim();
+
+    if (!email) {
+      alert('请输入邮箱地址！');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      alert('请输入有效的邮箱地址！');
+      return;
+    }
+
+    if (!code) {
+      alert('请输入验证码！');
+      return;
+    }
+
+    if (code !== '123456') { // 模拟验证码验证
+      alert('验证码错误！');
+      return;
+    }
+
+    try {
+      // 调用后端接口更新邮箱
+      const response = await fetch('http://localhost:8088/user', {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          userId: userData.id,
+          phone: userData.phoneBound ? userData.phone : null,  // 保持手机不变
+          email: email
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.code === 200) {
+        // 绑定成功
+        userData.email = email;
+        userData.emailBound = true;
+        updateUserDataDisplay();
+        closeEmailBindModal();
+        alert('邮箱绑定成功！');
+      } else {
+        alert('绑定失败：' + result.message);
+      }
+    } catch (error) {
+      console.error('绑定失败:', error);
+      alert('网络错误，请稍后重试');
+    }
+  });
+
+  // 验证密码复杂度
+  function validatePassword(password) {
+    // 至少8位，包含数字、字母、特殊字符 @$^_*#&
+    const re = /^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@$^_*#&])[a-zA-Z0-9@$^_*#&]{8,}$/;
+    return re.test(password);
+  }
+
+  // 页面切换函数
+  function switchPage(page) {
+    const iframe = document.getElementById('content-iframe');
+
+    // 从当前URL获取userId参数
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('userId');
+
+    // 传递userId参数
+    if (page.indexOf('?') === -1) {
+      iframe.src = `page/${page}?userId=${userId}`;
+    } else {
+      iframe.src = `page/${page}&userId=${userId}`;
+    }
+
+    // 通知侧边栏更新激活状态
+    const sidebarIframe = document.querySelector('aside iframe');
+    if (sidebarIframe.contentWindow) {
+      sidebarIframe.contentWindow.postMessage({
+        type: 'activateMenu',
+        page: page
+      }, '*');
+    }
+  }
+
+  // 监听消息，实现iframe页面切换 + 同步侧边栏高亮
+  window.addEventListener('message', function(e) {
+    if (e.data.type === 'switchPage') {
+      switchPage(e.data.page);
+    }
+
+    if (e.data.type === 'activateMenu') {
+      // 直接转发给侧边栏
+      const sidebarIframe = document.querySelector('aside iframe');
+      if (sidebarIframe && sidebarIframe.contentWindow) {
+        sidebarIframe.contentWindow.postMessage({
+          type: 'activateMenu',
+          page: e.data.page
+        }, '*');
+      }
+    }
+
+    // 监听退出登录消息
+    if (e.data.type === 'logout') {
+      showLogoutModal();
+    }
+
+    // 监听打开联系我们弹窗消息
+    if (e.data.type === 'openContactModal') {
+      openContactModal();
+    }
+
+    // 监听打开系统设置弹窗消息
+    if (e.data.type === 'openSystemSettings') {
+      openSystemSettings();
+    }
+  });
+
+  // 退出登录相关元素
+  const mainLogoutModal = document.getElementById('main-logout-modal');
+  const mainCancelLogoutBtn = document.getElementById('main-cancel-logout-btn');
+  const mainConfirmLogoutBtn = document.getElementById('main-confirm-logout-btn');
+
+  // 显示退出登录确认对话框
+  function showLogoutModal() {
+    mainLogoutModal.classList.remove('hidden');
+  }
+
+  // 取消退出
+  mainCancelLogoutBtn.addEventListener('click', function() {
+    mainLogoutModal.classList.add('hidden');
+  });
+
+  // 确认退出
+  mainConfirmLogoutBtn.addEventListener('click', function() {
+    // 清空本地用户数据
+    userData = {
+      id: '',
+      nickname: '',
+      phone: '',
+      email: '',
+      phoneBound: false,
+      emailBound: false
+    };
+    // 跳转到登录页
+    window.location.href = '../page/login.html';
+    // 隐藏模态框（跳转前隐藏）
+    mainLogoutModal.classList.add('hidden');
+  });
+
+  // 点击模态框外部关闭
+  mainLogoutModal.addEventListener('click', function(e) {
+    if (e.target === mainLogoutModal) {
+      mainLogoutModal.classList.add('hidden');
+    }
+  });
+
+  // ESC键关闭模态框
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !mainLogoutModal.classList.contains('hidden')) {
+      mainLogoutModal.classList.add('hidden');
+    }
+  });
+
+  // 通知下拉窗功能
+  const notificationDropdown = document.getElementById('notification-dropdown');
+  const notificationBtn = document.getElementById('notification-btn');
+  const notificationBadge = document.getElementById('notification-badge');
+  const notificationHeaderBadge = document.getElementById('notification-header-badge');
+  let currentActiveTab = 'unread'; // 记录当前激活的标签
+
+  // 计算未读通知数量
+  function getUnreadCount() {
+    const unreadItems = document.querySelectorAll('.notification-item[data-read="false"]');
+    return unreadItems.length;
+  }
+
+  // 更新未读数量显示
+  function updateUnreadCount() {
+    const unreadCount = getUnreadCount();
+
+    // 更新右上角角标
+    if (unreadCount > 0) {
+      notificationBadge.textContent = unreadCount;
+      notificationBadge.style.display = 'flex';
+    } else {
+      notificationBadge.style.display = 'none';
+    }
+
+    // 更新通知小窗标题中的未读数量
+    if (unreadCount > 0) {
+      notificationHeaderBadge.textContent = `${unreadCount} 条未读`;
+      notificationHeaderBadge.style.display = 'inline';
+    } else {
+      notificationHeaderBadge.style.display = 'none';
+    }
+  }
+
+  // 切换通知下拉窗
+  function toggleNotificationDropdown() {
+    if (notificationDropdown.classList.contains('hidden')) {
+      openNotificationDropdown();
+    } else {
+      closeNotificationDropdown();
+    }
+  }
+
+  // 打开通知下拉窗 - 总是显示"未读"标签页
+  function openNotificationDropdown() {
+    notificationDropdown.classList.remove('hidden');
+    notificationDropdown.style.opacity = '0';
+    notificationDropdown.style.transform = 'translateY(-10px)';
+
+    // 强制重绘
+    notificationDropdown.offsetHeight;
+
+    notificationDropdown.style.opacity = '1';
+    notificationDropdown.style.transform = 'translateY(0)';
+
+    // 总是显示"未读"标签页
+    switchNotificationTab('unread');
+
+    // 点击页面其他地方关闭下拉窗
+    setTimeout(() => {
+      document.addEventListener('click', closeNotificationOnClickOutside);
+    }, 10);
+  }
+
+  // 关闭通知下拉窗
+  function closeNotificationDropdown() {
+    notificationDropdown.style.opacity = '0';
+    notificationDropdown.style.transform = 'translateY(-10px)';
+
+    setTimeout(() => {
+      notificationDropdown.classList.add('hidden');
+      document.removeEventListener('click', closeNotificationOnClickOutside);
+    }, 300);
+  }
+
+  // 点击外部关闭通知下拉窗
+  function closeNotificationOnClickOutside(event) {
+    const isClickInsideDropdown = notificationDropdown.contains(event.target);
+    const isClickOnNotificationBtn = notificationBtn.contains(event.target);
+
+    // 只有在点击外部时才关闭
+    if (!isClickInsideDropdown && !isClickOnNotificationBtn) {
+      closeNotificationDropdown();
+    }
+  }
+
+  // 切换通知标签
+  function switchNotificationTab(tab) {
+    currentActiveTab = tab;
+
+    // 更新标签样式
+    document.getElementById('tab-unread').classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+    document.getElementById('tab-unread').classList.add('text-gray-500', 'hover:text-gray-700');
+
+    document.getElementById('tab-read').classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+    document.getElementById('tab-read').classList.add('text-gray-500', 'hover:text-gray-700');
+
+    document.getElementById('tab-all').classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+    document.getElementById('tab-all').classList.add('text-gray-500', 'hover:text-gray-700');
+
+    // 激活当前标签
+    document.getElementById('tab-' + tab).classList.remove('text-gray-500', 'hover:text-gray-700');
+    document.getElementById('tab-' + tab).classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+
+    // 显示/隐藏通知项
+    const notificationItems = document.querySelectorAll('.notification-item');
+    let visibleCount = 0;
+
+    notificationItems.forEach(item => {
+      const isRead = item.getAttribute('data-read') === 'true';
+
+      if (tab === 'unread' && !isRead) {
+        item.classList.remove('hidden');
+        visibleCount++;
+      } else if (tab === 'read' && isRead) {
+        item.classList.remove('hidden');
+        visibleCount++;
+      } else if (tab === 'all') {
+        item.classList.remove('hidden');
+        visibleCount++;
+      } else {
+        item.classList.add('hidden');
+      }
+    });
+
+    // 显示/隐藏空状态
+    const emptyState = document.getElementById('empty-notification');
+    if (visibleCount === 0) {
+      emptyState.classList.remove('hidden');
+    } else {
+      emptyState.classList.add('hidden');
+    }
+  }
+
+  // 标记单个通知为已读（点击按钮）
+  function markAsRead(button, event) {
+    if (event) event.stopPropagation(); // 阻止事件冒泡
+
+    const notificationItem = button.closest('.notification-item');
+    markNotificationAsRead(notificationItem);
+  }
+
+  // 通用的标记通知为已读函数
+  function markNotificationAsRead(notificationItem) {
+    const dot = notificationItem.querySelector('.w-2');
+
+    if (dot) {
+      dot.classList.remove('bg-red-500', 'bg-yellow-500');
+      dot.classList.add('bg-gray-300');
+    }
+
+    // 更新标题样式
+    const title = notificationItem.querySelector('h4');
+    if (title) {
+      title.classList.remove('text-gray-800');
+      title.classList.add('text-gray-600');
+    }
+
+    // 更新内容样式
+    const content = notificationItem.querySelector('p');
+    if (content) {
+      content.classList.remove('text-gray-600');
+      content.classList.add('text-gray-500');
+    }
+
+    // 更新时间样式
+    const time = notificationItem.querySelector('span.text-xs');
+    if (time) {
+      time.classList.remove('text-gray-500');
+      time.classList.add('text-gray-400');
+    }
+
+    // 移除标记按钮
+    const markButton = notificationItem.querySelector('button[onclick*="markAsRead"]');
+    if (markButton) {
+      markButton.remove();
+    }
+
+    // 更新数据属性
+    notificationItem.setAttribute('data-read', 'true');
+
+    // 更新未读计数
+    updateUnreadCount();
+
+    // 如果当前在"未读"标签页，重新应用过滤以保持显示
+    if (currentActiveTab === 'unread') {
+      // 在"未读"标签页中隐藏已读的通知
+      notificationItem.classList.add('hidden');
+
+      // 检查是否还有未读通知
+      const remainingUnread = document.querySelectorAll('.notification-item[data-read="false"]:not(.hidden)').length;
+      if (remainingUnread === 0) {
+        // 如果没有未读通知了，显示空状态
+        const emptyState = document.getElementById('empty-notification');
+        emptyState.classList.remove('hidden');
+      }
+    } else if (currentActiveTab === 'read') {
+      // 如果当前在"已读"标签页，确保该通知显示
+      notificationItem.classList.remove('hidden');
+    } else if (currentActiveTab === 'all') {
+      // 如果当前在"全部"标签页，确保该通知显示
+      notificationItem.classList.remove('hidden');
+    }
+  }
+
+  // 标记所有通知为已读
+  function markAllAsRead() {
+    const unreadNotifications = document.querySelectorAll('.notification-item[data-read="false"]');
+
+    unreadNotifications.forEach(item => {
+      markNotificationAsRead(item);
+    });
+
+    // 更新未读计数
+    updateUnreadCount();
+
+    // 如果当前在"未读"标签页，切换到"已读"标签页
+    if (currentActiveTab === 'unread') {
+      switchNotificationTab('read');
+    } else {
+      // 否则重新应用当前标签页的过滤
+      switchNotificationTab(currentActiveTab);
+    }
+  }
+
+  // 查看所有消息（跳转到完整通知页面）
+  function viewAllNotifications() {
+    // 跳转到通知页面
+    switchPage('notice.html');
+
+    // 关闭通知小窗
+    closeNotificationDropdown();
+  }
+
+  // 搜索通知
+  const searchInput = document.getElementById('notification-search');
+  if (searchInput) {
+    searchInput.addEventListener('input', function(e) {
+      const searchTerm = e.target.value.toLowerCase();
+      const notificationItems = document.querySelectorAll('.notification-item');
+      let visibleCount = 0;
+
+      notificationItems.forEach(item => {
+        const title = item.querySelector('h4').textContent.toLowerCase();
+        const content = item.querySelector('p').textContent.toLowerCase();
+
+        if (title.includes(searchTerm) || content.includes(searchTerm)) {
+          item.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+
+      // 显示/隐藏空状态
+      const emptyState = document.getElementById('empty-notification');
+      if (visibleCount === 0) {
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+      }
+    });
+  }
+
+  // 显示通知详情弹窗
+  function showNotificationDetail(title, content, type, time, details) {
+    // 创建详情弹窗
+    const detailModal = document.createElement('div');
+    detailModal.id = 'notification-detail-modal';
+    detailModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+
+    // 获取通知类型对应的徽章样式
+    const badgeClasses = {
+      'project': 'bg-blue-100 text-blue-800',
+      'system': 'bg-yellow-100 text-yellow-800',
+      'announcement': 'bg-green-100 text-green-800',
+      'activity': 'bg-purple-100 text-purple-800',
+      'audit': 'bg-red-100 text-red-800'
+    };
+
+    const typeTexts = {
+      'project': '项目审核',
+      'system': '系统通知',
+      'announcement': '公告',
+      'activity': '活动',
+      'audit': '审核'
+    };
+
+    const badgeClass = badgeClasses[type] || 'bg-gray-100 text-gray-800';
+    const typeText = typeTexts[type] || '通知';
+
+    // 详情弹窗内容 - 删除了底部的关闭按钮
+    detailModal.innerHTML = `
+      <div class="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+          <!-- 弹窗头部 -->
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <div class="flex items-center">
+                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium mr-2 ${badgeClass}">
+                  ${typeText}
+                </span>
+                <h3 class="text-xl font-bold text-gray-800">通知详情</h3>
+              </div>
+              <p class="text-gray-500 text-sm mt-1">${time}</p>
+            </div>
+            <button id="close-detail-modal" class="text-gray-500 hover:text-gray-700">
+              <i class="fa-solid fa-times text-xl"></i>
+            </button>
+          </div>
+
+          <!-- 分隔线 -->
+          <div class="border-t border-gray-200 pt-4 mb-6">
+            <h4 class="text-lg font-semibold text-gray-800 mb-2">${title}</h4>
+            <div class="text-gray-700 bg-gray-50 p-4 rounded-lg mt-4">
+              ${content}
+            </div>
+          </div>
+
+          <!-- 详情内容 -->
+          <div class="space-y-4">
+            <div>
+              <h5 class="text-sm font-semibold text-gray-700 mb-2">详细信息</h5>
+              <div class="bg-blue-50 p-4 rounded-lg">
+                ${details || '暂无更多详细信息'}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // 添加到页面
+    document.body.appendChild(detailModal);
+
+    // 添加关闭事件
+    const closeBtn = detailModal.querySelector('#close-detail-modal');
+
+    closeBtn.addEventListener('click', () => {
+      document.body.removeChild(detailModal);
+    });
+
+    // 点击外部关闭
+    detailModal.addEventListener('click', (e) => {
+      if (e.target === detailModal) {
+        document.body.removeChild(detailModal);
+      }
+    });
+
+    // ESC键关闭
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.getElementById('notification-detail-modal')) {
+        document.body.removeChild(detailModal);
+      }
+    });
+  }
+
+  // 打开通知详情（点击查看完整内容）
+  function openNotificationDetail(element) {
+    // 获取通知数据
+    const title = element.getAttribute('data-title');
+    const content = element.getAttribute('data-content');
+    const type = element.getAttribute('data-type');
+    const time = element.getAttribute('data-time');
+    const details = element.getAttribute('data-details');
+
+    // 如果通知是未读状态，则自动标记为已读
+    if (element.getAttribute('data-read') === 'false') {
+      markNotificationAsRead(element);
+    }
+
+    // 显示详情弹窗
+    showNotificationDetail(title, content, type, time, details);
+  }
+
+  // 联系我们功能
+  // 打开联系我们弹窗
+  function openContactModal() {
+    const contactModal = document.getElementById('main-contactModal');
+    contactModal.classList.remove('hidden');
+
+    // 添加关闭按钮事件
+    const closeBtn = document.getElementById('main-closeContactModal');
+    closeBtn.onclick = function() {
+      contactModal.classList.add('hidden');
+    };
+
+    // 点击模态框外部关闭
+    contactModal.addEventListener('click', function(e) {
+      if (e.target === contactModal) {
+        contactModal.classList.add('hidden');
+      }
+    });
+
+    // ESC键关闭模态框
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && !contactModal.classList.contains('hidden')) {
+        contactModal.classList.add('hidden');
+      }
+    });
+
+    // 工单按钮事件
+    const openTicketBtn = document.getElementById('main-openTicketBtn');
+    openTicketBtn.onclick = function() {
+      showMainTicketForm();
+    };
+  }
+
+  // 显示主页面工单表单
+  function showMainTicketForm() {
+    // 创建工单表单
+    const ticketForm = `
+      <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 overflow-y-auto max-h-[90vh]">
+          <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-xl font-bold text-gray-800">用户工单填写表</h3>
+              <button id="main-closeTicketForm" class="text-gray-500 hover:text-gray-700">
+                <i class="fa-solid fa-times"></i>
+              </button>
+            </div>
+
+            <div class="mb-6">
+              <p class="text-gray-700 mb-2">非常感谢您对 FMEA-Risk 的关注与支持</p>
+              <p class="text-gray-700 mb-2">我们会在工作日尽快处理您的反馈/申请</p>
+              <p class="text-gray-600 text-sm">Thank you for your continued support and interest in FMEA-Risk.</p>
+              <p class="text-gray-600 text-sm">We will process your feedback/request promptly during business days.</p>
+            </div>
+
+            <form id="main-ticketForm" class="space-y-6">
+              <!-- 语言选择 -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  表单语言选择 Form Language Selection
+                </label>
+                <div class="flex space-x-4">
+                  <label class="inline-flex items-center">
+                    <input type="radio" name="language" value="zh" checked class="form-radio text-blue-600">
+                    <span class="ml-2">中文</span>
+                  </label>
+                  <label class="inline-flex items-center">
+                    <input type="radio" name="language" value="en" class="form-radio text-blue-600">
+                    <span class="ml-2">English</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- 问题类型 -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  请选择问题类型
+                </label>
+                <div class="relative">
+                  <select class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none">
+                    <option value="">请选择问题类型</option>
+                    <option value="complaint">投诉举报</option>
+                    <option value="feedback">报错反馈/建议</option>
+                    <option value="refund">申请退款</option>
+                    <option value="technical">技术支持</option>
+                    <option value="other">其他问题</option>
+                  </select>
+                  <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                    <i class="fa-solid fa-chevron-down text-gray-400"></i>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 输入内容 -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  输入内容
+                </label>
+                <textarea
+                  rows="6"
+                  placeholder="请详细描述您的问题或反馈..."
+                  class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                ></textarea>
+              </div>
+
+              <!-- 联系方式 -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  联系方式（邮箱或电话）
+                </label>
+                <input
+                  type="text"
+                  placeholder="请输入您的邮箱或电话号码"
+                  class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+              </div>
+
+              <!-- 提交按钮 -->
+              <div class="pt-4">
+                <button type="submit" class="w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                  提交工单
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // 将表单添加到页面
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = ticketForm;
+    document.body.appendChild(tempDiv);
+
+    // 添加表单提交事件
+    const form = tempDiv.querySelector('#main-ticketForm');
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      alert('工单提交成功！我们的客服人员将在1-3个工作日内联系您。');
+      // 移除表单
+      document.body.removeChild(tempDiv);
+      // 同时关闭联系模态框
+      const contactModal = document.getElementById('main-contactModal');
+      contactModal.classList.add('hidden');
+    });
+
+    // 添加关闭按钮事件
+    const closeBtn = tempDiv.querySelector('#main-closeTicketForm');
+    closeBtn.addEventListener('click', function() {
+      document.body.removeChild(tempDiv);
+    });
+
+    // 点击外部关闭
+    const modal = tempDiv.querySelector('div[class*="fixed inset-0"]');
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        document.body.removeChild(tempDiv);
+      }
+    });
+
+    // ESC键关闭表单
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && document.body.contains(tempDiv)) {
+        document.body.removeChild(tempDiv);
+      }
+    });
+  }
+
+  // 系统设置弹窗功能
+  const systemSettingsModal = document.getElementById('system-settings-modal');
+
+  // 打开系统设置弹窗
+  function openSystemSettings() {
+    systemSettingsModal.classList.remove('hidden');
+
+    // 添加关闭按钮事件
+    const closeBtn = document.getElementById('close-system-settings');
+    const cancelBtn = document.getElementById('cancel-settings');
+
+    closeBtn.onclick = function() {
+      systemSettingsModal.classList.add('hidden');
+    };
+
+    cancelBtn.onclick = function() {
+      systemSettingsModal.classList.add('hidden');
+    };
+
+    // 点击模态框外部关闭
+    systemSettingsModal.addEventListener('click', function(e) {
+      if (e.target === systemSettingsModal) {
+        systemSettingsModal.classList.add('hidden');
+      }
+    });
+
+    // ESC键关闭模态框
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && !systemSettingsModal.classList.contains('hidden')) {
+        systemSettingsModal.classList.add('hidden');
+      }
+    });
+
+    // 主题选择功能
+    document.querySelectorAll('.theme-option').forEach(option => {
+      option.addEventListener('click', function() {
+        // 移除所有选项的选中状态
+        document.querySelectorAll('.theme-option').forEach(opt => {
+          opt.classList.remove('border-2', 'border-blue-500', 'bg-blue-50');
+          opt.classList.add('border', 'border-gray-300');
+        });
+
+        // 添加当前选项的选中状态
+        this.classList.remove('border', 'border-gray-300');
+        this.classList.add('border-2', 'border-blue-500', 'bg-blue-50');
+
+        const theme = this.getAttribute('data-theme');
+        console.log('主题已切换为:', theme);
+      });
+    });
+
+    // 语言选择功能
+    document.querySelectorAll('.language-option').forEach(option => {
+      option.addEventListener('click', function() {
+        // 移除所有选项的选中状态
+        document.querySelectorAll('.language-option').forEach(opt => {
+          opt.classList.remove('border-2', 'border-blue-500', 'bg-blue-50');
+          opt.classList.add('border', 'border-gray-300');
+        });
+
+        // 添加当前选项的选中状态
+        this.classList.remove('border', 'border-gray-300');
+        this.classList.add('border-2', 'border-blue-500', 'bg-blue-50');
+
+        const lang = this.getAttribute('data-lang');
+        console.log('语言已切换为:', lang);
+      });
+    });
+
+    // 保存设置功能
+    const saveBtn = document.getElementById('save-settings');
+    saveBtn.addEventListener('click', function() {
+      alert('系统设置已保存！');
+      systemSettingsModal.classList.add('hidden');
+    });
+  }
+
+  // 初始化事件监听
+  document.addEventListener('DOMContentLoaded', function() {
+    // 从URL获取用户ID
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('userId');
+
+    // 设置iframe初始src，带上userId参数
+    const contentIframe = document.getElementById('content-iframe');
+    if (userId) {
+      contentIframe.src = `page/home.html?userId=${userId}`;
+    }
+
+    fetchUserData();
+
+    // 账户设置弹窗事件
+    accountCloseBtn.addEventListener('click', closeAccountModal);
+    accountModalOverlay.addEventListener('click', closeAccountModal);
+
+    // 修改密码弹窗事件
+    passwordCloseBtn.addEventListener('click', closePasswordModal);
+    passwordCancelBtn.addEventListener('click', closePasswordModal);
+    passwordModalOverlay.addEventListener('click', closePasswordModal);
+
+    // 绑定手机弹窗事件
+    phoneBindCloseBtn.addEventListener('click', closePhoneBindModal);
+    phoneBindCancelBtn.addEventListener('click', closePhoneBindModal);
+    phoneBindModalOverlay.addEventListener('click', closePhoneBindModal);
+
+    // 绑定邮箱弹窗事件
+    emailBindCloseBtn.addEventListener('click', closeEmailBindModal);
+    emailBindCancelBtn.addEventListener('click', closeEmailBindModal);
+    emailBindModalOverlay.addEventListener('click', closeEmailBindModal);
+
+    // 密码显示/隐藏按钮功能
+    document.getElementById('toggle-current-password').addEventListener('click', function() {
+      const passwordInput = document.getElementById('current-password');
+      const icon = this.querySelector('i');
+
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.className = 'fa-regular fa-eye-slash';
+      } else {
+        passwordInput.type = 'password';
+        icon.className = 'fa-regular fa-eye';
+      }
+    });
+
+    document.getElementById('toggle-new-password').addEventListener('click', function() {
+      const passwordInput = document.getElementById('new-password');
+      const icon = this.querySelector('i');
+
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.className = 'fa-regular fa-eye-slash';
+      } else {
+        passwordInput.type = 'password';
+        icon.className = 'fa-regular fa-eye';
+      }
+    });
+
+    document.getElementById('toggle-confirm-password').addEventListener('click', function() {
+      const passwordInput = document.getElementById('confirm-password');
+      const icon = this.querySelector('i');
+
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.className = 'fa-regular fa-eye-slash';
+      } else {
+        passwordInput.type = 'password';
+        icon.className = 'fa-regular fa-eye';
+      }
+    });
+
+    // ESC键关闭弹窗
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        if (accountModal.style.display === 'block') {
+          closeAccountModal();
+        }
+        if (passwordModal.style.display === 'block') {
+          closePasswordModal();
+        }
+        if (phoneBindModal.style.display === 'block') {
+          closePhoneBindModal();
+        }
+        if (emailBindModal.style.display === 'block') {
+          closeEmailBindModal();
+        }
+
+        // 关闭通知详情弹窗
+        const detailModal = document.getElementById('notification-detail-modal');
+        if (detailModal) {
+          document.body.removeChild(detailModal);
+        }
+      }
+    });
+
+    // 初始化未读通知数量
+    updateUnreadCount();
+  });
+</script>
+</body>
+</html>

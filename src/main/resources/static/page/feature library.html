@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>特性库</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+    }
+    body {
+      background-color: #f5f7fa;
+      color: #333;
+      padding: 30px;
+    }
+    .main-content {
+      max-width: 1800px;
+      margin: 0 auto;
+    }
+    .page-title {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #2f4050;
+      font-weight: 600;
+    }
+    .filter-container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .filter-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #2f4050;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e6e6e6;
+    }
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+      justify-content: flex-start;
+      margin-bottom: 10px;
+    }
+    .search-wrapper {
+      position: relative;
+      flex: 1;
+      min-width: 200px;
+      max-width: 300px;
+    }
+    .search-input {
+      width: 100%;
+      padding: 10px 15px 10px 40px;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      font-size: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: all 0.3s;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: #165DFF;
+      box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.1);
+    }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+      font-size: 16px;
+    }
+    .filter-select {
+      padding: 10px 15px;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      font-size: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: all 0.3s;
+      min-width: 180px;
+    }
+    .filter-select:focus {
+      outline: none;
+      border-color: #165DFF;
+      box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.1);
+    }
+
+    /* 操作按钮容器 */
+    .filter-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 15px;
+      flex-shrink: 0;
+    }
+    .add-btn {
+      padding: 10px 24px;
+      background-color: #00B42A;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .add-btn:hover {
+      background-color: #009922;
+    }
+    .batch-delete-btn {
+      padding: 10px 24px;
+      background-color: #F53F3F;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .batch-delete-btn:hover {
+      background-color: #d92d2d;
+    }
+    .search-btn {
+      padding: 10px 24px;
+      background-color: #165DFF;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .search-btn:hover {
+      background-color: #0D52D9;
+    }
+    .reset-btn {
+      padding: 10px 24px;
+      background-color: #f5f7fa;
+      color: #666;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .reset-btn:hover {
+      background-color: #e8eaed;
+      border-color: #d9d9d9;
+    }
+
+    /* 表格容器 */
+    .table-container {
+      position: relative;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      display: none;
+    }
+
+    /* 滚动容器 */
+    .scrollable-content {
+      overflow-x: auto;
+      overflow-y: auto;
+      max-height: 600px;
+      scrollbar-width: thin;
+      scrollbar-color: #c1c1c1 #f5f5f5;
+    }
+
+    /* 单一表格样式 */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      min-width: 1520px;
+    }
+    .data-table thead {
+      background-color: #f8f9fa;
+      color: #2f4050;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    .data-table th, .data-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #e6e6e6;
+      font-size: 14px;
+      vertical-align: middle;
+      line-height: 1.5;
+      height: 60px;
+      min-height: 60px;
+      max-height: 60px;
+      overflow: hidden;
+    }
+    .data-table th {
+      font-weight: 600;
+      height: 48px;
+      min-height: 48px;
+    }
+    .data-table tbody tr {
+      height: 60px;
+      min-height: 60px;
+      max-height: 60px;
+    }
+    .data-table tbody tr:hover {
+      background-color: #fafbfc;
+    }
+
+    /* 重新设置各列宽度 */
+    .data-table th:nth-child(1),
+    .data-table td:nth-child(1) {
+      width: 60px;
+      min-width: 60px;
+      max-width: 60px;
+      text-align: center;
+    }
+    .data-table th:nth-child(2),
+    .data-table td:nth-child(2) {
+      width: 120px;
+      min-width: 120px;
+      max-width: 120px;
+    }
+    .data-table th:nth-child(3),
+    .data-table td:nth-child(3) {
+      width: 160px;
+      min-width: 160px;
+      max-width: 160px;
+    }
+    .data-table th:nth-child(4),
+    .data-table td:nth-child(4) {
+      width: 90px;
+      min-width: 90px;
+      max-width: 90px;
+    }
+    .data-table th:nth-child(5),
+    .data-table td:nth-child(5) {
+      width: 130px;
+      min-width: 130px;
+      max-width: 130px;
+    }
+    .data-table th:nth-child(6),
+    .data-table td:nth-child(6) {
+      width: 120px;
+      min-width: 120px;
+      max-width: 120px;
+      text-align: center;
+    }
+    .data-table th:nth-child(7),
+    .data-table td:nth-child(7) {
+      width: 100px;
+      min-width: 100px;
+      max-width: 100px;
+      text-align: right;
+    }
+    .data-table th:nth-child(8),
+    .data-table td:nth-child(8) {
+      width: 90px;
+      min-width: 90px;
+      max-width: 90px;
+      text-align: right;
+    }
+    .data-table th:nth-child(9),
+    .data-table td:nth-child(9) {
+      width: 90px;
+      min-width: 90px;
+      max-width: 90px;
+      text-align: right;
+    }
+    .data-table th:nth-child(10),
+    .data-table td:nth-child(10) {
+      width: 100px;
+      min-width: 100px;
+      max-width: 100px;
+    }
+    .data-table th:nth-child(11),
+    .data-table td:nth-child(11) {
+      width: 220px;
+      min-width: 220px;
+      max-width: 220px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.5;
+    }
+    .data-table th:nth-child(12),
+    .data-table td:nth-child(12) {
+      width: 120px;
+      min-width: 120px;
+      max-width: 120px;
+    }
+    /* 操作列位置 */
+    .data-table th:nth-child(13),
+    .data-table td:nth-child(13) {
+      width: 100px;
+      min-width: 100px;
+      max-width: 100px;
+      text-align: center;
+      position: sticky;
+      right: 0;
+      background-color: #fff;
+      z-index: 3;
+      border-left: 1px solid #e6e6e6;
+      box-shadow: -2px 0 4px rgba(0, 0, 0, 0.05);
+    }
+    .data-table thead th:nth-child(13) {
+      background-color: #f8f9fa;
+      z-index: 6;
+    }
+    .data-table tbody tr:hover td:nth-child(13) {
+      background-color: #fafbfc;
+    }
+
+    /* 特性类型标签样式 */
+    .type-tag {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      display: inline-block;
+      line-height: 1.5;
+    }
+    .type-tag.quantitative {
+      background-color: #e8f4fd;
+      color: #165DFF;
+    }
+    .type-tag.qualitative {
+      background-color: #f3e5f5;
+      color: #722ED1;
+    }
+
+    /* 特殊特性分类标签样式 */
+    .special-class-tag {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      display: inline-block;
+      line-height: 1.5;
+    }
+    .special-class-tag.safety {
+      background-color: #fef0f0;
+      color: #F53F3F;
+    }
+    .special-class-tag.critical {
+      background-color: #fff7e6;
+      color: #ff7d00;
+    }
+    .special-class-tag.major {
+      background-color: #fff2e8;
+      color: #ff7a00;
+    }
+    .special-class-tag.general {
+      background-color: #f6ffed;
+      color: #52c41a;
+    }
+
+    /* 操作按钮样式 */
+    .operation-item {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-height: 36px;
+      flex-wrap: nowrap;
+    }
+    .op-btn {
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: transparent;
+      flex-shrink: 0;
+    }
+    .op-edit {
+      color: #165DFF;
+    }
+    .op-edit:hover {
+      background-color: #e8f4fd;
+    }
+    .op-delete {
+      color: #F53F3F;
+    }
+    .op-delete:hover {
+      background-color: #fef0f0;
+    }
+
+    /* 分页样式 */
+    .pagination {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+      gap: 10px;
+    }
+    .pagination-btn {
+      padding: 5px 12px;
+      border: 1px solid #e6e6e6;
+      border-radius: 4px;
+      background-color: #fff;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .pagination-btn.active {
+      background-color: #165DFF;
+      color: #fff;
+      border-color: #165DFF;
+    }
+    .pagination-btn:disabled {
+      cursor: not-allowed;
+      color: #ccc;
+      border-color: #eee;
+    }
+
+    /* 弹窗样式 */
+    .modal-mask {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      display: none;
+    }
+    .modal-container {
+      background-color: #fff;
+      border-radius: 8px;
+      width: 700px;
+      max-width: 90%;
+      padding: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e6e6e6;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2f4050;
+    }
+    .modal-close {
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      color: #999;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .modal-close:hover {
+      color: #333;
+    }
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .form-item {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .form-label {
+      font-size: 14px;
+      color: #666;
+      font-weight: 500;
+    }
+    .form-input, .form-select, .form-textarea {
+      padding: 10px 15px;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .form-textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: #165DFF;
+      box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.1);
+    }
+    .form-required {
+      color: #F53F3F;
+      margin-left: 4px;
+    }
+    .form-row {
+      display: flex;
+      gap: 15px;
+    }
+    .form-row .form-item {
+      flex: 1;
+    }
+    .modal-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 1px solid #e6e6e6;
+    }
+    .modal-cancel {
+      padding: 8px 20px;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      background-color: #f5f7fa;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .modal-cancel:hover {
+      background-color: #e8eaed;
+    }
+    .modal-submit {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 8px;
+      background-color: #165DFF;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .modal-submit:hover {
+      background-color: #0D52D9;
+    }
+    .error-tip {
+      color: #F53F3F;
+      font-size: 12px;
+      display: none;
+    }
+    .batch-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    /* 详情查看弹窗 */
+    .detail-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      display: none;
+    }
+    .detail-content {
+      background-color: #fff;
+      border-radius: 8px;
+      width: 600px;
+      max-width: 90%;
+      padding: 24px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e6e6e6;
+    }
+    .detail-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2f4050;
+    }
+    .detail-close {
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      color: #999;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .detail-close:hover {
+      color: #333;
+    }
+    .detail-body {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #333;
+    }
+    .detail-item {
+      margin-bottom: 15px;
+    }
+    .detail-label {
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    .detail-value {
+      color: #333;
+      word-break: break-word;
+    }
+
+    /* 可点击单元格样式 */
+    .clickable-cell {
+      cursor: pointer;
+      position: relative;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .clickable-cell:hover {
+      background-color: #f0f9ff !important;
+    }
+    .clickable-cell:hover::after {
+      content: '点击查看详情';
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: #165DFF;
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      opacity: 0.9;
+      z-index: 10;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    /* 功能描述单元格特殊样式 */
+    .desc-cell.clickable-cell {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 220px;
+    }
+    .desc-cell.clickable-cell:hover::after {
+      content: '点击查看完整描述';
+      background-color: #165DFF;
+    }
+
+    /* 移除原有的desc-cell悬停样式，避免冲突 */
+    .desc-cell:hover::before {
+      display: none;
+    }
+
+    /* 定量数据单元格样式 */
+    .quantitative-data {
+      text-align: right;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* 特殊特性符号样式 */
+    .special-symbol {
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .special-symbol.safety {
+      color: #F53F3F;
+    }
+    .special-symbol.critical {
+      color: #ff7d00;
+    }
+    .special-symbol.major {
+      color: #ff7a00;
+    }
+
+    /* 操作按钮容器 - 防止点击行时触发操作按钮 */
+    .operation-item {
+      pointer-events: auto;
+    }
+
+    @media (max-width: 768px) {
+      .filter-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .search-wrapper {
+        max-width: 100%;
+      }
+      .filter-actions {
+        justify-content: center;
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+      .scrollable-content {
+        max-height: 400px;
+      }
+      .data-table {
+        min-width: 1500px;
+      }
+      .form-row {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="main-content">
+  <div class="page-title">特性库</div>
+
+  <!-- 筛选区域 -->
+  <div class="filter-container">
+    <div class="filter-title">筛选条件</div>
+    <div class="filter-row">
+      <!-- 主要信息搜索 -->
+      <div class="search-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" class="search-input" id="searchKeyword" placeholder="搜索：编号/标准名称/规格描述...">
+      </div>
+
+      <!-- 特性类型筛选 -->
+      <select class="filter-select" id="characteristicTypeFilter">
+        <option value="">特性类型</option>
+        <option value="定量">定量</option>
+        <option value="定性">定性</option>
+      </select>
+
+      <!-- 特殊特性分类筛选 -->
+      <select class="filter-select" id="specialClassFilter">
+        <option value="">特殊特性分类</option>
+        <option value="安全特性">安全特性</option>
+        <option value="关键特性">关键特性</option>
+        <option value="重要特性">重要特性</option>
+        <option value="一般特性">一般特性</option>
+      </select>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="filter-actions">
+      <button class="add-btn" id="addCharacteristicBtn">
+        <i class="fas fa-plus mr-1"></i> 新增特性
+      </button>
+      <button class="batch-delete-btn" id="batchDeleteBtn">
+        <i class="fas fa-trash mr-1"></i> 批量删除
+      </button>
+      <button class="search-btn" id="searchBtn">
+        <i class="fas fa-search mr-1"></i> 搜索
+      </button>
+      <button class="reset-btn" id="resetBtn">
+        <i class="fas fa-refresh mr-1"></i> 重置
+      </button>
+    </div>
+  </div>
+
+  <!-- 特性表格 -->
+  <div class="table-container" id="tableContainer">
+    <div class="scrollable-content" id="scrollableContent">
+      <table class="data-table" id="dataTable">
+        <thead>
+        <tr>
+          <th><input type="checkbox" class="batch-checkbox" id="checkAll"></th>
+          <th>特性编号</th>
+          <th>标准名称</th>
+          <th>特性类型</th>
+          <th>特殊特性分类</th>
+          <th>特殊特性符号</th>
+          <th>定量基准值</th>
+          <th>定量下限</th>
+          <th>定量上限</th>
+          <th>定量单位</th>
+          <th>定性规格/规格描述</th>
+          <th>最近更新时间</th>
+          <th>操作</th>
+        </tr>
+        </thead>
+        <tbody id="dataTableBody">
+        <!-- 数据表格内容由JS渲染 -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 分页 -->
+  <div class="pagination" id="paginationContainer">
+    <button class="pagination-btn" id="prevPageBtn">上一页</button>
+    <div id="pageNumberContainer">
+      <button class="pagination-btn active">1</button>
+    </div>
+    <button class="pagination-btn" id="nextPageBtn">下一页</button>
+  </div>
+</div>
+
+<!-- 新增/编辑特性弹窗 -->
+<div class="modal-mask" id="characteristicModal">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modalTitle">新增特性</h3>
+      <button class="modal-close" id="closeModalBtn">&times;</button>
+    </div>
+    <form class="modal-form" id="characteristicForm">
+      <input type="hidden" id="editCharacteristicCode">
+
+      <div class="form-row">
+        <div class="form-item">
+          <label class="form-label">编号 <span class="form-required">*</span></label>
+          <input type="text" class="form-input" id="characteristicCode" placeholder="自动生成" readonly>
+        </div>
+        <div class="form-item">
+          <label class="form-label">标准名称 <span class="form-required">*</span></label>
+          <input type="text" class="form-input" id="characteristicName" placeholder="请输入特性标准名称">
+          <div class="error-tip" id="nameError">标准名称不能为空</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-item">
+          <label class="form-label">特性类型 <span class="form-required">*</span></label>
+          <select class="form-select" id="characteristicType" onchange="toggleQuantitativeFields()">
+            <option value="">请选择特性类型</option>
+            <option value="定量">定量</option>
+            <option value="定性">定性</option>
+          </select>
+          <div class="error-tip" id="typeError">请选择特性类型</div>
+        </div>
+        <div class="form-item">
+          <label class="form-label">特殊特性分类 <span class="form-required">*</span></label>
+          <select class="form-select" id="specialClass">
+            <option value="">请选择特殊特性分类</option>
+            <option value="安全特性">安全特性</option>
+            <option value="关键特性">关键特性</option>
+            <option value="重要特性">重要特性</option>
+            <option value="一般特性">一般特性</option>
+          </select>
+          <div class="error-tip" id="classError">请选择特殊特性分类</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-item">
+          <label class="form-label">特殊特性符号</label>
+          <input type="text" class="form-input" id="specialSymbol" placeholder="如：🔴, 🟡, ⚪">
+        </div>
+      </div>
+
+      <!-- 定量数据字段 -->
+      <div id="quantitativeFields">
+        <div class="form-row">
+          <div class="form-item">
+            <label class="form-label">定量基准值</label>
+            <input type="number" step="0.001" class="form-input" id="baselineValue" placeholder="请输入基准值">
+          </div>
+          <div class="form-item">
+            <label class="form-label">定量下限</label>
+            <input type="number" step="0.001" class="form-input" id="lowerLimit" placeholder="请输入下限值">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-item">
+            <label class="form-label">定量上限</label>
+            <input type="number" step="0.001" class="form-input" id="upperLimit" placeholder="请输入上限值">
+          </div>
+          <div class="form-item">
+            <label class="form-label">定量单位</label>
+            <input type="text" class="form-input" id="unit" placeholder="如：mm, kg, °C">
+          </div>
+        </div>
+      </div>
+
+      <!-- 定性规格字段 -->
+      <div class="form-item">
+        <label class="form-label">定性规格/规格描述</label>
+        <textarea class="form-textarea" id="qualitativeSpec" placeholder="请输入定性规格或详细描述"></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="modal-cancel" id="cancelModalBtn">取消</button>
+        <button type="submit" class="modal-submit">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 详情查看弹窗 -->
+<div class="detail-modal" id="detailModal">
+  <div class="detail-content">
+    <div class="detail-header">
+      <h3 class="detail-title">特性详情</h3>
+      <button class="detail-close" id="closeDetailBtn">&times;</button>
+    </div>
+    <div class="detail-body" id="detailBody">
+      <!-- 详情内容由JS动态填充 -->
+    </div>
+  </div>
+</div>
+
+<script>
+  // 全局变量
+  let characteristics = JSON.parse(localStorage.getItem('characteristics') || '[]');
+  let currentPage = 1;
+  const pageSize = 10;
+  let filteredCharacteristics = [...characteristics];
+
+  // 页面加载初始化
+  document.addEventListener('DOMContentLoaded', function() {
+    renderCharacteristicTable();
+    bindEventListeners();
+    renderPagination();
+    bindCellClickEvents();
+  });
+
+  // 生成唯一特性编号
+  function generateCharacteristicCode() {
+    const count = characteristics.length + 1;
+    return `CHR-${String(count).padStart(3, '0')}`;
+  }
+
+  // 截断文本函数
+  function truncateText(text, maxLength = 25) {
+    if (!text || typeof text !== 'string') return '';
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  }
+
+  // 根据特性类型显示/隐藏定量字段
+  function toggleQuantitativeFields() {
+    const type = document.getElementById('characteristicType').value;
+    const quantitativeFields = document.getElementById('quantitativeFields');
+
+    if (type === '定量') {
+      quantitativeFields.style.display = 'block';
+    } else {
+      quantitativeFields.style.display = 'none';
+    }
+  }
+
+  // 表单验证
+  function validateForm() {
+    let isValid = true;
+    const characteristicName = document.getElementById('characteristicName').value.trim();
+    const characteristicType = document.getElementById('characteristicType').value;
+    const specialClass = document.getElementById('specialClass').value;
+
+    // 清空所有错误提示
+    document.querySelectorAll('.error-tip').forEach(tip => {
+      tip.style.display = 'none';
+    });
+
+    // 验证标准名称
+    if (!characteristicName) {
+      document.getElementById('nameError').style.display = 'block';
+      isValid = false;
+    }
+
+    // 验证特性类型
+    if (!characteristicType) {
+      document.getElementById('typeError').style.display = 'block';
+      isValid = false;
+    }
+
+    // 验证特殊特性分类
+    if (!specialClass) {
+      document.getElementById('classError').style.display = 'block';
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  // 打开新增/编辑弹窗
+  function openModal(type, characteristic = null) {
+    const modal = document.getElementById('characteristicModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const editCharacteristicCode = document.getElementById('editCharacteristicCode');
+
+    // 重置表单
+    document.getElementById('characteristicForm').reset();
+    document.querySelectorAll('.error-tip').forEach(tip => tip.style.display = 'none');
+
+    // 初始化定量字段显示
+    toggleQuantitativeFields();
+
+    if (type === 'add') {
+      modalTitle.textContent = '新增特性';
+      editCharacteristicCode.value = '';
+      document.getElementById('characteristicCode').value = generateCharacteristicCode();
+    } else if (type === 'edit') {
+      modalTitle.textContent = '编辑特性';
+      editCharacteristicCode.value = characteristic.code;
+      document.getElementById('characteristicCode').value = characteristic.code;
+      document.getElementById('characteristicName').value = characteristic.name;
+      document.getElementById('characteristicType').value = characteristic.type;
+      document.getElementById('specialClass').value = characteristic.specialClass;
+      document.getElementById('specialSymbol').value = characteristic.specialSymbol || '';
+      document.getElementById('baselineValue').value = characteristic.baselineValue || '';
+      document.getElementById('lowerLimit').value = characteristic.lowerLimit || '';
+      document.getElementById('upperLimit').value = characteristic.upperLimit || '';
+      document.getElementById('unit').value = characteristic.unit || '';
+      document.getElementById('qualitativeSpec').value = characteristic.qualitativeSpec || '';
+
+      // 根据类型显示/隐藏定量字段
+      toggleQuantitativeFields();
+    }
+
+    modal.style.display = 'flex';
+  }
+
+  // 关闭弹窗
+  function closeModal() {
+    document.getElementById('characteristicModal').style.display = 'none';
+  }
+
+  // 新增特性
+  function addCharacteristic() {
+    const currentDate = new Date().toISOString().split('T')[0];
+    const characteristicType = document.getElementById('characteristicType').value;
+
+    const newCharacteristic = {
+      code: document.getElementById('characteristicCode').value.trim(),
+      name: document.getElementById('characteristicName').value.trim(),
+      type: characteristicType,
+      specialClass: document.getElementById('specialClass').value,
+      specialSymbol: document.getElementById('specialSymbol').value.trim(),
+      baselineValue: characteristicType === '定量' ? parseFloat(document.getElementById('baselineValue').value) || null : null,
+      lowerLimit: characteristicType === '定量' ? parseFloat(document.getElementById('lowerLimit').value) || null : null,
+      upperLimit: characteristicType === '定量' ? parseFloat(document.getElementById('upperLimit').value) || null : null,
+      unit: characteristicType === '定量' ? document.getElementById('unit').value.trim() : '',
+      qualitativeSpec: document.getElementById('qualitativeSpec').value.trim(),
+      creator: "系统",
+      createTime: currentDate,
+      lastUpdateTime: currentDate
+    };
+
+    characteristics.push(newCharacteristic);
+    localStorage.setItem('characteristics', JSON.stringify(characteristics));
+    filteredCharacteristics = [...characteristics];
+    closeModal();
+    renderCharacteristicTable();
+    renderPagination();
+  }
+
+  // 编辑特性
+  function updateCharacteristic() {
+    const characteristicCode = document.getElementById('editCharacteristicCode').value;
+    const index = characteristics.findIndex(c => c.code === characteristicCode);
+    const characteristicType = document.getElementById('characteristicType').value;
+
+    if (index !== -1) {
+      characteristics[index] = {
+        ...characteristics[index],
+        name: document.getElementById('characteristicName').value.trim(),
+        type: characteristicType,
+        specialClass: document.getElementById('specialClass').value,
+        specialSymbol: document.getElementById('specialSymbol').value.trim(),
+        baselineValue: characteristicType === '定量' ? parseFloat(document.getElementById('baselineValue').value) || null : null,
+        lowerLimit: characteristicType === '定量' ? parseFloat(document.getElementById('lowerLimit').value) || null : null,
+        upperLimit: characteristicType === '定量' ? parseFloat(document.getElementById('upperLimit').value) || null : null,
+        unit: characteristicType === '定量' ? document.getElementById('unit').value.trim() : '',
+        qualitativeSpec: document.getElementById('qualitativeSpec').value.trim(),
+        lastUpdateTime: new Date().toISOString().split('T')[0]
+      };
+      localStorage.setItem('characteristics', JSON.stringify(characteristics));
+      filteredCharacteristics = [...characteristics];
+      closeModal();
+      renderCharacteristicTable();
+    }
+  }
+
+  // 显示特性详情
+  function showCharacteristicDetail(characteristic) {
+    const detailModal = document.getElementById('detailModal');
+    const detailBody = document.getElementById('detailBody');
+
+    // 根据特殊特性分类确定样式类
+    let specialClassTagClass = '';
+    switch(characteristic.specialClass) {
+      case '安全特性': specialClassTagClass = 'safety'; break;
+      case '关键特性': specialClassTagClass = 'critical'; break;
+      case '重要特性': specialClassTagClass = 'major'; break;
+      case '一般特性': specialClassTagClass = 'general'; break;
+    }
+
+    // 根据特性类型确定样式类
+    let typeTagClass = characteristic.type === '定量' ? 'quantitative' : 'qualitative';
+
+    detailBody.innerHTML = `
+      <div class="detail-item">
+        <div class="detail-label">编号</div>
+        <div class="detail-value">${characteristic.code}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">标准名称</div>
+        <div class="detail-value">${characteristic.name}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">特性类型</div>
+        <div class="detail-value"><span class="type-tag ${typeTagClass}">${characteristic.type}</span></div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">特殊特性分类</div>
+        <div class="detail-value"><span class="special-class-tag ${specialClassTagClass}">${characteristic.specialClass}</span></div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">特殊特性符号</div>
+        <div class="detail-value">${characteristic.specialSymbol || '无'}</div>
+      </div>
+      ${characteristic.type === '定量' ? `
+      <div class="detail-item">
+        <div class="detail-label">定量基准值</div>
+        <div class="detail-value">${characteristic.baselineValue !== null ? characteristic.baselineValue : '-'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">定量下限</div>
+        <div class="detail-value">${characteristic.lowerLimit !== null ? characteristic.lowerLimit : '-'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">定量上限</div>
+        <div class="detail-value">${characteristic.upperLimit !== null ? characteristic.upperLimit : '-'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">定量单位</div>
+        <div class="detail-value">${characteristic.unit || '-'}</div>
+      </div>
+      ` : `
+      <div class="detail-item">
+        <div class="detail-label">定性规格/规格描述</div>
+        <div class="detail-value">${characteristic.qualitativeSpec || '无'}</div>
+      </div>
+      `}
+      <div class="detail-item">
+        <div class="detail-label">创建时间</div>
+        <div class="detail-value">${characteristic.createTime}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">最近更新时间</div>
+        <div class="detail-value">${characteristic.lastUpdateTime}</div>
+      </div>
+    `;
+
+    detailModal.style.display = 'flex';
+  }
+
+  // 关闭详情弹窗
+  function closeDetailModal() {
+    document.getElementById('detailModal').style.display = 'none';
+  }
+
+  // 渲染特性表格
+  function renderCharacteristicTable() {
+    const dataTableBody = document.getElementById('dataTableBody');
+    const tableContainer = document.getElementById('tableContainer');
+    dataTableBody.innerHTML = '';
+
+    // 检查是否有数据
+    if (filteredCharacteristics.length === 0) {
+      tableContainer.style.display = 'none';
+      return;
+    }
+
+    // 有数据，显示表格容器
+    tableContainer.style.display = 'block';
+
+    // 计算分页数据
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedCharacteristics = filteredCharacteristics.slice(startIndex, endIndex);
+
+    paginatedCharacteristics.forEach((characteristic, index) => {
+      // 确定特性类型标签类
+      let typeClass = characteristic.type === '定量' ? 'quantitative' : 'qualitative';
+
+      // 确定特殊特性分类标签类
+      let specialClassTagClass = '';
+      switch(characteristic.specialClass) {
+        case '安全特性': specialClassTagClass = 'safety'; break;
+        case '关键特性': specialClassTagClass = 'critical'; break;
+        case '重要特性': specialClassTagClass = 'major'; break;
+        case '一般特性': specialClassTagClass = 'general'; break;
+      }
+
+      // 确定特殊特性符号样式类
+      let specialSymbolClass = '';
+      switch(characteristic.specialClass) {
+        case '安全特性': specialSymbolClass = 'safety'; break;
+        case '关键特性': specialSymbolClass = 'critical'; break;
+        case '重要特性': specialSymbolClass = 'major'; break;
+      }
+
+      // 截断描述为单行显示
+      const truncatedSpec = truncateText(characteristic.qualitativeSpec, 30);
+
+      // 渲染单一行
+      const row = document.createElement('tr');
+      row.setAttribute('data-index', index);
+      row.setAttribute('data-characteristic', characteristic.code);
+      row.innerHTML = `
+        <td><input type="checkbox" class="batch-checkbox" data-characteristic="${characteristic.code}"></td>
+        <td class="clickable-cell" onclick="showCharacteristicDetailByCode('${characteristic.code}')">
+          ${characteristic.code}
+        </td>
+        <td class="clickable-cell" onclick="showCharacteristicDetailByCode('${characteristic.code}')">
+          ${characteristic.name}
+        </td>
+        <td class="clickable-cell" onclick="showCharacteristicDetailByCode('${characteristic.code}')">
+          <span class="type-tag ${typeClass}">${characteristic.type}</span>
+        </td>
+        <td class="clickable-cell" onclick="showCharacteristicDetailByCode('${characteristic.code}')">
+          <span class="special-class-tag ${specialClassTagClass}">${characteristic.specialClass}</span>
+        </td>
+        <td class="special-symbol ${specialSymbolClass}">${characteristic.specialSymbol || ''}</td>
+        <td class="quantitative-data">${characteristic.baselineValue !== null ? characteristic.baselineValue : '-'}</td>
+        <td class="quantitative-data">${characteristic.lowerLimit !== null ? characteristic.lowerLimit : '-'}</td>
+        <td class="quantitative-data">${characteristic.upperLimit !== null ? characteristic.upperLimit : '-'}</td>
+        <td>${characteristic.unit || '-'}</td>
+        <td class="clickable-cell desc-cell" onclick="showCharacteristicDetailByCode('${characteristic.code}')">
+          ${truncatedSpec || '-'}
+        </td>
+        <td class="clickable-cell" onclick="showCharacteristicDetailByCode('${characteristic.code}')">
+          ${characteristic.lastUpdateTime}
+        </td>
+        <td>
+          <div class="operation-item">
+            <!-- 编辑按钮 -->
+            <button class="op-btn op-edit" data-characteristic="${characteristic.code}">
+              <i class="fa-solid fa-edit"></i>
+            </button>
+            <!-- 删除按钮 -->
+            <button class="op-btn op-delete" data-characteristic="${characteristic.code}">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        </td>
+      `;
+      dataTableBody.appendChild(row);
+    });
+
+    bindOperationBtnEvents();
+    bindCheckboxEvents();
+  }
+
+  // 绑定单元格点击事件
+  function bindCellClickEvents() {
+    document.querySelectorAll('.clickable-cell').forEach(cell => {
+      cell.onclick = null;
+      cell.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const row = this.closest('tr');
+        if (row) {
+          const characteristicCode = row.getAttribute('data-characteristic');
+          if (characteristicCode) {
+            showCharacteristicDetailByCode(characteristicCode);
+          }
+        }
+      });
+    });
+  }
+
+  // 根据特性编号显示详情
+  function showCharacteristicDetailByCode(characteristicCode) {
+    const characteristic = characteristics.find(c => c.code === characteristicCode);
+    if (characteristic) {
+      showCharacteristicDetail(characteristic);
+    }
+  }
+
+  // 绑定复选框事件
+  function bindCheckboxEvents() {
+    const checkAll = document.getElementById('checkAll');
+    const checkItems = document.querySelectorAll('.batch-checkbox[data-characteristic]');
+
+    checkAll.addEventListener('change', function() {
+      checkItems.forEach(item => {
+        item.checked = this.checked;
+      });
+    });
+
+    checkItems.forEach(item => {
+      item.addEventListener('change', function() {
+        const allChecked = Array.from(checkItems).every(i => i.checked);
+        checkAll.checked = allChecked;
+      });
+    });
+  }
+
+  // 批量删除特性
+  function batchDeleteCharacteristics() {
+    const checkedItems = document.querySelectorAll('.batch-checkbox[data-characteristic]:checked');
+    if (checkedItems.length === 0) {
+      alert('请选择要删除的特性！');
+      return;
+    }
+
+    if (confirm(`确认删除选中的${checkedItems.length}个特性吗？删除后不可恢复！`)) {
+      const deleteCodes = Array.from(checkedItems).map(item => item.getAttribute('data-characteristic'));
+      characteristics = characteristics.filter(c => !deleteCodes.includes(c.code));
+      localStorage.setItem('characteristics', JSON.stringify(characteristics));
+      filteredCharacteristics = [...characteristics];
+      currentPage = 1;
+      renderCharacteristicTable();
+      renderPagination();
+    }
+  }
+
+  // 渲染分页
+  function renderPagination() {
+    const totalPages = Math.ceil(filteredCharacteristics.length / pageSize);
+    const pageContainer = document.getElementById('pageNumberContainer');
+    const prevBtn = document.getElementById('prevPageBtn');
+    const nextBtn = document.getElementById('nextPageBtn');
+    const paginationContainer = document.getElementById('paginationContainer');
+
+    pageContainer.innerHTML = '';
+
+    if (totalPages === 0 || filteredCharacteristics.length === 0) {
+      paginationContainer.style.display = 'none';
+      return;
+    } else {
+      paginationContainer.style.display = 'flex';
+    }
+
+    for (let i = 1; i <= totalPages; i++) {
+      const pageBtn = document.createElement('button');
+      pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+      pageBtn.textContent = i;
+      pageBtn.addEventListener('click', function() {
+        currentPage = i;
+        renderCharacteristicTable();
+        renderPagination();
+      });
+      pageContainer.appendChild(pageBtn);
+    }
+
+    prevBtn.disabled = currentPage === 1;
+    nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+  }
+
+  // 绑定操作按钮事件
+  function bindOperationBtnEvents() {
+    // 编辑按钮
+    document.querySelectorAll('.op-edit').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const characteristicCode = this.getAttribute('data-characteristic');
+        const characteristic = characteristics.find(c => c.code === characteristicCode);
+        if (characteristic) {
+          openModal('edit', characteristic);
+        }
+      });
+    });
+
+    // 删除按钮
+    document.querySelectorAll('.op-delete').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const characteristicCode = this.getAttribute('data-characteristic');
+        const characteristic = characteristics.find(c => c.code === characteristicCode);
+        if (characteristic && confirm(`确认删除特性【${characteristic.name}】吗？删除后不可恢复！`)) {
+          characteristics = characteristics.filter(c => c.code !== characteristicCode);
+          localStorage.setItem('characteristics', JSON.stringify(characteristics));
+          filteredCharacteristics = [...characteristics];
+          const totalPages = Math.ceil(filteredCharacteristics.length / pageSize);
+          if (currentPage > totalPages && totalPages > 0) {
+            currentPage = totalPages;
+          } else if (totalPages === 0) {
+            currentPage = 1;
+          }
+          renderCharacteristicTable();
+          renderPagination();
+        }
+      });
+    });
+  }
+
+  // 绑定所有事件监听
+  function bindEventListeners() {
+    // 搜索按钮
+    document.getElementById('searchBtn').addEventListener('click', filterCharacteristics);
+    // 搜索框回车
+    document.getElementById('searchKeyword').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') filterCharacteristics();
+    });
+    // 重置按钮
+    document.getElementById('resetBtn').addEventListener('click', resetFilters);
+    // 新增特性按钮
+    document.getElementById('addCharacteristicBtn').addEventListener('click', () => openModal('add'));
+    // 批量删除按钮
+    document.getElementById('batchDeleteBtn').addEventListener('click', batchDeleteCharacteristics);
+    // 关闭弹窗按钮
+    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+    document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
+    // 关闭详情弹窗按钮
+    document.getElementById('closeDetailBtn').addEventListener('click', closeDetailModal);
+    // 表单提交
+    document.getElementById('characteristicForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (validateForm()) {
+        const editCharacteristicCode = document.getElementById('editCharacteristicCode').value;
+        if (editCharacteristicCode) {
+          updateCharacteristic();
+        } else {
+          addCharacteristic();
+        }
+      }
+    });
+    // 分页按钮
+    document.getElementById('prevPageBtn').addEventListener('click', function() {
+      if (currentPage > 1) {
+        currentPage--;
+        renderCharacteristicTable();
+        renderPagination();
+      }
+    });
+    document.getElementById('nextPageBtn').addEventListener('click', function() {
+      const totalPages = Math.ceil(filteredCharacteristics.length / pageSize);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderCharacteristicTable();
+        renderPagination();
+      }
+    });
+    // 特性类型变化时切换字段
+    document.getElementById('characteristicType').addEventListener('change', toggleQuantitativeFields);
+  }
+
+  // 多条件筛选
+  function filterCharacteristics() {
+    const keyword = document.getElementById('searchKeyword').value.trim().toLowerCase();
+    const type = document.getElementById('characteristicTypeFilter').value;
+    const specialClass = document.getElementById('specialClassFilter').value;
+
+    filteredCharacteristics = characteristics.filter(characteristic => {
+      const matchKeyword = keyword === '' ||
+              characteristic.code.toLowerCase().includes(keyword) ||
+              characteristic.name.toLowerCase().includes(keyword) ||
+              (characteristic.qualitativeSpec && characteristic.qualitativeSpec.toLowerCase().includes(keyword));
+
+      const matchType = type === '' || characteristic.type === type;
+
+      const matchSpecialClass = specialClass === '' || characteristic.specialClass === specialClass;
+
+      return matchKeyword && matchType && matchSpecialClass;
+    });
+
+    currentPage = 1;
+    renderCharacteristicTable();
+    renderPagination();
+  }
+
+  // 重置筛选条件
+  function resetFilters() {
+    document.getElementById('searchKeyword').value = '';
+    document.getElementById('characteristicTypeFilter').value = '';
+    document.getElementById('specialClassFilter').value = '';
+    filteredCharacteristics = [...characteristics];
+    currentPage = 1;
+    renderCharacteristicTable();
+    renderPagination();
+  }
+</script>
+</body>
+</html>

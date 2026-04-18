@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>DFMEA失效分析与风险分析</title>
+    <link rel="stylesheet" href="../css/modal-form-common.css">
+    <link rel="stylesheet" href="../css/DFMEA-page-7.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="dfmea-container">
+        <div class="edit-container" style="display: flex; justify-content: flex-end;">
+            <div class="edit-actions">
+                <button class="action-btn primary" onclick="exportData()">
+                    <i class="fas fa-paper-plane"></i> 导出
+                </button>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table id="dfmea-table">
+                <thead>
+                    <tr>
+                        <th colspan="4">失效分析（步骤四）</th>
+                        <th colspan="6">风险分析（步骤五）</th>
+                    </tr>
+                    <tr>
+                        <!-- 失效分析列 -->
+                        <th>1、对于上一较高级别要素和/或最终用户的失效影响（FE）</th>
+                        <th>失效影响的严重度（S）</th>
+                        <th>2、关注要素的失效模式（FM）</th>
+                        <th>3、工作要素的失效模式（FC）</th>
+                        
+                        <!-- 风险分析列 -->
+                        <th>对失效起因的当前预防控制（PC）</th>
+                        <th>失效起因的频度（O）</th>
+                        <th>对失效起因或失效模式的当前探测控制（DC）</th>
+                        <th>失效起因/失效模式的探测度（D）</th>
+                        <th>AP</th>
+                        <th>特殊特性</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 右键菜单 -->
+    <div id="context-menu">
+        <div id="context-menu-content">
+            <!-- 动态菜单内容 -->
+        </div>
+    </div>
+
+    <!-- 修改严重度模态框 -->
+    <div id="severity-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑严重度</h3>
+                <button class="modal-close" onclick="closeSeverityModal()">&times;</button>
+            </div>
+            <div class="modal-two-column">
+                <div class="standard-panel">
+                    <div class="standard-header">
+                        <h4><i class="fas fa-book"></i> 严重度（S）标准</h4>
+                        <button class="edit-standard-btn" onclick="editStandard('severity')">
+                            <i class="fas fa-edit"></i> 编辑
+                        </button>
+                    </div>
+                    <div class="standard-content" id="severity-standard-content">
+                        <!-- 严重度标准内容将通过JS动态加载 -->
+                    </div>
+                </div>
+                <div class="form-panel">
+                    <form id="severity-form">
+                        <div class="form-group">
+                            <label for="fe-description">系统失效影响（FE）：</label>
+                            <textarea id="fe-description" class="modal-textarea" readonly></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="severity-level">严重度（S）：</label>
+                            <select id="severity-level" class="modal-input" required>
+                                <option value="">请选择严重度等级</option>
+                                <option value="1">1 - 非常低</option>
+                                <option value="2">2 - 低</option>
+                                <option value="3">3 - 低</option>
+                                <option value="4">4 - 中</option>
+                                <option value="5">5 - 中</option>
+                                <option value="6">6 - 中</option>
+                                <option value="7">7 - 高</option>
+                                <option value="8">8 - 高</option>
+                                <option value="9">9 - 非常高</option>
+                                <option value="10">10 - 非常高</option>
+                            </select>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="modal-cancel" onclick="closeSeverityModal()">取消</button>
+                            <button type="submit" class="modal-submit">确认</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 修改频度度模态框 -->
+    <div id="preventive-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑预防措施（频度）</h3>
+                <button class="modal-close" onclick="closePreventiveModal()">&times;</button>
+            </div>
+            <div class="modal-two-column">
+                <div class="standard-panel">
+                    <div class="standard-header">
+                        <h4><i class="fas fa-book"></i> 频度（O）标准</h4>
+                        <button class="edit-standard-btn" onclick="editStandard('occurrence')">
+                            <i class="fas fa-edit"></i> 编辑
+                        </button>
+                    </div>
+                    <div class="standard-content" id="preventive-standard-content">
+                        <!-- 频度标准内容将通过JS动态加载 -->
+                    </div>
+                </div>
+                <div class="form-panel">
+                    <form id="preventive-form">
+                        <div class="form-group">
+                            <label for="pc-description">预防措施描述：</label>
+                            <textarea id="pc-description" class="modal-textarea" placeholder="请输入预防措施描述..." required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="pc-occurrence">频度（O）：</label>
+                            <select id="pc-occurrence" class="modal-input" required>
+                                <option value="">请选择频度等级</option>
+                                <option value="1">1 - 几乎不可能</option>
+                                <option value="2">2 - 极少</option>
+                                <option value="3">3 - 很少</option>
+                                <option value="4">4 - 少</option>
+                                <option value="5">5 - 偶尔</option>
+                                <option value="6">6 - 中等</option>
+                                <option value="7">7 - 频繁</option>
+                                <option value="8">8 - 很频繁</option>
+                                <option value="9">9 - 频繁失效</option>
+                                <option value="10">10 - 几乎肯定失效</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="pc-status">措施状态：</label>
+                            <select id="pc-status" class="modal-input">
+                                <option value="">请选择措施状态</option>
+                                <option value="不执行">不执行</option>
+                                <option value="尚未确认">尚未确认</option>
+                                <option value="尚未决策">尚未决策</option>
+                                <option value="尚未完成">尚未完成</option>
+                                <option value="已完成">已完成</option>
+                            </select>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="modal-cancel" onclick="closePreventiveModal()">取消</button>
+                            <button type="submit" class="modal-submit">确认</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 修改探测度模态框 -->
+    <div id="detective-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>探测措施（探测度）</h3>
+                <button class="modal-close" onclick="closeDetectiveModal()">&times;</button>
+            </div>
+            <div class="modal-two-column">
+                <div class="standard-panel">
+                    <div class="standard-header">
+                        <h4><i class="fas fa-book"></i> 探测度（D）标准</h4>
+                        <button class="edit-standard-btn" onclick="editStandard('detection')">
+                            <i class="fas fa-edit"></i> 编辑
+                        </button>
+                    </div>
+                    <div class="standard-content" id="detective-standard-content">
+                        <!-- 探测度标准内容将通过JS动态加载 -->
+                    </div>
+                </div>
+                <div class="form-panel">
+                    <form id="detective-form">
+                        <div class="form-group">
+                            <label for="dc-description">探测措施描述：</label>
+                            <textarea id="dc-description" class="modal-textarea" placeholder="请输入探测措施描述..." required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="dc-detection">探测度（D）：</label>
+                            <select id="dc-detection" class="modal-input" required>
+                                <option value="">请选择探测度等级</option>
+                                <option value="1">1 - 几乎肯定能探测</option>
+                                <option value="2">2 - 很高</option>
+                                <option value="3">3 - 高</option>
+                                <option value="4">4 - 中高</option>
+                                <option value="5">5 - 中等</option>
+                                <option value="6">6 - 低</option>
+                                <option value="7">7 - 很低</option>
+                                <option value="8">8 - 极低</option>
+                                <option value="9">9 - 不太可能探测</option>
+                                <option value="10">10 - 绝对无法探测</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="dc-status">措施状态：</label>
+                            <select id="dc-status" class="modal-input">
+                                <option value="">请选择措施状态</option>
+                                <option value="不执行">不执行</option>
+                                <option value="尚未确认">尚未确认</option>
+                                <option value="尚未决策">尚未决策</option>
+                                <option value="尚未完成">尚未完成</option>
+                                <option value="已完成">已完成</option>
+                            </select>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="modal-cancel" onclick="closeDetectiveModal()">取消</button>
+                            <button type="submit" class="modal-submit">确认</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="..\js\DFMEA-page-7.js"></script>
+</body>
+</html>

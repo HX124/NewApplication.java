@@ -1,0 +1,246 @@
+/* edit.css - 保持原有类名，只更新样式 */
+
+/* 1. 添加body滚动条隐藏样式 */
+body {
+  margin: 0;
+  padding: 0;
+  overflow-y: scroll; /* 保留滚动功能 */
+}
+
+/* 隐藏滚动条但保留功能 */
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+
+.container {
+  display: flex;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  background-color: #f5f7fa;
+}
+
+.main-content {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* 修改 iframe 容器 */
+#projectsEditBody {
+  position: relative;
+  height: auto;
+  min-height: calc(100vh - 60px);
+  width: 100%;
+  overflow: auto;
+}
+
+/* 编辑栏 - 保持类名不变，更新样式为页面9风格 */
+.edit_part {
+  width: 100%;
+  background-color: white;
+  border-bottom: 1px solid #e1e4e8;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  z-index: 10;
+}
+
+/* 方案一：自适应平分宽度（推荐） */
+.edit_option {
+  display: flex;
+  padding: 0;
+  gap: 0; /* 移除间距 */
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  margin: 10px;
+  border: 1px solid #e1e4e8;
+  overflow: hidden; /* 隐藏溢出内容 */
+}
+
+/* 按钮 - 自适应平分宽度 */
+.menu-item {
+  flex: 1; /* 平分宽度 */
+  min-width: 0; /* 允许缩小到0 */
+  padding: 10px 8px; /* 减少左右内边距 */
+  background-color: #f8f9fa;
+  border: none;
+  border-right: 1px solid #e1e4e8;
+  color: #666;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  min-height: 40px;
+  overflow: hidden; /* 隐藏溢出文本 */
+}
+
+/* 隐藏图标时的文字 */
+.menu-item-text {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menu-item:last-child {
+  border-right: none;
+}
+
+.menu-item:hover {
+  background-color: #e9ecef;
+  color: #2c3e50;
+}
+
+.menu-item.active {
+  background-color: #165DFF;
+  color: white;
+  border-color: #165DFF;
+}
+
+.menu-item.active:hover {
+  background-color: #0D52D9;
+}
+
+#iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* 保持原有contextMenu样式不变 */
+#contextMenu {
+  display: none;
+  position: absolute;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+  border-radius: 6px;
+  padding: 6px 0;
+  min-width: 180px;
+  z-index: 1000;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+#contextMenu button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 15px;
+  text-align: left;
+  background: none;
+  border: none;
+  color: #2d3748;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+#contextMenu button:hover {
+  background-color: #70b1f1;
+  color: #1a365d;
+}
+
+#contextMenu hr {
+  margin: 6px 0;
+  border: none;
+  border-top: 1px solid #9e9898;
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .menu-item {
+    padding: 10px 6px;
+    font-size: 11px;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 768px) {
+  .menu-item {
+    padding: 8px 4px;
+    font-size: 11px;
+    gap: 3px;
+    min-height: 36px;
+  }
+  
+  /* 宽度小于400px时只显示前两个字 */
+  @media (max-width: 400px) {
+    .menu-item {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* 显示前两个字，隐藏其余部分 */
+    .menu-item::after {
+      content: attr(data-short);
+      position: absolute;
+      left: 0;
+      right: 0;
+      text-align: center;
+    }
+    
+    /* 设置每个按钮的前两个字的缩写 */
+    .menu-item:nth-child(1)::after { content: "策划"; }      /* 策划与准备 */
+    .menu-item:nth-child(2)::after { content: "结构"; }      /* 结构分析 */
+    .menu-item:nth-child(3)::after { content: "功能"; }      /* 功能分析 */
+    .menu-item:nth-child(4)::after { content: "失效"; }      /* 失效分析 */
+    .menu-item:nth-child(5)::after { content: "风险"; }      /* 风险分析 */
+    .menu-item:nth-child(6)::after { content: "优化"; }      /* 优化 */
+    .menu-item:nth-child(7)::after { content: "结果"; }      /* 结果文件化 */
+    
+    /* 隐藏原有文字 */
+    .menu-item span,
+    .menu-item-text {
+      display: none !important;
+    }
+  }
+  
+  /* 宽度小于180px时完全隐藏所有文字（空按钮） */
+  @media (max-width: 180px) {
+    .menu-item::after {
+      display: none !important;
+    }
+    
+    .menu-item::before {
+      display: none !important;
+    }
+    
+    .menu-item {
+      min-width: 20px; /* 保持最小可点击区域 */
+      padding: 8px 2px;
+      font-size: 0; /* 完全隐藏文字 */
+    }
+    
+    /* 确保按钮内部没有任何内容显示 */
+    .menu-item * {
+      display: none !important;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .edit_option {
+    margin: 10px 5px;
+  }
+  
+  .menu-item {
+    padding: 8px 2px;
+    font-size: 10px;
+  }
+}

@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FMEA数字化管理系统</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Excel导出库 -->
+  <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+  <!-- PDF导出库 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- html2canvas for screenshot -->
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <!-- jsPDF AutoTable插件 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            secondary: '#F5F7FA',
+            success: '#00B42A',
+            warning: '#FF7D00',
+            danger: '#F53F3F',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .card-shadow {
+        @apply shadow-sm hover:shadow-md transition-shadow duration-200;
+      }
+      .delete-btn {
+        @apply text-gray-500 hover:text-danger transition-colors;
+      }
+      .open-btn {
+        @apply text-primary hover:text-primary/80 transition-colors;
+      }
+      .edit-btn {
+        @apply text-primary hover:text-primary/80 transition-colors;
+      }
+      .export-btn {
+        @apply text-gray-500 hover:text-gray-700 transition-colors;
+      }
+      .tooltip {
+        @apply relative inline-block;
+      }
+      .tooltip .tooltip-text {
+        @apply invisible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap z-10 transition-opacity duration-200 opacity-0;
+      }
+      .tooltip:hover .tooltip-text {
+        @apply visible opacity-100;
+      }
+      .modal-mask {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        display: none;
+      }
+      .modal-container {
+        background-color: #fff;
+        border-radius: 8px;
+        width: 500px;
+        max-width: 90%;
+        max-height: 80vh;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e6e6e6;
+      }
+      .modal-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #2f4050;
+      }
+      .modal-close {
+        background: transparent;
+        border: none;
+        font-size: 20px;
+        color: #999;
+        cursor: pointer;
+        transition: color 0.3s;
+      }
+      .modal-close:hover {
+        color: #333;
+      }
+      .modal-form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        overflow-y: auto;
+        flex: 1;
+        padding-right: 5px;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .form-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .form-label {
+        font-size: 14px;
+        color: #666;
+        font-weight: 500;
+      }
+      .form-input, .form-select {
+        padding: 10px 15px;
+        border: 1px solid #e6e6e6;
+        border-radius: 8px;
+        font-size: 14px;
+      }
+      .form-input:focus, .form-select:focus {
+        outline: none;
+        border-color: #165DFF;
+        box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.1);
+      }
+      .form-required {
+        color: #F53F3F;
+        margin-left: 4px;
+      }
+      .modal-footer {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 20px;
+        padding-top: 10px;
+        border-top: 1px solid #e6e6e6;
+      }
+      .modal-cancel {
+        padding: 8px 20px;
+        border: 1px solid #e6e6e6;
+        border-radius: 8px;
+        background-color: #f5f7fa;
+        color: #666;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+      .modal-cancel:hover {
+        background-color: #e8eaed;
+      }
+      .modal-submit {
+        padding: 8px 20px;
+        border: none;
+        border-radius: 8px;
+        background-color: #165DFF;
+        color: #fff;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      .modal-submit:hover {
+        background-color: #0D52D9;
+      }
+      .error-tip {
+        color: #F53F3F;
+        font-size: 12px;
+        display: none;
+      }
+      .responsible-person {
+        color: #165DFF;
+        font-weight: 500;
+      }
+      .status-badge {
+        @apply px-2 py-1 rounded text-xs;
+      }
+      .status-processing {
+        @apply bg-warning/10 text-warning;
+      }
+      .status-completed {
+        @apply bg-success/10 text-success;
+      }
+      .status-paused {
+        @apply bg-red-100 text-red-500;
+      }
+      .status-pending {
+        @apply bg-gray-100 text-gray-500;
+      }
+
+      /* 导出模态框样式 */
+      .export-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        display: none;
+      }
+      .export-modal-content {
+        background-color: #fff;
+        border-radius: 8px;
+        width: 450px;
+        max-width: 90%;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      }
+      .export-options {
+        margin: 20px 0;
+      }
+      .export-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 15px;
+        margin: 10px 0;
+        border: 1px solid #e6e6e6;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+      .export-option:hover {
+        background-color: #f5f7fa;
+        border-color: #165DFF;
+      }
+      .export-option i {
+        font-size: 20px;
+        color: #165DFF;
+      }
+      .export-option-text {
+        flex: 1;
+      }
+      .export-option-title {
+        font-weight: 500;
+        color: #2f4050;
+      }
+      .export-option-desc {
+        font-size: 12px;
+        color: #666;
+        margin-top: 2px;
+      }
+      .export-type-selector {
+        margin: 15px 0;
+      }
+      .export-type-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #2f4050;
+        margin-bottom: 8px;
+        display: block;
+      }
+      .export-type-options {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .export-type-btn {
+        padding: 8px 16px;
+        border: 1px solid #e6e6e6;
+        border-radius: 6px;
+        background-color: #f5f7fa;
+        color: #666;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 13px;
+      }
+      .export-type-btn.active {
+        background-color: #165DFF;
+        color: #fff;
+        border-color: #165DFF;
+      }
+
+      /* 隐藏的iframe */
+      .export-iframe-container {
+        position: fixed;
+        top: -9999px;
+        left: -9999px;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+      }
+
+      /* 搜索框样式 */
+      .search-wrapper {
+        position: relative;
+        flex: 1;
+        min-width: 200px;
+        max-width: 300px;
+      }
+      .search-input {
+        width: 100%;
+        padding: 10px 15px 10px 40px;
+        border: 1px solid #e6e6e6;
+        border-radius: 8px;
+        font-size: 14px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        transition: all 0.3s;
+      }
+      .search-input:focus {
+        outline: none;
+        border-color: #165DFF;
+        box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.1);
+      }
+      .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+        font-size: 16px;
+      }
+
+      /* 项目选择弹窗样式 */
+      .project-select-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 16px;
+        margin: 12px 0;
+        border: 1px solid #e6e6e6;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        background-color: #fff;
+      }
+      .project-select-item:hover {
+        background-color: #f8fafc;
+        border-color: #165DFF;
+      }
+      .project-select-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        background-color: #f0f6ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #165DFF;
+        font-size: 20px;
+        flex-shrink: 0;
+      }
+      .project-select-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .project-select-name {
+        font-weight: 600;
+        color: #2f4050;
+        font-size: 15px;
+        margin-bottom: 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .project-select-details {
+        font-size: 13px;
+        color: #666;
+        line-height: 1.5;
+      }
+      .project-select-details div {
+        margin-bottom: 3px;
+      }
+      .project-select-details strong {
+        font-weight: 500;
+        color: #333;
+        margin-right: 4px;
+      }
+      .project-select-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+        flex-shrink: 0;
+        margin-left: auto;
+      }
+      .select-project-btn {
+        width: 80px;
+        height: 32px;
+        background-color: #165DFF;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 0;
+      }
+      .select-project-btn:hover {
+        background-color: #0D52D9;
+      }
+      .project-select-status {
+        font-size: 11px;
+        padding: 3px 8px;
+        border-radius: 4px;
+        text-align: center;
+        min-width: 60px;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 font-sans antialiased">
+<div class="h-screen overflow-hidden">
+  <div class="w-full h-full flex flex-col overflow-hidden">
+    <main class="flex-1 overflow-y-auto p-6 bg-gray-50 pt-8">
+      <!-- 欢迎语 + 快速创建按钮 -->
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h1 class="text-[clamp(1.25rem,2vw,1.75rem)] font-bold text-gray-900"></h1>
+          <p class="text-gray-500 mt-1">今日待处理FMEA任务：<span class="text-warning font-medium">3</span> 项</p>
+        </div>
+        <button class="bg-primary text-white px-4 py-2 rounded-lg flex items-center hover:bg-primary/90 transition-colors" id="quick-create-btn">
+          <i class="fa-solid fa-plus mr-2"></i>
+          快速创建FMEA
+        </button>
+      </div>
+
+      <!-- 数据概览卡片 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <div class="bg-white rounded-lg p-5 card-shadow cursor-pointer" id="totalProjectsCard">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-500 text-sm">FMEA总项目数</p>
+              <h3 class="text-2xl font-bold text-gray-900 mt-1">128</h3>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+              <i class="fa-solid fa-folder-open"></i>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg p-5 card-shadow">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-500 text-sm">进行中项目</p>
+              <h3 class="text-2xl font-bold text-gray-900 mt-1">45</h3>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center text-warning">
+              <i class="fa-solid fa-spinner"></i>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg p-5 card-shadow">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-500 text-sm">已完成项目</p>
+              <h3 class="text-2xl font-bold text-gray-900 mt-1">76</h3>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center text-success">
+              <i class="fa-solid fa-check-circle"></i>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg p-5 card-shadow">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-500 text-sm">高风险项数量</p>
+              <h3 class="text-2xl font-bold text-gray-900 mt-1">8</h3>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-500">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 最近项目列表 -->
+      <div class="bg-white rounded-lg card-shadow mb-6" id="recent-projects-card">
+        <div class="p-5 border-b border-gray-200 flex justify-between items-center">
+          <h2 class="text-lg font-bold text-gray-900">最近访问的FMEA项目</h2>
+          <a href="javascript:void(0);" id="view-all-projects" class="text-primary text-sm hover:underline">查看全部</a>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left" id="fmea-project-table">
+            <thead class="bg-gray-50 text-gray-600">
+            <tr>
+              <th class="px-6 py-3 rounded-l-lg">FMEA名称</th>
+              <th class="px-6 py-3">FMEA编号</th>
+              <th class="px-6 py-3">类型</th>
+              <th class="px-6 py-3">状态</th>
+              <th class="px-6 py-3">责任人</th>
+              <th class="px-6 py-3">最后访问时间</th>
+              <th class="px-6 py-3 rounded-r-lg">操作</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200" id="recent-projects-body">
+            <!-- 最近项目列表将在这里动态生成 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 快捷工具区 -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white rounded-lg p-5 card-shadow">
+          <div class="flex items-center mb-4">
+            <i class="fa-solid fa-file-export text-primary text-xl mr-3"></i>
+            <h3 class="font-bold text-gray-900">导出报告</h3>
+          </div>
+          <p class="text-gray-500 text-sm mb-4">将FMEA分析结果导出为PDF/Excel格式</p>
+          <button class="text-primary text-sm hover:underline" id="quick-export-btn">立即导出 →</button>
+        </div>
+        <div class="bg-white rounded-lg p-5 card-shadow">
+          <div class="flex items-center mb-4">
+            <i class="fa-solid fa-users text-primary text-xl mr-3"></i>
+            <h3 class="font-bold text-gray-900">团队协作</h3>
+          </div>
+          <p class="text-gray-500 text-sm mb-4">邀请团队成员共同编辑FMEA项目</p>
+          <button class="text-primary text-sm hover:underline">邀请成员 →</button>
+        </div>
+        <div class="bg-white rounded-lg p-5 card-shadow">
+          <div class="flex items-center mb-4">
+            <i class="fa-solid fa-upload text-primary text-xl mr-3"></i>
+            <h3 class="font-bold text-gray-900">导入数据</h3>
+          </div>
+          <p class="text-gray-500 text-sm mb-4">从Excel导入历史FMEA数据，快速复用</p>
+          <button class="text-primary text-sm hover:underline">选择文件 →</button>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- 新增/编辑FMEA项目弹窗 -->
+<div class="modal-mask" id="projectModal">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modalTitle">新增FMEA项目</h3>
+      <button class="modal-close" id="closeModalBtn">&times;</button>
+    </div>
+    <form class="modal-form" id="projectForm">
+      <input type="hidden" id="editFmeaCode"> <!-- 编辑时存储FMEA编号 -->
+      <div class="form-item">
+        <label class="form-label">FMEA名称 <span class="form-required">*</span></label>
+        <input type="text" class="form-input" id="fmeaName" placeholder="请输入FMEA名称">
+        <div class="error-tip" id="nameError">FMEA名称不能为空</div>
+      </div>
+      <div class="form-item">
+        <label class="form-label">FMEA编号</label>
+        <input type="text" class="form-input" id="fmeaCode" placeholder="系统自动生成" readonly>
+      </div>
+      <div class="form-item">
+        <label class="form-label">类型 <span class="form-required">*</span></label>
+        <select class="form-select" id="projectType">
+          <option value="">请选择项目类型</option>
+          <option value="DFMEA">DFMEA</option>
+        </select>
+        <div class="error-tip" id="typeError">请选择项目类型</div>
+      </div>
+      <div class="form-item">
+        <label class="form-label">状态 <span class="form-required">*</span></label>
+        <select class="form-select" id="projectStatus">
+          <option value="">请选择项目状态</option>
+          <option value="进行中">进行中</option>
+          <option value="已完成">已完成</option>
+          <option value="暂停">暂停</option>
+          <option value="待启动">待启动</option>
+        </select>
+        <div class="error-tip" id="statusError">请选择项目状态</div>
+      </div>
+      <div class="form-item">
+        <label class="form-label">责任人 <span class="form-required">*</span></label>
+        <input type="text" class="form-input" id="responsiblePerson" placeholder="请输入责任人姓名">
+        <div class="error-tip" id="personError">责任人不能为空</div>
+      </div>
+      <div class="form-item">
+        <label class="form-label">计划开始时间 <span class="form-required">*</span></label>
+        <input type="date" class="form-input" id="planStartDate">
+        <div class="error-tip" id="dateError">请选择计划开始时间</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="modal-cancel" id="cancelModalBtn">取消</button>
+        <button type="submit" class="modal-submit">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 项目选择弹窗 -->
+<div class="export-modal" id="projectSelectModal">
+  <div class="export-modal-content" style="width: 750px; max-width: 90%; max-height: 80vh;">
+    <div class="modal-header">
+      <h3 class="modal-title">选择要导出的项目</h3>
+      <button class="modal-close" id="closeProjectSelectModalBtn">&times;</button>
+    </div>
+
+    <!-- 项目搜索和筛选 -->
+    <div style="margin-bottom: 15px;">
+      <div class="search-wrapper" style="width: 100%; max-width: none;">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" class="search-input" id="projectSearchInput" placeholder="搜索FMEA项目名称、编号或责任人...">
+      </div>
+    </div>
+
+    <!-- 项目列表 -->
+    <div style="max-height: 400px; overflow-y: auto; padding: 5px;">
+      <div id="projectSelectList">
+        <!-- 项目列表将动态生成 -->
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="modal-cancel" id="cancelProjectSelectBtn">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- 导出格式选择弹窗 -->
+<div class="export-modal" id="exportModal">
+  <div class="export-modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">导出FMEA项目</h3>
+      <button class="modal-close" id="closeExportModalBtn">&times;</button>
+    </div>
+    <div class="export-options">
+      <!-- 内容类型选择 -->
+      <div class="export-type-selector">
+        <label class="export-type-label">选择导出内容类型：</label>
+        <div class="export-type-options">
+          <button class="export-type-btn active" data-type="dfmea">DFMEA表格</button>
+          <button class="export-type-btn" data-type="dvp">DVP表格</button>
+          <button class="export-type-btn" data-type="characteristic">特性清单</button>
+        </div>
+      </div>
+
+      <!-- 导出格式选择 -->
+      <div class="export-option" id="exportExcelOption">
+        <i class="fas fa-file-excel"></i>
+        <div class="export-option-text">
+          <div class="export-option-title">导出为Excel</div>
+          <div class="export-option-desc" id="excelDesc">导出为.xlsx格式，包含DFMEA表格</div>
+        </div>
+      </div>
+      <div class="export-option" id="exportPDFOption">
+        <i class="fas fa-file-pdf"></i>
+        <div class="export-option-text">
+          <div class="export-option-title">导出为PDF</div>
+          <div class="export-option-desc" id="pdfDesc">导出为.pdf格式，包含DFMEA表格</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="modal-cancel" id="cancelExportBtn">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- 隐藏的iframe容器，用于调用DFMEA-page-9的导出函数 -->
+<div class="export-iframe-container">
+  <iframe id="exportFrame" name="exportFrame" style="width: 100%; height: 100%; border: none;"></iframe>
+</div>
+
+<script>
+  // 全局变量
+  let fmeaProjects = []; // 项目数据（从后端获取）
+  let recentProjectsLimit = 5; // 显示最近项目的数量
+  let currentExportProject = null; // 当前要导出的项目
+  let currentExportType = 'dfmea'; // 当前选择的导出内容类型，默认DFMEA表格
+  let exportFrameLoaded = false; // 导出iframe是否已加载
+
+  // 页面加载初始化
+  document.addEventListener('DOMContentLoaded', function() {
+    updateWelcomeName(); // 更新欢迎语
+    fetchProjectsFromBackend(); // 从后端获取项目数据
+    bindEventListeners(); // 绑定所有事件
+    preloadExportFrame(); // 预加载导出iframe
+  });
+
+  // 获取当前登录用户ID
+  function getCurrentUserId() {
+    // 从当前页面的URL获取
+    const urlParams = new URLSearchParams(window.location.search);
+    let userId = urlParams.get('userId');
+
+    // 如果当前页面没有，从父页面获取（因为是在iframe里）
+    if (!userId && window.parent !== window) {
+      const parentParams = new URLSearchParams(window.parent.location.search);
+      userId = parentParams.get('userId');
+    }
+
+    return userId ? parseInt(userId) : null;
+  }
+
+  // 预加载导出iframe
+  function preloadExportFrame() {
+    const iframe = document.getElementById('exportFrame');
+    iframe.src = 'DFMEA-page-9.html';
+    iframe.onload = function() {
+      exportFrameLoaded = true;
+      console.log('导出iframe已加载完成');
+    };
+  }
+
+  // 获取用户ID并更新欢迎语
+  async function updateWelcomeName() {
+    try {
+      const userId = getCurrentUserId();
+
+      if (!userId) {
+        console.log('未找到用户ID');
+        const welcomeEl = document.querySelector('h1.text-gray-900');
+        if (welcomeEl) {
+          welcomeEl.innerHTML = '欢迎回来';
+        }
+        return;
+      }
+
+      const response = await fetch(`http://localhost:8088/user/${userId}`);
+      const result = await response.json();
+
+      if (result.code === 200 && result.data) {
+        const user = result.data;
+        // 更新欢迎语
+        const welcomeEl = document.querySelector('h1.text-gray-900');
+        if (welcomeEl) {
+          welcomeEl.innerHTML = `欢迎回来，${user.userName}`;
+        }
+      }
+    } catch (error) {
+      console.error('获取用户信息失败:', error);
+      const welcomeEl = document.querySelector('h1.text-gray-900');
+      if (welcomeEl) {
+        welcomeEl.innerHTML = '欢迎回来，张三';
+      }
+    }
+  }
+
+  // 监听来自父页面的消息
+  window.addEventListener('message', function(e) {
+    console.log('sidebar 收到消息:', e.data);
+    if (e.data.type === 'refreshUserData') {
+      updateWelcomeName();
+    }
+  });
+
+  // 记录项目访问时间（调用后端接口）
+  function recordProjectVisit(fmeaId) {
+    console.log('recordProjectVisit 被调用, fmeaId:', fmeaId);
+    if (!fmeaId) return;
+
+
+    fetch(`/project/visit/${fmeaId}`, {
+      method: 'PUT'
+    })
+            .then(response => response.json())
+            .then(result => {
+              if (result.code === 200) {
+                console.log('更新访问时间成功');
+              }
+            })
+            .catch(error => {
+              console.error('更新访问时间失败:', error);
+            });
+  }
+
+  // 获取最近一周内访问的项目
+  function getRecentProjects() {
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7); // 一周前
+
+    // 筛选有访问记录且在一周内的项目
+    const recentProjects = fmeaProjects.filter(project => {
+      // 如果有 lastVisitedTime 字段
+      if (project.lastVisitedTime) {
+        const lastVisited = new Date(project.lastVisitedTime);
+        return lastVisited >= oneWeekAgo;
+      }
+      return false;
+    });
+
+    // 如果有最近访问的项目，按时间排序返回
+    if (recentProjects.length > 0) {
+      return recentProjects
+              .sort((a, b) => new Date(b.lastVisitedTime) - new Date(a.lastVisitedTime))
+              .slice(0, recentProjectsLimit);
+    }
+
+    // 如果没有最近访问的项目，就返回最新的5个项目（按创建时间）
+    return fmeaProjects
+            .sort((a, b) => {
+              // 如果有创建时间，按创建时间倒序
+              const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+              const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+              return dateB - dateA;
+            })
+            .slice(0, recentProjectsLimit);
+  }
+
+  // 渲染最近项目列表
+  function renderRecentProjects() {
+    const tbody = document.getElementById('recent-projects-body');
+    const recentProjectsCard = document.getElementById('recent-projects-card');
+    tbody.innerHTML = '';
+
+    const recentProjects = getRecentProjects();
+
+    // 如果没有数据，隐藏整个卡片
+    if (recentProjects.length === 0) {
+      recentProjectsCard.style.display = 'none';
+      return;
+    }
+
+    // 有数据时显示卡片
+    recentProjectsCard.style.display = 'block';
+
+    recentProjects.forEach((project) => {
+      const fmeaName = project.fmeaName || '未命名';
+      const fmeaCode = project.fmeaCode || '无编号';
+      const projectType = project.projectType || '未知类型';
+      const projectStatus = project.projectStatus || '未知状态';
+      const responsiblePerson = project.responsiblePerson || '未指定';
+      const lastVisitedTime = project.lastVisitedTime ?
+              new Date(project.lastVisitedTime).toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+              }) : '从未访问';
+
+      // 状态样式类
+      let statusClass = '';
+      switch (projectStatus) {
+        case '进行中': statusClass = 'status-badge status-processing'; break;
+        case '已完成': statusClass = 'status-badge status-completed'; break;
+        case '暂停': statusClass = 'status-badge status-paused'; break;
+        case '待启动': statusClass = 'status-badge status-pending'; break;
+        default: statusClass = 'status-badge status-pending';
+      }
+
+      const row = document.createElement('tr');
+      row.className = 'hover:bg-gray-50';
+      row.innerHTML = `
+        <td class="px-6 py-4 font-medium">${fmeaName}</td>
+        <td class="px-6 py-4">${fmeaCode}</td>
+        <td class="px-6 py-4">${projectType}</td>
+        <td class="px-6 py-4"><span class="${statusClass}">${projectStatus}</span></td>
+        <td class="px-6 py-4"><span class="responsible-person">${responsiblePerson}</span></td>
+        <td class="px-6 py-4">${lastVisitedTime}</td>
+        <td class="px-6 py-4">
+          <div class="flex space-x-2">
+            <!-- 打开按钮 + 悬浮提示 -->
+            <div class="tooltip open-btn">
+              <button class="open-project-btn" data-fmea="${fmeaCode}">
+                <i class="fa-solid fa-folder-open"></i>
+              </button>
+              <span class="tooltip-text">打开</span>
+            </div>
+            <!-- 编辑按钮 + 悬浮提示 -->
+            <div class="tooltip edit-btn">
+              <button class="edit-project-btn" data-fmea="${fmeaCode}">
+                <i class="fa-solid fa-edit"></i>
+              </button>
+              <span class="tooltip-text">编辑</span>
+            </div>
+            <!-- 删除按钮 + 悬浮提示 -->
+            <div class="tooltip delete-btn">
+              <button class="delete-project-btn" data-fmea="${fmeaCode}">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+              <span class="tooltip-text">删除</span>
+            </div>
+            <!-- 导出按钮 + 悬浮提示 -->
+            <div class="tooltip export-btn">
+              <button class="export-project-btn" data-fmea="${fmeaCode}">
+                <i class="fa-solid fa-file-export"></i>
+              </button>
+              <span class="tooltip-text">导出</span>
+            </div>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(row);
+    });
+
+    // 绑定操作按钮事件
+    bindProjectOperationEvents();
+  }
+
+  // 绑定项目操作按钮事件
+  function bindProjectOperationEvents() {
+    // 打开项目
+    document.querySelectorAll('.open-project-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const fmeaCode = this.getAttribute('data-fmea');
+        const project = fmeaProjects.find(p => p.fmeaCode === fmeaCode);
+        if (project) {
+          recordProjectVisit(project.fmeaId);
+
+          const userId = getCurrentUserId();
+
+          // 通知父页面切换到项目管理并高亮
+          if (window.parent !== window) {
+            window.parent.postMessage({
+              type: 'activateMenu',
+              page: 'seek FMEA.html'
+            }, '*');
+          }
+
+          window.location.href = `edit.html?code=${encodeURIComponent(fmeaCode)}&userId=${userId}`;
+        } else {
+          alert('FMEA项目数据不存在！');
+        }
+      });
+    });
+
+    // 编辑项目
+    document.querySelectorAll('.edit-project-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const fmeaCode = this.getAttribute('data-fmea');
+        const project = fmeaProjects.find(p => p.fmeaCode === fmeaCode);
+        if (project) {
+          // 记录访问时间
+          recordProjectVisit(project.fmeaId);
+
+          openEditModal(project);
+        } else {
+          alert('FMEA项目数据不存在！');
+        }
+      });
+    });
+
+    // 删除项目
+    document.querySelectorAll('.delete-project-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const fmeaCode = this.getAttribute('data-fmea');
+        const project = fmeaProjects.find(p => p.fmeaCode === fmeaCode);
+        if (!project) {
+          alert('FMEA项目数据不存在！');
+          return;
+        }
+
+        if (confirm(`确认删除FMEA项目【${project.fmeaName}】吗？删除后不可恢复！`)) {
+          fetch(`http://localhost:8088/project/${project.fmeaId}`, {
+            method: 'DELETE'
+          })
+                  .then(response => response.json())
+                  .then(result => {
+                    if (result.code === 200) {
+                      // 重新获取数据
+                      fetchProjectsFromBackend();
+                      alert(`FMEA项目【${project.fmeaName}】已成功删除！`);
+                    } else {
+                      alert('删除失败：' + (result.message || '未知错误'));
+                    }
+                  })
+                  .catch(error => {
+                    console.error('删除项目失败:', error);
+                    alert('删除失败，请检查网络连接！');
+                  });
+        }
+      });
+    });
+
+    // 导出项目
+    document.querySelectorAll('.export-project-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const fmeaCode = this.getAttribute('data-fmea');
+        const project = fmeaProjects.find(p => p.fmeaCode === fmeaCode);
+        if (project) {
+          // 记录访问时间
+          recordProjectVisit(project.fmeaId);
+
+          // 打开导出格式选择弹窗
+          openExportModal(project);
+        } else {
+          alert('FMEA项目数据不存在！');
+        }
+      });
+    });
+  }
+
+  // 表单验证
+  function validateForm() {
+    let isValid = true;
+    const fmeaName = document.getElementById('fmeaName').value.trim();
+    const projectType = document.getElementById('projectType').value;
+    const projectStatus = document.getElementById('projectStatus').value;
+    const responsiblePerson = document.getElementById('responsiblePerson').value.trim();
+    const planStartDate = document.getElementById('planStartDate').value;
+
+    // 清空所有错误提示
+    document.querySelectorAll('.error-tip').forEach(tip => {
+      tip.style.display = 'none';
+    });
+
+    if (!fmeaName) {
+      document.getElementById('nameError').style.display = 'block';
+      isValid = false;
+    }
+
+    if (!projectType) {
+      document.getElementById('typeError').style.display = 'block';
+      isValid = false;
+    }
+
+    if (!projectStatus) {
+      document.getElementById('statusError').style.display = 'block';
+      isValid = false;
+    }
+
+    if (!responsiblePerson) {
+      document.getElementById('personError').style.display = 'block';
+      isValid = false;
+    }
+
+    if (!planStartDate) {
+      document.getElementById('dateError').style.display = 'block';
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  // 打开新增弹窗
+  function openAddModal() {
+    const modal = document.getElementById('projectModal');
+    const modalTitle = document.getElementById('modalTitle');
+
+    document.getElementById('projectForm').reset();
+    document.querySelectorAll('.error-tip').forEach(tip => tip.style.display = 'none');
+
+    modalTitle.textContent = '新增FMEA项目';
+    document.getElementById('editFmeaCode').value = '';
+
+    // FMEA编号让后端生成，前端先留空
+    document.getElementById('fmeaCode').value = '（保存时自动生成）';
+
+    // 默认填充当前日期
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('planStartDate').value = today;
+
+    modal.style.display = 'flex';
+  }
+
+  // 打开编辑弹窗
+  function openEditModal(project) {
+    const modal = document.getElementById('projectModal');
+    const modalTitle = document.getElementById('modalTitle');
+
+    document.getElementById('projectForm').reset();
+    document.querySelectorAll('.error-tip').forEach(tip => tip.style.display = 'none');
+
+    modalTitle.textContent = '编辑FMEA项目';
+    document.getElementById('editFmeaCode').value = project.fmeaCode || '';
+
+    // 填充数据
+    document.getElementById('fmeaName').value = project.fmeaName || '';
+    document.getElementById('fmeaCode').value = project.fmeaCode || '';
+    document.getElementById('projectType').value = project.projectType || '';
+    document.getElementById('projectStatus').value = project.projectStatus || '';
+    document.getElementById('responsiblePerson').value = project.responsiblePerson || '';
+    document.getElementById('planStartDate').value = project.planStartDate || '';
+
+    modal.style.display = 'flex';
+  }
+
+  // 关闭弹窗
+  function closeModal() {
+    document.getElementById('projectModal').style.display = 'none';
+  }
+
+  // 新增项目
+  function addProject() {
+    const fmeaName = document.getElementById('fmeaName').value.trim();
+    const projectType = document.getElementById('projectType').value;
+    const projectStatus = document.getElementById('projectStatus').value;
+    const responsiblePerson = document.getElementById('responsiblePerson').value.trim();
+    const planStartDate = document.getElementById('planStartDate').value;
+    const userId = getCurrentUserId();
+
+    if (!fmeaName || !projectType || !projectStatus || !responsiblePerson || !planStartDate) {
+      alert('表单信息不完整！');
+      return;
+    }
+
+    if (!userId) {
+      alert('无法获取用户信息，请重新登录！');
+      return;
+    }
+
+    const projectData = {
+      fmeaName: fmeaName,
+      projectType: projectType,
+      projectStatus: projectStatus,
+      responsiblePerson: responsiblePerson,
+      planStartDate: planStartDate,
+      userId: userId
+    };
+
+    fetch('http://localhost:8088/project', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(projectData)
+    })
+            .then(response => response.json())
+            .then(result => {
+              if (result.code === 200) {
+                fetchProjectsFromBackend();
+                closeModal();
+                alert('FMEA项目新增成功！');
+              } else {
+                alert('新增失败：' + (result.message || '未知错误'));
+              }
+            })
+            .catch(error => {
+              console.error('新增项目失败:', error);
+              alert('新增失败，请检查网络连接！');
+            });
+  }
+
+  // 编辑项目
+  function updateProject() {
+    const fmeaId = document.getElementById('editFmeaCode').value;
+
+    const projectData = {
+      fmeaId: parseInt(fmeaId),
+      fmeaName: document.getElementById('fmeaName').value.trim(),
+      projectType: document.getElementById('projectType').value,
+      projectStatus: document.getElementById('projectStatus').value,
+      responsiblePerson: document.getElementById('responsiblePerson').value.trim(),
+      planStartDate: document.getElementById('planStartDate').value
+    };
+
+    fetch('http://localhost:8088/project', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(projectData)
+    })
+            .then(response => response.json())
+            .then(result => {
+              if (result.code === 200) {
+                fetchProjectsFromBackend();
+                closeModal();
+                alert('FMEA项目编辑成功！');
+              } else {
+                alert('编辑失败：' + (result.message || '未知错误'));
+              }
+            })
+            .catch(error => {
+              console.error('编辑项目失败:', error);
+              alert('编辑失败，请检查网络连接！');
+            });
+  }
+
+  // 更新项目统计数据
+  function updateProjectStats() {
+    const totalProjects = fmeaProjects.length;
+    const processingProjects = fmeaProjects.filter(p => p.projectStatus === '进行中').length;
+    const completedProjects = fmeaProjects.filter(p => p.projectStatus === '已完成').length;
+
+    // 高风险项数量（暂时用静态数据，后面再改）
+    const highRiskCount = 8;
+
+    const cards = document.querySelectorAll('.bg-white.rounded-lg');
+    if (cards.length >= 4) {
+      cards[0].querySelector('h3').textContent = totalProjects;
+      cards[1].querySelector('h3').textContent = processingProjects;
+      cards[2].querySelector('h3').textContent = completedProjects;
+      cards[3].querySelector('h3').textContent = highRiskCount;
+    }
+  }
+
+  // 从后端获取项目数据
+  function fetchProjectsFromBackend() {
+    const userId = getCurrentUserId();
+    console.log('首页 - 当前登录用户ID:', userId);
+
+    let url = 'http://localhost:8088/project/list';
+    if (userId) {
+      url = `http://localhost:8088/project/user/${userId}`;
+    }
+
+    fetch(url)
+            .then(response => response.json())
+            .then(result => {
+              if (result.code === 200) {
+                fmeaProjects = result.data || [];
+                fmeaProjects = fmeaProjects.map(project => ({
+                  fmeaName: project.fmeaName,
+                  fmeaCode: project.fmeaCode,
+                  projectType: project.projectType,
+                  projectStatus: project.projectStatus,
+                  responsiblePerson: project.responsiblePerson,
+                  planStartDate: project.PlanStartDate,
+                  lastVisitedTime: project.lastVisitedTime,
+                  createdAt: project.createdAt,
+                  fmeaId: project.fmeaId
+                }));
+
+                updateProjectStats();
+                renderRecentProjects();
+
+                console.log('首页 - 获取项目数据成功:', JSON.stringify(fmeaProjects, null, 2));
+              } else {
+                console.error('获取项目数据失败:', result.message);
+                fmeaProjects = [];
+                renderRecentProjects();
+              }
+            })
+            .catch(error => {
+              console.error('请求后端失败:', error);
+              fmeaProjects = [];
+              renderRecentProjects();
+            });
+  }
+
+  // 导出相关函数
+  function openExportModal(project) {
+    currentExportProject = project;
+    currentExportType = 'dfmea';
+
+    document.querySelectorAll('.export-type-btn').forEach(btn => {
+      if (btn.dataset.type === 'dfmea') {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    updateExportDesc();
+    document.getElementById('exportModal').style.display = 'flex';
+  }
+
+  function updateExportDesc() {
+    const typeNames = {
+      'dfmea': 'DFMEA表格',
+      'dvp': 'DVP表格',
+      'characteristic': '特性清单'
+    };
+
+    const desc = typeNames[currentExportType] || 'DFMEA表格';
+    document.getElementById('excelDesc').textContent = `导出为.xlsx格式，包含${desc}`;
+    document.getElementById('pdfDesc').textContent = `导出为.pdf格式，包含${desc}`;
+  }
+
+  function closeExportModal() {
+    document.getElementById('exportModal').style.display = 'none';
+    currentExportProject = null;
+  }
+
+  function exportToExcel(project, exportType) {
+    try {
+      recordProjectVisit(project.fmeaId);
+      showExportLoading();
+
+      const iframe = document.getElementById('exportFrame');
+      const iframeWindow = iframe.contentWindow;
+
+      if (exportFrameLoaded && iframeWindow && iframeWindow.fmeaExportFunctions) {
+        iframeWindow.fmeaExportFunctions.setProjectData(project);
+
+        switch(exportType) {
+          case 'dfmea': iframeWindow.fmeaExportFunctions.exportDFMEAExcel(); break;
+          case 'dvp': iframeWindow.fmeaExportFunctions.exportDVPExcel(); break;
+          case 'characteristic': iframeWindow.fmeaExportFunctions.exportCharacteristicExcel(); break;
+          default: iframeWindow.fmeaExportFunctions.exportDFMEAExcel();
+        }
+
+        hideExportLoading();
+        closeExportModal();
+      } else {
+        iframe.src = 'DFMEA-page-9.html';
+        const checkInterval = setInterval(() => {
+          if (iframe.contentWindow && iframe.contentWindow.fmeaExportFunctions) {
+            clearInterval(checkInterval);
+            iframe.contentWindow.fmeaExportFunctions.setProjectData(project);
+
+            switch(exportType) {
+              case 'dfmea': iframe.contentWindow.fmeaExportFunctions.exportDFMEAExcel(); break;
+              case 'dvp': iframe.contentWindow.fmeaExportFunctions.exportDVPExcel(); break;
+              case 'characteristic': iframe.contentWindow.fmeaExportFunctions.exportCharacteristicExcel(); break;
+              default: iframe.contentWindow.fmeaExportFunctions.exportDFMEAExcel();
+            }
+
+            hideExportLoading();
+            closeExportModal();
+          }
+        }, 100);
+
+        setTimeout(() => {
+          clearInterval(checkInterval);
+          hideExportLoading();
+          alert('导出页面加载超时，请重试！');
+        }, 5000);
+      }
+    } catch (error) {
+      console.error('Excel导出失败:', error);
+      hideExportLoading();
+      alert('Excel导出失败，请重试！');
+      closeExportModal();
+    }
+  }
+
+  function exportToPDF(project, exportType) {
+    try {
+      recordProjectVisit(project.fmeaId);
+      showExportLoading();
+
+      const iframe = document.getElementById('exportFrame');
+      const iframeWindow = iframe.contentWindow;
+
+      if (exportFrameLoaded && iframeWindow && iframeWindow.fmeaExportFunctions) {
+        iframeWindow.fmeaExportFunctions.setProjectData(project);
+
+        switch(exportType) {
+          case 'dfmea': iframeWindow.fmeaExportFunctions.exportDFMEAPDF(); break;
+          case 'dvp': iframeWindow.fmeaExportFunctions.exportDVPPDF(); break;
+          case 'characteristic': iframeWindow.fmeaExportFunctions.exportCharacteristicPDF(); break;
+          default: iframeWindow.fmeaExportFunctions.exportDFMEAPDF();
+        }
+
+        hideExportLoading();
+        closeExportModal();
+      } else {
+        iframe.src = 'DFMEA-page-9.html';
+        const checkInterval = setInterval(() => {
+          if (iframe.contentWindow && iframe.contentWindow.fmeaExportFunctions) {
+            clearInterval(checkInterval);
+            iframe.contentWindow.fmeaExportFunctions.setProjectData(project);
+
+            switch(exportType) {
+              case 'dfmea': iframe.contentWindow.fmeaExportFunctions.exportDFMEAPDF(); break;
+              case 'dvp': iframe.contentWindow.fmeaExportFunctions.exportDVPPDF(); break;
+              case 'characteristic': iframe.contentWindow.fmeaExportFunctions.exportCharacteristicPDF(); break;
+              default: iframe.contentWindow.fmeaExportFunctions.exportDFMEAPDF();
+            }
+
+            hideExportLoading();
+            closeExportModal();
+          }
+        }, 100);
+
+        setTimeout(() => {
+          clearInterval(checkInterval);
+          hideExportLoading();
+          alert('导出页面加载超时，请重试！');
+        }, 5000);
+      }
+    } catch (error) {
+      console.error('PDF导出失败:', error);
+      hideExportLoading();
+      alert('PDF导出失败，请重试！');
+      closeExportModal();
+    }
+  }
+
+  function showExportLoading() {
+    let loadingDiv = document.getElementById('exportLoading');
+    if (!loadingDiv) {
+      loadingDiv = document.createElement('div');
+      loadingDiv.id = 'exportLoading';
+      loadingDiv.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 16px;
+        z-index: 10001;
+      `;
+      loadingDiv.innerHTML = `
+        <div class="spinner" style="
+          border: 4px solid #f3f3f3;
+          border-top: 4px solid #3498db;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          animation: spin 2s linear infinite;
+          margin-bottom: 20px;
+        "></div>
+        <div>正在准备导出，请稍候...</div>
+        <style>
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        </style>
+      `;
+      document.body.appendChild(loadingDiv);
+    } else {
+      loadingDiv.style.display = 'flex';
+    }
+  }
+
+  function hideExportLoading() {
+    const loadingDiv = document.getElementById('exportLoading');
+    if (loadingDiv) {
+      loadingDiv.style.display = 'none';
+    }
+  }
+
+  // 绑定所有事件监听
+  function bindEventListeners() {
+    // 总项目卡片点击事件
+    document.getElementById('totalProjectsCard').addEventListener('click', function() {
+      const userId = getCurrentUserId();
+
+      // 通知父页面切换到项目管理页面
+      if (window.parent !== window) {
+        window.parent.postMessage({
+          type: 'switchPage',
+          page: 'seek FMEA.html'
+        }, '*');
+      } else {
+        window.location.href = 'seek FMEA.html';
+      }
+    });
+
+    document.getElementById('quick-create-btn').addEventListener('click', openAddModal);
+
+    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+    document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
+
+    document.getElementById('closeExportModalBtn').addEventListener('click', closeExportModal);
+    document.getElementById('cancelExportBtn').addEventListener('click', closeExportModal);
+
+    document.getElementById('quick-export-btn').addEventListener('click', function() {
+      alert('导出功能开发中，请先在项目管理页面选择项目导出');
+    });
+
+    document.querySelectorAll('.export-type-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.export-type-btn').forEach(b => {
+          b.classList.remove('active');
+        });
+        this.classList.add('active');
+        currentExportType = this.dataset.type;
+        updateExportDesc();
+      });
+    });
+
+    document.getElementById('exportExcelOption').addEventListener('click', function() {
+      if (currentExportProject) {
+        exportToExcel(currentExportProject, currentExportType);
+      }
+    });
+
+    document.getElementById('exportPDFOption').addEventListener('click', function() {
+      if (currentExportProject) {
+        exportToPDF(currentExportProject, currentExportType);
+      }
+    });
+
+    document.getElementById('projectForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (validateForm()) {
+        const editFmeaCode = document.getElementById('editFmeaCode').value;
+        if (editFmeaCode) {
+          updateProject();
+        } else {
+          addProject();
+        }
+      }
+    });
+
+    document.getElementById('view-all-projects').addEventListener('click', function() {
+      if (window.parent !== window) {
+        window.parent.postMessage({
+          type: 'switchPage',
+          page: 'seek FMEA.html'
+        }, '*');
+      } else {
+        window.location.href = 'seek FMEA.html';
+      }
+    });
+  }
+</script>
+</body>
+</html>

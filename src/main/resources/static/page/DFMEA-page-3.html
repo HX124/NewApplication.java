@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>DFMEA策划与准备</title>
+    <link rel="stylesheet" href="../css/modal-form-common.css">
+    <link rel="stylesheet" href="../css/DFMEA-page-3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 操作按钮 -->
+        <div class="edit-controls">
+            <div class="action-buttons">
+                <button class="action-btn primary" onclick="editForm()">
+                    <i class="fas fa-edit"></i> 编辑
+                </button>
+                <button class="action-btn secondary" onclick="saveForm()">
+                    <i class="fas fa-save"></i> 保存
+                </button>
+            </div>
+        </div>
+        
+        <!-- 基本信息表单 -->
+        <div class="page-header" id="basic-info-header">
+            <div class="header-row">
+                <div class="header-item">
+                    <label>FMEA编号：</label>
+                    <input type="text" id="fmea-code" placeholder="请输入FMEA编号" disabled>
+                </div>
+                <div class="header-item">
+                    <label>FMEA名称：</label>
+                    <input type="text" id="fmea-name" placeholder="请输入FMEA名称" disabled>
+                </div>
+            </div>
+            <div class="header-row">
+                <div class="header-item">
+                    <label>项目名称：</label>
+                    <input type="text" id="project-name" placeholder="请输入项目名称" disabled>
+                </div>
+                <div class="header-item">
+                    <label>负责人：</label>
+                    <input type="text" id="responsible-person" placeholder="请输入负责人" disabled>
+                </div>
+            </div>
+            <div class="header-row">
+                <div class="header-item">
+                    <label>公司名称：</label>
+                    <input type="text" id="company-name" placeholder="请输入公司名称" disabled>
+                </div>
+                <div class="header-item">
+                    <label>开始日期：</label>
+                    <input type="date" id="plan-start-date" disabled>
+                </div>
+            </div>
+            <div class="header-row">
+                <div class="header-item">
+                    <label>结束日期：</label>
+                    <input type="date" id="end-date" disabled>
+                </div>
+                <div class="header-item">
+                    <label>协调员：</label>
+                    <input type="text" id="coordinator" placeholder="请输入协调员" disabled>
+                </div>
+            </div>
+            <div class="header-row">
+                <div class="header-item">
+                    <label>保密等级：</label>
+                    <select id="confidentiality-level" disabled>
+                        <option value="">请选择保密等级</option>
+                        <option value="保密">保密</option>
+                        <option value="专有">专有</option>
+                        <option value="内部用途">内部用途</option>
+                    </select>
+                </div>
+                <div class="header-item">
+                    <label>核心团队：</label>
+                    <input type="text" id="core-team" placeholder="请输入核心团队" disabled>
+                </div>
+            </div>
+            <div class="header-row">
+                <div class="header-item">
+                    <label>拓展团队：</label>
+                    <input type="text" id="extended-team" placeholder="请输入拓展团队" disabled>
+                </div>
+                <div class="header-item">
+                    <label>客户：</label>
+                    <input type="text" id="customer" placeholder="请输入客户" disabled>
+                </div>
+            </div>
+            <div class="header-row">
+                <div class="header-item">
+                    <label>客户要求：</label>
+                    <input type="file" id="customer-requirements" disabled>
+                </div>
+                <div class="header-item">
+                    <label>项目附件：</label>
+                    <input type="file" id="project-attachments" disabled>
+                </div>
+            </div>
+            <div class="header-row">
+                <div class="header-item">
+                    <label>联系电话：</label>
+                    <input type="tel" id="phone-number" placeholder="请输入联系电话" disabled>
+                </div>
+                <div class="header-item">
+                    <label>备注：</label>
+                    <input type="text" id="notes" placeholder="请输入备注" disabled>
+                </div>
+            </div>
+        </div>
+
+    <script src="../js/DFMEA-page-3.js"></script>
+</body>
+</html>

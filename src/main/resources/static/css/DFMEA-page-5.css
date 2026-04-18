@@ -1,0 +1,106 @@
+/* ===== 基础样式 ===== */
+body {
+  font-family: "Microsoft YaHei", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f7fa;
+  color: #333;
+  height: 100vh;
+  overflow-y: scroll;         /* 确保滚动区域 */
+}
+
+body::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari, Edge新版 */
+}
+
+/* ===== 布局样式 ===== */
+/* 内容区域 */
+.content-box {
+  flex: 1;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+#chart-container {
+  flex: 1;
+  width: 100%;
+  position: relative;
+  min-height: 600px;
+}
+
+/* ===== 特殊组件样式 ===== */
+/* 表格中特性描述列加宽 */
+#tablecha-container td:nth-child(3) {
+  max-width: 300px;
+  min-width: 200px;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+/* 特性分类标签样式（用于表格显示） */
+.special-class-tag {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+  line-height: 1.5;
+}
+.special-class-tag.safety {
+  background-color: #fef0f0;
+  color: #F53F3F;
+}
+.special-class-tag.critical {
+  background-color: #fff7e6;
+  color: #ff7d00;
+}
+.special-class-tag.major {
+  background-color: #fff2e8;
+  color: #ff7a00;
+}
+.special-class-tag.general {
+  background-color: #f6ffed;
+  color: #52c41a;
+}
+
+/* 特性弹窗内容宽度 */
+#characteristic-modal .modal-content {
+  width: 700px;
+  max-width: 90%;
+}
+
+/* 功能要求特殊样式 */
+.function-text {
+  color: #32CD32;
+  font-size: 12px;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* 功能要求文本区域特殊样式（补充公共样式） */
+.function-textarea {
+  border-left: 3px solid #32CD32;
+}
+
+.function-textarea:focus {
+  border-left-color: #165DFF;
+}
+
+.function-textarea.readonly {
+  background-color: #f9ffed;
+  border-left: 3px solid #d9f7be;
+}
+
+/* ===== 响应式调整 ===== */
+@media (max-width: 768px) {
+  #characteristic-modal .modal-content {
+    width: 95%;
+  }
+}

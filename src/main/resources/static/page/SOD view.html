@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOD评分表查看</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+    }
+    body {
+      background-color: #f5f7fa;
+      color: #333;
+      padding: 20px;
+    }
+    .main-content {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .page-title {
+      font-size: 24px;
+      color: #2f4050;
+      font-weight: 600;
+    }
+    .fmea-info {
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .info-label {
+      font-size: 12px;
+      color: #999;
+    }
+    .info-value {
+      font-size: 16px;
+      font-weight: 500;
+      color: #2f4050;
+    }
+    .info-value.code {
+      color: #165DFF;
+    }
+    .info-value.status {
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .status-processing {
+      background-color: #fff7e6;
+      color: #ff7d00;
+    }
+    .status-completed {
+      background-color: #e8f8f0;
+      color: #00b42a;
+    }
+    .status-paused {
+      background-color: #fef0f0;
+      color: #f53f3f;
+    }
+    .status-pending {
+      background-color: #f5f5f5;
+      color: #909399;
+    }
+    .sod-tabs {
+      display: flex;
+      background-color: #f5f5f5;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .sod-tab {
+      padding: 12px 24px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+      border: none;
+      background: transparent;
+      transition: all 0.3s;
+    }
+    .sod-tab.active {
+      background-color: #165DFF;
+      color: #fff;
+    }
+    .sod-section {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    .section-header {
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-bottom: 1px solid #e6e6e6;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2f4050;
+    }
+    .dimension-info {
+      font-size: 14px;
+      color: #666;
+      margin-top: 5px;
+    }
+    .section-content {
+      padding: 0;
+      overflow: auto;
+    }
+
+    /* 简洁表格样式 - 类似Excel */
+    .compact-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      min-width: 800px;
+    }
+    .compact-table th, .compact-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border: 1px solid #e6e6e6;
+      font-size: 14px;
+      vertical-align: top;
+      line-height: 1.5;
+    }
+    .compact-table th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+      color: #2f4050;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    .compact-table tbody tr:nth-child(even) {
+      background-color: #fafbfc;
+    }
+    .compact-table tbody tr:hover {
+      background-color: #f0f7ff;
+    }
+
+    /* 分数列样式 */
+    .score-column {
+      width: 100px;
+      text-align: center;
+      background-color: #f8f9fa;
+      font-weight: 600;
+    }
+    .score-number {
+      font-size: 16px;
+      color: #165DFF;
+      font-weight: 700;
+    }
+    .score-label {
+      font-size: 12px;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    /* 描述列样式 */
+    .description-column {
+      min-width: 400px;
+    }
+
+    /* 示例列样式 */
+    .example-column {
+      min-width: 400px;
+    }
+
+    .empty-example {
+      color: #999;
+      font-style: italic;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+      padding: 20px;
+      border-top: 1px solid #e6e6e6;
+      background-color: #fff;
+    }
+    .btn {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary {
+      background-color: #165DFF;
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background-color: #0D52D9;
+    }
+    .btn-secondary {
+      background-color: #f5f7fa;
+      color: #666;
+      border: 1px solid #e6e6e6;
+    }
+    .btn-secondary:hover {
+      background-color: #e8eaed;
+      border-color: #d9d9d9;
+    }
+    .btn-success {
+      background-color: #00B42A;
+      color: #fff;
+    }
+    .btn-success:hover {
+      background-color: #009922;
+    }
+    .no-data {
+      text-align: center;
+      padding: 60px;
+      color: #999;
+      font-size: 14px;
+    }
+    .edit-btn {
+      padding: 8px 16px;
+      background-color: #165DFF;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .edit-btn:hover {
+      background-color: #0D52D9;
+    }
+
+    /* 表格滚动容器 */
+    .table-container {
+      max-height: 600px;
+      overflow-y: auto;
+      overflow-x: auto;
+      border: 1px solid #e6e6e6;
+      border-radius: 0 0 8px 8px;
+    }
+
+    /* 滚动条样式 */
+    .table-container::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    .table-container::-webkit-scrollbar-track {
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+    .table-container::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+    .table-container::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+
+    @media (max-width: 768px) {
+      .fmea-info {
+        flex-direction: column;
+        gap: 15px;
+      }
+      .compact-table th, .compact-table td {
+        padding: 10px 12px;
+        font-size: 13px;
+      }
+      .sod-tab {
+        padding: 10px 15px;
+        font-size: 13px;
+      }
+      .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+      .edit-btn {
+        align-self: flex-end;
+      }
+      .table-container {
+        max-height: 500px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="main-content">
+  <!-- 页面头部 -->
+  <div class="page-header">
+    <div class="page-title">SOD评分表查看</div>
+  </div>
+
+  <!-- FMEA项目信息 -->
+  <div class="fmea-info" id="fmeaInfo">
+    <div class="info-item">
+      <span class="info-label">FMEA名称</span>
+      <span class="info-value" id="fmeaName">-</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">FMEA编号</span>
+      <span class="info-value code" id="fmeaCode">-</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">类型</span>
+      <span class="info-value" id="projectType">-</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">状态</span>
+      <span class="info-value status status-processing" id="projectStatus">-</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">责任人</span>
+      <span class="info-value" id="responsiblePerson">-</span>
+    </div>
+  </div>
+
+  <!-- SOD选项卡 -->
+  <div class="sod-tabs" id="sodTabs">
+    <button class="sod-tab active" data-type="S">严重度(S)</button>
+    <button class="sod-tab" data-type="O">发生度(O)</button>
+    <button class="sod-tab" data-type="D">探测度(D)</button>
+  </div>
+
+  <!-- 评分表内容区域 -->
+  <div class="sod-section">
+    <div class="section-header">
+      <div>
+        <div class="section-title" id="editorTitle">严重度(S)评价表</div>
+        <div class="dimension-info" id="dimensionDescription">
+          评估失效影响的严重程度
+        </div>
+      </div>
+      <button class="edit-btn" id="editBtn">
+        <i class="fas fa-edit"></i> 编辑评分表
+      </button>
+    </div>
+    <div class="section-content">
+      <div class="table-container">
+        <table class="compact-table" id="scoreTable">
+          <thead>
+          <tr>
+            <th class="score-column">分数</th>
+            <th class="description-column" id="tableCol1">失效影响描述</th>
+            <th class="example-column" id="tableCol2">设备/安全关联示例</th>
+          </tr>
+          </thead>
+          <tbody id="scoreTableBody">
+          <!-- 评分表内容会在这里动态生成 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 操作按钮 -->
+  <div class="actions">
+    <button class="btn btn-secondary" id="backBtn">
+      <i class="fas fa-arrow-left"></i> 返回列表
+    </button>
+    <button class="btn btn-success" id="exportBtn">
+      <i class="fas fa-file-export"></i> 导出评分表
+    </button>
+  </div>
+</div>
+
+<script>
+  // 全局变量
+  let currentFmeaCode = '';
+  let currentDimension = 'S'; // 当前选中的维度：S/O/D
+  let currentProject = null;
+  let sodData = {
+    S: [], // 严重度数据
+    O: [], // 发生度数据
+    D: []  // 探测度数据
+  };
+
+  // SOD模板数据（与SOD score.html中相同）
+  const templateData = {
+    S: [
+      {score: 10, description: "导致减速器完全失效，引发人员伤亡或设备损毁", example: "箱体结构开裂，导致整机解体；齿轮断裂失效碎片飞出，击穿箱体或伤人。"},
+      {score: 9, description: "违反安全法规要求", example: "箱体结构损坏（如砂眼、缩孔）未检出，违反设备安全标准。"},
+      {score: 8, description: "设备紧急停机，造成生产线重大中断或严重影响维修成本", example: "传动轴疲劳断裂失效，起重机无法起吊，导致港口装卸作业完全中断。"},
+      {score: 7, description: "减速器故障后下降，需立即停机检修", example: "轮齿断裂失效或齿面严重点蚀/胶合，导致传动卡滞、异响巨大。"},
+      {score: 6, description: "减速器故障引发设备运行不稳定", example: "传动轴弯曲变形，或轴承异常磨损，导致起重机起升、变幅动作抖动、不平稳。"},
+      {score: 5, description: "轻微振动加剧，导致旋转部件异常磨损", example: "齿面粘着磨损（胶合）初期，或密封失效导致漏油，增加摩擦阻力。"},
+      {score: 4, description: "需额外人工干预才能维持正常功能", example: "润滑系统异常或油脂泄漏，需额外手动清洁滤芯或补油。"},
+      {score: 3, description: "仅影响设备维护便利性", example: "密封件老化导致轻微渗油，需缩短维护周期。"},
+      {score: 2, description: "仅产生可忽略的噪音或振动", example: "齿面轻微磨损，产生噪声于背景的、稳定的运行噪音。"},
+      {score: 1, description: "无实际影响（外观瑕疵）", example: "箱体表面涂层划伤。"}
+    ],
+    O: [
+      {score: 10, description: "几乎必然（2次/周）", example: "港口多尘环境，未有效过滤，导致润滑油污染，引起持续的磨粒磨损。"},
+      {score: 9, description: "极高（1次/月 ~ 1次/周）", example: "润滑管理不当，导致齿面胶合或轴承异常磨损。"},
+      {score: 8, description: "高（1次/年 ~ 1次/月）", example: "轴端密封失效，导致齿面漏气、盐雾进入，加速腐蚀与磨损。"},
+      {score: 7, description: "中等偏高（1次/3年 ~ 1次/年）", example: "频繁起吊冲击载荷，超出设计余量，导致传动轴疲劳裂纹萌生或轮齿过载断裂风险增加。"},
+      {score: 6, description: "中等（1次/5年 ~ 1次/3年）", example: "安装过程中不良长期存在，导致传动轴弯曲变形及轴承偏磨损伤。"},
+      {score: 5, description: "中等偏低（1次/10年 ~ 1次/5年）", example: "轴承保持架结构损坏，在长期运行后显现。"},
+      {score: 4, description: "低（1次/20年 ~ 1次/10年）", example: "箱体结构局部缺陷在交变应力下扩展为疲劳裂纹。"},
+      {score: 3, description: "极低（1次/设备寿命周期）", example: "材料本身存在极端恶劣的原始缺陷，导致早期轮齿断裂失效。"},
+      {score: 2, description: "几乎不可能", example: "在规范操作和完好维护下，发生箱体结构开裂。"},
+      {score: 1, description: "不可能", example: "设计、制造、安装、维护全流程受控下，发生传动轴疲劳断裂。"}
+    ],
+    D: [
+      {score: 10, description: "几乎无法检测", example: "箱体内部锈蚀缺陷在扩展为表面裂纹前。"},
+      {score: 9, description: "极难检测", example: "传动轴内部微观疲劳裂纹的萌生阶段（长度<1mm）。"},
+      {score: 8, description: "较难检测", example: "齿面胶合的初始阶段，未引起明显振动或温度变化时。"},
+      {score: 7, description: "中等难度检测", example: "轴承保持架的早期轻微变形或裂纹。"},
+      {score: 6, description: "需专项检测", example: "传动轴轻微弯曲变形，需激光对中仪检测。"},
+      {score: 5, description: "常规检测可实现", example: "轮齿断裂失效，通过日常停机目视检查或振动冲击信号可发现。"},
+      {score: 4, description: "自动监测覆盖", example: "润滑系统异常或油脂泄漏，通过在线油液监测传感器可预警。"},
+      {score: 3, description: "实时报警系统", example: "箱体表面涂层划伤，通过设备状态监测系统实时报警。"},
+      {score: 2, description: "多重冗余检测", example: "箱体结构局部缺陷在交变应力下扩展为疲劳裂纹。"},
+      {score: 1, description: "失效自锁机制", example: "设计上，当发生极端超载时，安全离合器打开，防止轮齿或轴断裂。"}
+    ]
+  };
+
+  // 维度描述信息
+  const dimensionInfo = {
+    S: {
+      title: "严重度(S)评价表",
+      description: "评估失效影响的严重程度",
+      col1: "失效影响描述",
+      col2: "设备/安全关联示例"
+    },
+    O: {
+      title: "发生度(O)评价表",
+      description: "评估失效发生的频率或概率",
+      col1: "发生概率描述",
+      col2: "港口场景典型失效原因"
+    },
+    D: {
+      title: "探测度(D)评价表",
+      description: "评估失效被探测到的难易程度",
+      col1: "检测能力描述",
+      col2: "港口场景典型失效示例"
+    }
+  };
+
+  // 分数描述
+  const scoreDescriptions = {
+    S: {
+      10: "灾难性",
+      9: "重大",
+      8: "严重",
+      7: "较高",
+      6: "中等",
+      5: "较低",
+      4: "轻微",
+      3: "很轻微",
+      2: "可忽略",
+      1: "无影响"
+    },
+    O: {
+      10: "几乎必然",
+      9: "极高",
+      8: "高",
+      7: "中等偏高",
+      6: "中等",
+      5: "中等偏低",
+      4: "低",
+      3: "极低",
+      2: "几乎不可能",
+      1: "不可能"
+    },
+    D: {
+      10: "几乎无法检测",
+      9: "极难检测",
+      8: "较难检测",
+      7: "中等难度检测",
+      6: "需专项检测",
+      5: "常规检测可实现",
+      4: "自动监测覆盖",
+      3: "实时报警系统",
+      2: "多重冗余检测",
+      1: "失效自锁机制"
+    }
+  };
+
+  // 页面加载初始化
+  document.addEventListener('DOMContentLoaded', function() {
+    // 从URL获取FMEA编号
+    const urlParams = new URLSearchParams(window.location.search);
+    currentFmeaCode = urlParams.get('code');
+
+    if (!currentFmeaCode) {
+      alert('未指定FMEA项目！');
+      window.location.href = 'scoring rules.html';
+      return;
+    }
+
+    loadProjectData();
+    loadSodData();
+    initEventListeners();
+    renderDimension('S');
+  });
+
+  // 加载FMEA项目数据
+  function loadProjectData() {
+    const projects = JSON.parse(localStorage.getItem('fmeaProjects') || '[]');
+    currentProject = projects.find(p => p.fmeaCode === currentFmeaCode);
+
+    if (!currentProject) {
+      alert('未找到指定的FMEA项目！');
+      window.location.href = 'scoring rules.html';
+      return;
+    }
+
+    // 更新项目信息显示
+    document.getElementById('fmeaName').textContent = currentProject.fmeaName || '-';
+    document.getElementById('fmeaCode').textContent = currentProject.fmeaCode || '-';
+    document.getElementById('projectType').textContent = currentProject.projectType || '-';
+    document.getElementById('projectStatus').textContent = currentProject.projectStatus || '-';
+    document.getElementById('responsiblePerson').textContent = currentProject.responsiblePerson || '-';
+
+    // 更新状态标签样式
+    const statusElement = document.getElementById('projectStatus');
+    statusElement.className = 'info-value status';
+    switch(currentProject.projectStatus) {
+      case '进行中':
+        statusElement.classList.add('status-processing');
+        break;
+      case '已完成':
+        statusElement.classList.add('status-completed');
+        break;
+      case '暂停':
+        statusElement.classList.add('status-paused');
+        break;
+      case '待启动':
+        statusElement.classList.add('status-pending');
+        break;
+    }
+  }
+
+  // 加载SOD评分数据
+  function loadSodData() {
+    const storedData = JSON.parse(localStorage.getItem(`sodData_${currentFmeaCode}`) || '{}');
+
+    // 如果没有存储的数据，使用模板数据
+    if (!storedData.S || storedData.S.length === 0) {
+      sodData.S = JSON.parse(JSON.stringify(templateData.S));
+      sodData.O = JSON.parse(JSON.stringify(templateData.O));
+      sodData.D = JSON.parse(JSON.stringify(templateData.D));
+    } else {
+      sodData.S = storedData.S;
+      sodData.O = storedData.O;
+      sodData.D = storedData.D;
+    }
+  }
+
+  // 初始化事件监听
+  function initEventListeners() {
+    // SOD选项卡切换
+    document.querySelectorAll('.sod-tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        const type = this.getAttribute('data-type');
+        switchDimension(type);
+      });
+    });
+
+    // 编辑按钮
+    document.getElementById('editBtn').addEventListener('click', function() {
+      // 跳转到编辑页面
+      window.location.href = `SOD score.html?code=${encodeURIComponent(currentFmeaCode)}`;
+    });
+
+    // 返回按钮
+    document.getElementById('backBtn').addEventListener('click', function() {
+      window.location.href = 'scoring rules.html';
+    });
+
+    // 导出按钮
+    document.getElementById('exportBtn').addEventListener('click', exportSodData);
+  }
+
+  // 切换维度
+  function switchDimension(type) {
+    // 更新选项卡状态
+    document.querySelectorAll('.sod-tab').forEach(tab => {
+      tab.classList.remove('active');
+      if (tab.getAttribute('data-type') === type) {
+        tab.classList.add('active');
+      }
+    });
+
+    currentDimension = type;
+    renderDimension(type);
+  }
+
+  // 渲染指定维度的评分表
+  function renderDimension(type) {
+    const info = dimensionInfo[type];
+    const data = sodData[type];
+
+    // 更新标题和描述
+    document.getElementById('editorTitle').textContent = info.title;
+    document.getElementById('dimensionDescription').textContent = info.description;
+
+    // 更新表头
+    document.getElementById('tableCol1').textContent = info.col1;
+    document.getElementById('tableCol2').textContent = info.col2;
+
+    // 渲染评分表
+    renderScoreTable(type, data);
+  }
+
+  // 渲染评分表
+  function renderScoreTable(type, data) {
+    const tbody = document.getElementById('scoreTableBody');
+    const info = dimensionInfo[type];
+
+    tbody.innerHTML = '';
+
+    if (!data || data.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="3" class="no-data">暂无评分数据，请先编辑评分表</td>
+        </tr>
+      `;
+      return;
+    }
+
+    // 按分数降序排列（10分到1分）
+    const sortedData = [...data].sort((a, b) => b.score - a.score);
+
+    sortedData.forEach(item => {
+      const row = document.createElement('tr');
+      const scoreDesc = scoreDescriptions[type][item.score] || '';
+
+      row.innerHTML = `
+        <td class="score-column">
+          <div class="score-number">${item.score}</div>
+          <div class="score-label">${scoreDesc}</div>
+        </td>
+        <td class="description-column">${item.description || '未填写'}</td>
+        <td class="example-column ${!item.example ? 'empty-example' : ''}">
+          ${item.example || '未填写示例'}
+        </td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+
+  // 导出评分表数据
+  function exportSodData() {
+    const currentData = sodData[currentDimension];
+    const info = dimensionInfo[currentDimension];
+
+    if (!currentData || currentData.length === 0) {
+      alert('当前维度没有评分数据，无法导出！');
+      return;
+    }
+
+    // 创建导出内容
+    let exportContent = `${currentProject.fmeaName} - ${info.title}\n`;
+    exportContent += `导出时间：${new Date().toLocaleString('zh-CN')}\n\n`;
+
+    // 添加表头
+    exportContent += `分数\t${info.col1}\t${info.col2}\n`;
+
+    // 添加数据行（按分数降序）
+    const sortedData = [...currentData].sort((a, b) => b.score - a.score);
+
+    sortedData.forEach(item => {
+      const scoreDesc = scoreDescriptions[currentDimension][item.score] || '';
+      exportContent += `${item.score}(${scoreDesc})\t${item.description || ''}\t${item.example || ''}\n`;
+    });
+
+    // 创建Blob并下载
+    const blob = new Blob([exportContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${currentFmeaCode}_${currentDimension}_评分表_${new Date().toISOString().slice(0, 10)}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    alert('评分表导出成功！');
+  }
+</script>
+</body>
+</html>

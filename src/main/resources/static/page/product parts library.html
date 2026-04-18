@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>产品零件库</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+    }
+    body {
+      background-color: #f5f7fa;
+      color: #333;
+      padding: 30px;
+    }
+    .main-content {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    .page-title {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #2f4050;
+      font-weight: 600;
+    }
+    .filter-container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .filter-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #2f4050;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e6e6e6;
+    }
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+      justify-content: flex-start;
+      margin-bottom: 10px;
+    }
+    .search-wrapper {
+      position: relative;
+      flex: 1;
+      min-width: 200px;
+      max-width: 300px;
+    }
+    .search-input {
+      width: 100%;
+      padding: 10px 15px 10px 40px;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      font-size: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: all 0.3s;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: #165DFF;
+      box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.1);
+    }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+      font-size: 16px;
+    }
+    .filter-select, .date-input {
+      padding: 10px 15px;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      font-size: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: all 0.3s;
+      min-width: 180px;
+    }
+    .filter-select:focus, .date-input:focus {
+      outline: none;
+      border-color: #165DFF;
+      box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.1);
+    }
+
+    /* 修改：将操作按钮组移到右下角 */
+    .filter-actions {
+      display: flex;
+      gap: 10px;
+      margin-left: auto;
+      flex-shrink: 0;
+      justify-content: flex-end;
+      width: 100%;
+      margin-top: 15px;
+    }
+    .add-btn {
+      padding: 10px 24px;
+      background-color: #00B42A;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .add-btn:hover {
+      background-color: #009922;
+    }
+    .batch-delete-btn {
+      padding: 10px 24px;
+      background-color: #F53F3F;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .batch-delete-btn:hover {
+      background-color: #d92d2d;
+    }
+    .search-btn {
+      padding: 10px 24px;
+      background-color: #165DFF;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .search-btn:hover {
+      background-color: #0D52D9;
+    }
+    .reset-btn {
+      padding: 10px 24px;
+      background-color: #f5f7fa;
+      color: #666;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .reset-btn:hover {
+      background-color: #e8eaed;
+      border-color: #d9d9d9;
+    }
+
+    /* 表格容器新布局 - 改为单一表格 */
+    .table-container {
+      position: relative;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      display: none; /* 默认隐藏，有数据时显示 */
+    }
+
+    /* 滚动容器 - 修改高度为600px，与技术标准库相同 */
+    .scrollable-content {
+      overflow-x: auto;
+      overflow-y: auto;
+      max-height: 600px; /* 修改为600px */
+      scrollbar-width: thin;
+      scrollbar-color: #c1c1c1 #f5f5f5;
+    }
+    .scrollable-content::-webkit-scrollbar {
+      height: 8px;
+      width: 8px;
+    }
+    .scrollable-content::-webkit-scrollbar-track {
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+    .scrollable-content::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+    .scrollable-content::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+
+    /* 单一表格样式 - 确保行高绝对一致 */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      min-width: 1200px;
+    }
+    .data-table thead {
+      background-color: #f8f9fa;
+      color: #2f4050;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    .data-table th, .data-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #e6e6e6;
+      font-size: 14px;
+      vertical-align: middle;
+      line-height: 1.5;
+      height: 60px; /* 统一行高 */
+      min-height: 60px;
+      max-height: 60px;
+      overflow: hidden;
+    }
+    .data-table th {
+      font-weight: 600;
+      height: 48px;
+      min-height: 48px;
+    }
+    .data-table tbody tr {
+      height: 60px; /* 强制行高 */
+      min-height: 60px;
+      max-height: 60px;
+    }
+    .data-table tbody tr:hover {
+      background-color: #fafbfc;
+      cursor: default;
+    }
+
+    /* 重新设置各列宽度 - 删除创建时间列 */
+    .data-table th:nth-child(1),
+    .data-table td:nth-child(1) {
+      width: 60px;
+      min-width: 60px;
+      max-width: 60px;
+      text-align: center;
+    }
+    .data-table th:nth-child(2),
+    .data-table td:nth-child(2) {
+      width: 140px; /* 零件编号 */
+      min-width: 140px;
+      max-width: 140px;
+    }
+    .data-table th:nth-child(3),
+    .data-table td:nth-child(3) {
+      width: 160px; /* 零件名称 */
+      min-width: 160px;
+      max-width: 160px;
+    }
+    .data-table th:nth-child(4),
+    .data-table td:nth-child(4) {
+      width: 450px; /* 零件描述 - 增加宽度 */
+      min-width: 450px;
+      max-width: 450px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.5;
+    }
+    /* 删除创建时间列，最近更新时间变为第5列 */
+    .data-table th:nth-child(5),
+    .data-table td:nth-child(5) {
+      width: 120px; /* 最近更新时间 */
+      min-width: 120px;
+      max-width: 120px;
+    }
+    /* 操作列 - 修改宽度为80px，与预防措施库和探测措施库相同 */
+    .data-table th:nth-child(6),
+    .data-table td:nth-child(6) {
+      width: 80px; /* 修改为80px，与预防措施库和探测措施库相同 */
+      min-width: 80px;
+      max-width: 80px;
+      text-align: center;
+      position: sticky;
+      right: 0;
+      background-color: #fff;
+      z-index: 3;
+      border-left: 1px solid #e6e6e6;
+    }
+    .data-table thead th:nth-child(6) {
+      background-color: #f8f9fa;
+      z-index: 6;
+    }
+
+    /* 修改：操作按钮容器 - 与预防措施库和探测措施库相同 */
+    .operation-item {
+      display: flex;
+      gap: 4px; /* 从8px改为4px，与预防措施库和探测措施库相同 */
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-height: 36px;
+      flex-wrap: nowrap;
+    }
+
+    /* 修改：操作按钮 - 与预防措施库和探测措施库相同 */
+    .op-btn {
+      width: 26px; /* 从32px改为26px，与预防措施库和探测措施库相同 */
+      height: 26px; /* 从32px改为26px，与预防措施库和探测措施库相同 */
+      padding: 0;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: transparent;
+      flex-shrink: 0;
+      flex: 0 0 26px; /* 从32px改为26px，与预防措施库和探测措施库相同 */
+    }
+    .op-edit {
+      color: #165DFF;
+    }
+    .op-edit:hover {
+      background-color: #e8f4fd;
+    }
+    .op-delete {
+      color: #F53F3F;
+    }
+    .op-delete:hover {
+      background-color: #fef0f0;
+    }
+
+    .no-data {
+      height: 150px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #999;
+      font-size: 14px;
+      display: none;
+    }
+
+    /* 分页样式 - 默认隐藏 */
+    .pagination {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+      gap: 10px;
+    }
+    .pagination-btn {
+      padding: 5px 12px;
+      border: 1px solid #e6e6e6;
+      border-radius: 4px;
+      background-color: #fff;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .pagination-btn.active {
+      background-color: #165DFF;
+      color: #fff;
+      border-color: #165DFF;
+    }
+    .pagination-btn:disabled {
+      cursor: not-allowed;
+      color: #ccc;
+      border-color: #eee;
+    }
+
+    /* 弹窗样式 */
+    .modal-mask {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      display: none;
+    }
+    .modal-container {
+      background-color: #fff;
+      border-radius: 8px;
+      width: 600px;
+      max-width: 90%;
+      padding: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e6e6e6;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2f4050;
+    }
+    .modal-close {
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      color: #999;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .modal-close:hover {
+      color: #333;
+    }
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .form-item {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .form-label {
+      font-size: 14px;
+      color: #666;
+      font-weight: 500;
+    }
+    .form-input, .form-select, .form-textarea {
+      padding: 10px 15px;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .form-textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: #165DFF;
+      box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.1);
+    }
+    .form-required {
+      color: #F53F3F;
+      margin-left: 4px;
+    }
+    .modal-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 1px solid #e6e6e6;
+    }
+    .modal-cancel {
+      padding: 8px 20px;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      background-color: #f5f7fa;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .modal-cancel:hover {
+      background-color: #e8eaed;
+    }
+    .modal-submit {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 8px;
+      background-color: #165DFF;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .modal-submit:hover {
+      background-color: #0D52D9;
+    }
+    .error-tip {
+      color: #F53F3F;
+      font-size: 12px;
+      display: none;
+    }
+    .batch-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    /* 详情查看弹窗 */
+    .detail-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      display: none;
+    }
+    .detail-content {
+      background-color: #fff;
+      border-radius: 8px;
+      width: 600px;
+      max-width: 90%;
+      padding: 24px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e6e6e6;
+    }
+    .detail-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2f4050;
+    }
+    .detail-close {
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      color: #999;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .detail-close:hover {
+      color: #333;
+    }
+    .detail-body {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #333;
+    }
+    .detail-item {
+      margin-bottom: 15px;
+    }
+    .detail-label {
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    .detail-value {
+      color: #333;
+      word-break: break-word;
+    }
+
+    /* 描述省略提示 */
+    .desc-cell {
+      position: relative;
+    }
+
+    /* 可点击单元格样式 - 与预防措施库相同 */
+    .clickable-cell {
+      cursor: pointer;
+      position: relative;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .clickable-cell:hover {
+      background-color: #f0f9ff !important;
+    }
+    .clickable-cell:hover::after {
+      content: '点击查看详情';
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: #165DFF;
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      opacity: 0.9;
+      z-index: 10;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    /* 功能描述单元格特殊样式 */
+    .desc-cell.clickable-cell {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 450px;
+    }
+    .desc-cell.clickable-cell:hover::after {
+      content: '点击查看完整描述';
+      background-color: #165DFF;
+    }
+
+    /* 移除原有的desc-cell悬停样式，避免冲突 */
+    .desc-cell:hover::before {
+      display: none;
+    }
+
+    /* 操作按钮容器 - 防止点击行时触发操作按钮 */
+    .operation-item {
+      pointer-events: auto;
+    }
+
+    @media (max-width: 768px) {
+      .filter-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .search-wrapper {
+        max-width: 100%;
+      }
+      .filter-actions {
+        justify-content: center;
+        margin-left: 0;
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+      .date-range {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 5px;
+      }
+      .scrollable-content {
+        max-height: 400px;
+      }
+      .data-table {
+        min-width: 1100px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="main-content">
+  <div class="page-title">产品零件库</div>
+
+  <!-- 筛选区域 -->
+  <div class="filter-container">
+    <div class="filter-title">筛选条件</div>
+    <div class="filter-row">
+      <!-- 主要信息搜索 -->
+      <div class="search-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" class="search-input" id="searchKeyword" placeholder="搜索：零件编号/名称/描述...">
+      </div>
+    </div>
+
+    <!-- 操作按钮 - 现在位于搜索部分右下角 -->
+    <div class="filter-actions">
+      <button class="add-btn" id="addPartBtn">
+        <i class="fas fa-plus mr-1"></i> 新增零件
+      </button>
+      <button class="batch-delete-btn" id="batchDeleteBtn">
+        <i class="fas fa-trash mr-1"></i> 批量删除
+      </button>
+      <button class="search-btn" id="searchBtn">
+        <i class="fas fa-search mr-1"></i> 搜索
+      </button>
+      <button class="reset-btn" id="resetBtn">
+        <i class="fas fa-refresh mr-1"></i> 重置
+      </button>
+    </div>
+  </div>
+
+  <!-- 零件表格 - 单一表格布局 -->
+  <div class="table-container" id="tableContainer">
+    <div class="scrollable-content" id="scrollableContent">
+      <table class="data-table" id="dataTable">
+        <thead>
+        <tr>
+          <th><input type="checkbox" class="batch-checkbox" id="checkAll"></th>
+          <th>零件编号</th>
+          <th>零件名称</th>
+          <th>零件描述</th>
+          <th>最近更新时间</th>
+          <th>操作</th>
+        </tr>
+        </thead>
+        <tbody id="dataTableBody">
+        <!-- 数据表格内容由JS渲染 -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 分页 -->
+  <div class="pagination" id="paginationContainer">
+    <button class="pagination-btn" id="prevPageBtn">上一页</button>
+    <div id="pageNumberContainer">
+      <button class="pagination-btn active">1</button>
+    </div>
+    <button class="pagination-btn" id="nextPageBtn">下一页</button>
+  </div>
+</div>
+
+<!-- 新增/编辑零件弹窗 -->
+<div class="modal-mask" id="partModal">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modalTitle">新增零件</h3>
+      <button class="modal-close" id="closeModalBtn">&times;</button>
+    </div>
+    <form class="modal-form" id="partForm">
+      <input type="hidden" id="editPartCode"> <!-- 编辑时存储零件编号 -->
+      <div class="form-item">
+        <label class="form-label">零件名称 <span class="form-required">*</span></label>
+        <input type="text" class="form-input" id="partName" placeholder="请输入零件名称">
+        <div class="error-tip" id="nameError">零件名称不能为空</div>
+      </div>
+      <div class="form-item">
+        <label class="form-label">零件描述</label>
+        <textarea class="form-textarea" id="partDescription" placeholder="请输入零件详细描述（如：材质、规格、用途等）"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="modal-cancel" id="cancelModalBtn">取消</button>
+        <button type="submit" class="modal-submit">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 详情查看弹窗 -->
+<div class="detail-modal" id="detailModal">
+  <div class="detail-content">
+    <div class="detail-header">
+      <h3 class="detail-title">零件详情</h3>
+      <button class="detail-close" id="closeDetailBtn">&times;</button>
+    </div>
+    <div class="detail-body" id="detailBody">
+      <!-- 详情内容由JS动态填充 -->
+    </div>
+  </div>
+</div>
+
+<script>
+  // 全局变量
+  let productParts = JSON.parse(localStorage.getItem('productParts') || '[]');
+  let currentPage = 1; // 当前页码
+  const pageSize = 10; // 每页显示10条数据
+  let filteredParts = [...productParts]; // 筛选后的零件列表
+
+  // 页面加载初始化
+  document.addEventListener('DOMContentLoaded', function() {
+    renderPartTable(); // 渲染表格
+    bindEventListeners(); // 绑定所有事件
+    renderPagination(); // 渲染分页
+    bindCellClickEvents(); // 绑定单元格点击事件
+  });
+
+  // 生成唯一零件编号（新增时使用）
+  function generatePartCode() {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const count = productParts.length + 1;
+    return `PL${year%100}${month}${day}${String(count).padStart(4, '0')}`;
+  }
+
+  // 截断文本函数 - 统一限制显示字数
+  function truncateText(text, maxLength = 30) {
+    if (!text || typeof text !== 'string') return '';
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  }
+
+  // 表单验证
+  function validateForm() {
+    let isValid = true;
+    const partName = document.getElementById('partName').value.trim();
+
+    // 清空所有错误提示
+    document.querySelectorAll('.error-tip').forEach(tip => {
+      tip.style.display = 'none';
+    });
+
+    // 验证零件名称
+    if (!partName) {
+      document.getElementById('nameError').style.display = 'block';
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  // 打开新增/编辑弹窗
+  function openModal(type, part = null) {
+    const modal = document.getElementById('partModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const editPartCode = document.getElementById('editPartCode');
+
+    // 重置表单
+    document.getElementById('partForm').reset();
+    document.querySelectorAll('.error-tip').forEach(tip => tip.style.display = 'none');
+
+    if (type === 'add') {
+      modalTitle.textContent = '新增零件';
+      editPartCode.value = '';
+    } else if (type === 'edit') {
+      modalTitle.textContent = '编辑零件';
+      editPartCode.value = part.partCode;
+      // 回显数据
+      document.getElementById('partName').value = part.partName;
+      document.getElementById('partDescription').value = part.partDescription || '';
+    }
+
+    modal.style.display = 'flex';
+  }
+
+  // 关闭弹窗
+  function closeModal() {
+    document.getElementById('partModal').style.display = 'none';
+  }
+
+  // 新增零件
+  function addPart() {
+    const currentDate = new Date().toISOString().split('T')[0];
+    const newPart = {
+      partName: document.getElementById('partName').value.trim(),
+      partDescription: document.getElementById('partDescription').value.trim(),
+      createTime: currentDate,
+      lastUpdateTime: currentDate,
+      partCode: generatePartCode()
+    };
+
+    productParts.push(newPart);
+    localStorage.setItem('productParts', JSON.stringify(productParts));
+    filteredParts = [...productParts]; // 重置筛选列表
+    closeModal();
+    renderPartTable();
+    renderPagination();
+  }
+
+  // 编辑零件
+  function updatePart() {
+    const partCode = document.getElementById('editPartCode').value;
+    const index = productParts.findIndex(p => p.partCode === partCode);
+
+    if (index !== -1) {
+      productParts[index] = {
+        ...productParts[index],
+        partName: document.getElementById('partName').value.trim(),
+        partDescription: document.getElementById('partDescription').value.trim(),
+        lastUpdateTime: new Date().toISOString().split('T')[0]
+      };
+      localStorage.setItem('productParts', JSON.stringify(productParts));
+      filteredParts = [...productParts]; // 重置筛选列表
+      closeModal();
+      renderPartTable();
+    }
+  }
+
+  // 显示零件详情
+  function showPartDetail(part) {
+    const detailModal = document.getElementById('detailModal');
+    const detailBody = document.getElementById('detailBody');
+
+    detailBody.innerHTML = `
+      <div class="detail-item">
+        <div class="detail-label">零件编号</div>
+        <div class="detail-value">${part.partCode}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">零件名称</div>
+        <div class="detail-value">${part.partName}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">零件描述</div>
+        <div class="detail-value">${part.partDescription || '暂无描述'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">创建时间</div>
+        <div class="detail-value">${part.createTime}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">最近更新时间</div>
+        <div class="detail-value">${part.lastUpdateTime}</div>
+      </div>
+    `;
+
+    detailModal.style.display = 'flex';
+  }
+
+  // 关闭详情弹窗
+  function closeDetailModal() {
+    document.getElementById('detailModal').style.display = 'none';
+  }
+
+  // 渲染零件表格 - 修改为与预防措施库相同的渲染方式
+  function renderPartTable() {
+    const dataTableBody = document.getElementById('dataTableBody');
+    dataTableBody.innerHTML = '';
+    const tableContainer = document.getElementById('tableContainer');
+
+    if (filteredParts.length === 0) {
+      tableContainer.style.display = 'none';
+      return;
+    }
+
+    tableContainer.style.display = 'block';
+
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedParts = filteredParts.slice(startIndex, endIndex);
+
+    paginatedParts.forEach((part, index) => {
+      // 截断描述为单行显示
+      const truncatedDesc = truncateText(part.partDescription, 40);
+
+      // 渲染单一行 - 使用与预防措施库相同的方式
+      const row = document.createElement('tr');
+      row.setAttribute('data-index', index);
+      row.setAttribute('data-part', part.partCode);
+      row.innerHTML = `
+        <td><input type="checkbox" class="batch-checkbox" data-part="${part.partCode}"></td>
+        <td class="clickable-cell">
+          ${part.partCode}
+        </td>
+        <td class="clickable-cell">
+          ${part.partName}
+        </td>
+        <td class="clickable-cell desc-cell" title="${part.partDescription || '暂无描述'}">
+          ${truncatedDesc || '暂无描述'}
+        </td>
+        <td class="clickable-cell">
+          ${part.lastUpdateTime}
+        </td>
+        <td>
+          <div class="operation-item">
+            <button class="op-btn op-edit" data-part="${part.partCode}">
+              <i class="fa-solid fa-edit"></i>
+            </button>
+            <button class="op-btn op-delete" data-part="${part.partCode}">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        </td>
+      `;
+      dataTableBody.appendChild(row);
+    });
+
+    bindOperationBtnEvents(); // 绑定操作按钮事件
+    bindCheckboxEvents(); // 绑定复选框事件
+    bindCellClickEvents(); // 绑定单元格点击事件
+  }
+
+  // 绑定单元格点击事件 - 修改为与预防措施库相同的方式
+  function bindCellClickEvents() {
+    document.querySelectorAll('.clickable-cell').forEach(cell => {
+      cell.onclick = null;
+      cell.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const row = this.closest('tr');
+        if (row) {
+          const partCode = row.getAttribute('data-part');
+          if (partCode) {
+            showPartDetailByCode(partCode);
+          }
+        }
+      });
+    });
+  }
+
+  // 根据零件编号显示详情
+  function showPartDetailByCode(partCode) {
+    const part = productParts.find(p => p.partCode === partCode);
+    if (part) {
+      showPartDetail(part);
+    }
+  }
+
+  // 绑定复选框事件（全选/取消全选）
+  function bindCheckboxEvents() {
+    const checkAll = document.getElementById('checkAll');
+    const checkItems = document.querySelectorAll('.batch-checkbox[data-part]');
+
+    if (!checkAll || checkItems.length === 0) return;
+
+    // 重置全选复选框状态
+    resetCheckAll();
+
+    // 全选/取消全选
+    checkAll.addEventListener('change', function() {
+      const isChecked = this.checked;
+      checkItems.forEach(item => {
+        item.checked = isChecked;
+      });
+    });
+
+    // 单个复选框影响全选状态
+    checkItems.forEach(item => {
+      item.addEventListener('change', function() {
+        const allChecked = Array.from(checkItems).every(i => i.checked);
+        const someChecked = Array.from(checkItems).some(i => i.checked);
+
+        // 设置全选复选框的状态
+        if (allChecked) {
+          checkAll.checked = true;
+          checkAll.indeterminate = false;
+        } else if (someChecked) {
+          checkAll.checked = false;
+          checkAll.indeterminate = true;
+        } else {
+          checkAll.checked = false;
+          checkAll.indeterminate = false;
+        }
+      });
+    });
+  }
+
+  // 重置全选复选框状态
+  function resetCheckAll() {
+    const checkAll = document.getElementById('checkAll');
+    if (checkAll) {
+      checkAll.checked = false;
+      checkAll.indeterminate = false;
+    }
+  }
+
+  // 批量删除零件
+  function batchDeleteParts() {
+    try {
+      // 获取所有选中的复选框
+      const checkedItems = document.querySelectorAll('.batch-checkbox[data-part]:checked');
+
+      if (checkedItems.length === 0) {
+        alert('请先选择要删除的零件！');
+        return;
+      }
+
+      // 显示确认对话框
+      if (!confirm(`确定要删除选中的 ${checkedItems.length} 个零件吗？此操作不可恢复！`)) {
+        return;
+      }
+
+      // 获取要删除的零件编号
+      const deleteCodes = Array.from(checkedItems).map(item => item.getAttribute('data-part'));
+
+      // 从数组中删除选中的零件
+      productParts = productParts.filter(p => !deleteCodes.includes(p.partCode));
+
+      // 保存到 localStorage
+      localStorage.setItem('productParts', JSON.stringify(productParts));
+
+      // 重置筛选列表
+      filteredParts = [...productParts];
+
+      // 重置当前页码
+      currentPage = 1;
+
+      // 重新渲染表格和分页
+      renderPartTable();
+      renderPagination();
+
+      // 重置全选复选框
+      resetCheckAll();
+    } catch (error) {
+      console.error('批量删除失败:', error);
+      alert('批量删除失败，请稍后重试！');
+    }
+  }
+
+  // 渲染分页
+  function renderPagination() {
+    const totalPages = Math.ceil(filteredParts.length / pageSize);
+    const pageContainer = document.getElementById('pageNumberContainer');
+    const prevBtn = document.getElementById('prevPageBtn');
+    const nextBtn = document.getElementById('nextPageBtn');
+    const paginationContainer = document.getElementById('paginationContainer');
+
+    // 如果没有数据，隐藏分页
+    if (filteredParts.length === 0) {
+      paginationContainer.style.display = 'none';
+      return;
+    }
+
+    // 显示分页
+    paginationContainer.style.display = 'flex';
+
+    // 清空页码容器
+    pageContainer.innerHTML = '';
+
+    // 生成页码按钮
+    for (let i = 1; i <= totalPages; i++) {
+      const pageBtn = document.createElement('button');
+      pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+      pageBtn.textContent = i;
+      pageBtn.addEventListener('click', function() {
+        currentPage = i;
+        renderPartTable();
+        renderPagination();
+      });
+      pageContainer.appendChild(pageBtn);
+    }
+
+    // 禁用/启用上一页/下一页
+    prevBtn.disabled = currentPage === 1;
+    nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+  }
+
+  // 绑定操作按钮事件（编辑/删除） - 修改为与预防措施库相同的方式
+  function bindOperationBtnEvents() {
+    // 编辑按钮
+    document.querySelectorAll('.op-edit').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const partCode = this.getAttribute('data-part');
+        const part = productParts.find(p => p.partCode === partCode);
+        if (part) {
+          openModal('edit', part);
+        }
+      });
+    });
+
+    // 单个删除按钮
+    document.querySelectorAll('.op-delete').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const partCode = this.getAttribute('data-part');
+        const part = productParts.find(p => p.partCode === partCode);
+        if (confirm(`确认删除零件【${part.partName}】吗？删除后不可恢复！`)) {
+          productParts = productParts.filter(p => p.partCode !== partCode);
+          localStorage.setItem('productParts', JSON.stringify(productParts));
+          filteredParts = [...productParts]; // 重置筛选列表
+          // 处理页码（如果当前页无数据，跳转到上一页）
+          const totalPages = Math.ceil(filteredParts.length / pageSize);
+          if (currentPage > totalPages && totalPages > 0) {
+            currentPage = totalPages;
+          } else if (totalPages === 0) {
+            currentPage = 1;
+          }
+          renderPartTable();
+          renderPagination();
+        }
+      });
+    });
+  }
+
+  // 绑定所有事件监听
+  function bindEventListeners() {
+    // 搜索按钮
+    document.getElementById('searchBtn').addEventListener('click', filterParts);
+    // 搜索框回车
+    document.getElementById('searchKeyword').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') filterParts();
+    });
+    // 重置按钮
+    document.getElementById('resetBtn').addEventListener('click', resetFilters);
+    // 新增零件按钮
+    document.getElementById('addPartBtn').addEventListener('click', () => openModal('add'));
+    // 批量删除按钮
+    document.getElementById('batchDeleteBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      batchDeleteParts();
+    });
+    // 关闭弹窗按钮
+    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+    document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
+    // 关闭详情弹窗按钮
+    document.getElementById('closeDetailBtn').addEventListener('click', closeDetailModal);
+    // 表单提交（新增/编辑）
+    document.getElementById('partForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (validateForm()) {
+        const editPartCode = document.getElementById('editPartCode').value;
+        if (editPartCode) {
+          // 编辑模式
+          updatePart();
+        } else {
+          // 新增模式
+          addPart();
+        }
+      }
+    });
+    // 分页按钮
+    document.getElementById('prevPageBtn').addEventListener('click', function() {
+      if (currentPage > 1) {
+        currentPage--;
+        renderPartTable();
+        renderPagination();
+      }
+    });
+    document.getElementById('nextPageBtn').addEventListener('click', function() {
+      const totalPages = Math.ceil(filteredParts.length / pageSize);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderPartTable();
+        renderPagination();
+      }
+    });
+  }
+
+  // 多条件筛选
+  function filterParts() {
+    const keyword = document.getElementById('searchKeyword').value.trim().toLowerCase();
+
+    filteredParts = productParts.filter(part => {
+      // 关键词匹配（编号/名称/描述）
+      const matchKeyword = keyword === '' ||
+              part.partCode.toLowerCase().includes(keyword) ||
+              part.partName.toLowerCase().includes(keyword) ||
+              (part.partDescription && part.partDescription.toLowerCase().includes(keyword));
+
+      return matchKeyword;
+    });
+
+    currentPage = 1; // 筛选后重置页码
+    renderPartTable();
+    renderPagination();
+  }
+
+  // 重置筛选条件
+  function resetFilters() {
+    document.getElementById('searchKeyword').value = '';
+    filteredParts = [...productParts]; // 重置筛选列表
+    currentPage = 1; // 重置页码
+    renderPartTable();
+    renderPagination();
+  }
+</script>
+</body>
+</html>

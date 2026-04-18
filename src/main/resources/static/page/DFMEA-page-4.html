@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>结构可视化</title>
+  <link rel="stylesheet" href="../css/modal-form-common.css">
+  <link rel="stylesheet" href="../css/DFMEA-page-4.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+<div class="dfmea-container">
+  <div class="edit-container">
+    <div class="edit-tabs">
+      <button class="tab-btn active" onclick="showChart()"><i class="fas fa-project-diagram"></i> 结构树</button>
+      <button class="tab-btn" onclick="showTable()"><i class="fas fa-table"></i> 结构表</button>
+    </div>
+    <div class="edit-actions">
+      <button class="action-btn primary" onclick="exportData(this)"><i class="fas fa-paper-plane"></i> 导出结构树</button>
+    </div>
+  </div>
+  
+  <div class="content-box">
+    <div id="chart-section">
+      <div id="chart-container"></div>
+    </div>
+    <div id="table-section" class="hidden">
+      <div class="table-wrapper">
+        <table id="table-container">
+          <thead>
+            <tr>
+              <th>上一较高级别</th>
+              <th>关注要素</th>
+              <th>下一较低级别或特性类型</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 右键菜单 -->
+<div id="context-menu" class="context-menu">
+  <ul>
+    <li onclick="handleAdd()"><i class="fas fa-plus"></i> 新增</li>
+    <li onclick="handleEdit()"><i class="fas fa-edit"></i> 编辑</li>
+    <li onclick="handleDelete()"><i class="fas fa-trash"></i> 删除</li>
+  </ul>
+</div>
+
+<!-- 弹窗 -->
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <!-- 弹窗内容将由JavaScript动态生成 -->
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<script src="..\js\DFMEA-page-4.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</body>
+</html>

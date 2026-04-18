@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>通知中心</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+<div class="max-w-4xl mx-auto py-6 px-4">
+  <!-- 页面标题 -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">通知中心</h1>
+    <p class="text-gray-500 mt-1">查看所有系统通知和提醒</p>
+  </div>
+
+  <!-- 操作工具栏 -->
+  <div class="flex justify-between items-center mb-6">
+    <div class="flex space-x-2">
+      <button id="mark-all-read" class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium">
+        全部标记为已读
+      </button>
+      <button id="clear-all" class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium">
+        清空通知
+      </button>
+    </div>
+    <div class="text-sm text-gray-500">
+      共 <span id="unread-count" class="font-semibold">12</span> 条未读通知
+    </div>
+  </div>
+
+  <!-- 通知列表 -->
+  <div id="notification-list" class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <!-- 未读通知 -->
+    <div id="unread-section" class="border-b border-gray-200">
+      <div class="px-6 py-4 bg-blue-50 border-l-4 border-blue-500">
+        <h3 class="font-medium text-gray-800">未读通知 (<span id="unread-badge">3</span>)</h3>
+      </div>
+
+      <div id="unread-items" class="divide-y divide-gray-100">
+        <!-- 通知项1 -->
+        <div class="px-6 py-4 hover:bg-gray-50 cursor-pointer flex items-start notification-item"
+             data-id="1"
+             data-title="新的FMEA项目审核请求"
+             data-content="张三提交了'发动机控制系统FMEA'项目，等待您的审核。"
+             data-type="project"
+             data-time="10分钟前"
+             data-details="项目名称：发动机控制系统FMEA<br>提交人：张三<br>提交时间：2023-10-10 14:30<br>紧急程度：高<br>要求完成时间：2023-10-15"
+             onclick="openNotificationDetailPage(this)">
+          <div class="mr-4 mt-1">
+            <div class="w-2 h-2 bg-red-500 rounded-full unread-dot"></div>
+          </div>
+          <div class="flex-1">
+            <div class="flex justify-between">
+              <h4 class="font-medium text-gray-800 unread-title notification-title">新的FMEA项目审核请求</h4>
+              <span class="text-xs text-gray-500 unread-time notification-time">10分钟前</span>
+            </div>
+            <p class="text-gray-600 text-sm mt-1 unread-content notification-content">张三提交了"发动机控制系统FMEA"项目，等待您的审核。</p>
+            <div class="flex items-center mt-2 space-x-4">
+              <span class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded notification-type">项目审核</span>
+              <button class="text-xs text-blue-600 hover:text-blue-800" onclick="event.stopPropagation();">查看详情</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 通知项2 -->
+        <div class="px-6 py-4 hover:bg-gray-50 cursor-pointer flex items-start notification-item"
+             data-id="2"
+             data-title="系统维护提醒"
+             data-content="系统将于今晚00:00-02:00进行维护升级，请提前保存工作。"
+             data-type="system"
+             data-time="2小时前"
+             data-details="维护时间：今晚00:00-02:00<br>影响范围：全系统<br>建议操作：请提前保存所有工作，避免数据丢失"
+             onclick="openNotificationDetailPage(this)">
+          <div class="mr-4 mt-1">
+            <div class="w-2 h-2 bg-yellow-500 rounded-full unread-dot"></div>
+          </div>
+          <div class="flex-1">
+            <div class="flex justify-between">
+              <h4 class="font-medium text-gray-800 unread-title notification-title">系统维护提醒</h4>
+              <span class="text-xs text-gray-500 unread-time notification-time">2小时前</span>
+            </div>
+            <p class="text-gray-600 text-sm mt-1 unread-content notification-content">系统将于今晚00:00-02:00进行维护升级，请提前保存工作。</p>
+            <div class="flex items-center mt-2 space-x-4">
+              <span class="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded notification-type">系统通知</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 已读通知 -->
+    <div id="read-section">
+      <div class="px-6 py-4 bg-gray-50">
+        <h3 class="font-medium text-gray-800">已读通知 (<span id="read-badge">9</span>)</h3>
+      </div>
+
+      <div id="read-items" class="divide-y divide-gray-100">
+        <!-- 已读通知项 -->
+        <div class="px-6 py-4 hover:bg-gray-50 cursor-pointer flex items-start opacity-70 notification-item"
+             data-id="3"
+             data-title="知识库更新完成"
+             data-content="'故障模式库'已更新15条新记录。"
+             data-type="announcement"
+             data-time="昨天"
+             data-details="更新内容：故障模式库<br>新增记录：15条<br>更新时间：2023-10-09 18:00<br>更新人：系统管理员"
+             onclick="openNotificationDetailPage(this)">
+          <div class="mr-4 mt-1">
+            <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
+          </div>
+          <div class="flex-1">
+            <div class="flex justify-between">
+              <h4 class="font-medium text-gray-600 notification-title">知识库更新完成</h4>
+              <span class="text-xs text-gray-400 notification-time">昨天</span>
+            </div>
+            <p class="text-gray-500 text-sm mt-1 notification-content">"故障模式库"已更新15条新记录。</p>
+          </div>
+        </div>
+
+        <div class="px-6 py-4 hover:bg-gray-50 cursor-pointer flex items-start opacity-70 notification-item"
+             data-id="4"
+             data-title="新用户加入"
+             data-content="李四已加入您的团队，请分配相关权限。"
+             data-type="system"
+             data-time="2天前"
+             data-details="新用户：李四<br>加入团队：研发部<br>加入时间：2023-10-08 09:30<br>角色：普通用户<br>需要分配权限：FMEA查看、编辑权限"
+             onclick="openNotificationDetailPage(this)">
+          <div class="mr-4 mt-1">
+            <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
+          </div>
+          <div class="flex-1">
+            <div class="flex justify-between">
+              <h4 class="font-medium text-gray-600 notification-title">新用户加入</h4>
+              <span class="text-xs text-gray-400 notification-time">2天前</span>
+            </div>
+            <p class="text-gray-500 text-sm mt-1 notification-content">李四已加入您的团队，请分配相关权限。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 空状态 -->
+  <div class="mt-8 text-center py-12 bg-white rounded-xl shadow-sm hidden" id="empty-state">
+    <i class="fa-regular fa-bell text-4xl text-gray-300 mb-4"></i>
+    <h3 class="text-lg font-medium text-gray-600">暂无通知</h3>
+    <p class="text-gray-500 mt-1">当有新的系统消息时，会在这里显示</p>
+  </div>
+</div>
+
+<script>
+  // 存储通知状态的localStorage键名
+  const NOTIFICATION_STORAGE_KEY = 'notification_status';
+
+  // 初始化通知状态
+  function initNotificationStatus() {
+    const storedStatus = localStorage.getItem(NOTIFICATION_STORAGE_KEY);
+    if (storedStatus) {
+      const statusMap = JSON.parse(storedStatus);
+
+      // 遍历所有通知项，应用已读状态
+      document.querySelectorAll('.notification-item').forEach(item => {
+        const id = item.getAttribute('data-id');
+        if (id && statusMap[id]) {
+          // 如果状态为已读，则应用已读样式
+          if (statusMap[id].read) {
+            applyReadStyle(item);
+
+            // 移动到已读列表
+            const readItems = document.getElementById('read-items');
+            const unreadItems = document.getElementById('unread-items');
+
+            if (item.parentElement === unreadItems) {
+              unreadItems.removeChild(item);
+              readItems.appendChild(item);
+            }
+          }
+        }
+      });
+
+      // 更新计数
+      updateNotificationCount();
+    }
+  }
+
+  // 保存通知状态到localStorage
+  function saveNotificationStatus(id, isRead) {
+    let statusMap = {};
+    const storedStatus = localStorage.getItem(NOTIFICATION_STORAGE_KEY);
+
+    if (storedStatus) {
+      statusMap = JSON.parse(storedStatus);
+    }
+
+    statusMap[id] = {
+      read: isRead,
+      timestamp: new Date().toISOString()
+    };
+
+    localStorage.setItem(NOTIFICATION_STORAGE_KEY, JSON.stringify(statusMap));
+
+    // 通知主页面更新状态
+    if (window.parent) {
+      window.parent.postMessage({
+        type: 'notificationStatusUpdated',
+        id: id,
+        read: isRead
+      }, '*');
+    }
+  }
+
+  // 应用已读样式
+  function applyReadStyle(notificationItem) {
+    // 添加已读样式类
+    notificationItem.classList.add('opacity-70');
+
+    // 将未读圆点改为已读样式
+    const dot = notificationItem.querySelector('.unread-dot');
+    if (dot) {
+      dot.classList.remove('bg-red-500', 'bg-yellow-500');
+      dot.classList.add('bg-gray-300');
+      dot.classList.remove('unread-dot');
+    }
+
+    // 将标题改为已读样式
+    const title = notificationItem.querySelector('.unread-title');
+    if (title) {
+      title.classList.remove('text-gray-800');
+      title.classList.add('text-gray-600');
+      title.classList.remove('unread-title');
+    }
+
+    // 将时间改为已读样式
+    const time = notificationItem.querySelector('.unread-time');
+    if (time) {
+      time.classList.remove('text-gray-500');
+      time.classList.add('text-gray-400');
+      time.classList.remove('unread-time');
+    }
+
+    // 将内容改为已读样式
+    const content = notificationItem.querySelector('.unread-content');
+    if (content) {
+      content.classList.remove('text-gray-600');
+      content.classList.add('text-gray-500');
+      content.classList.remove('unread-content');
+    }
+
+    // 移除标签中的蓝色/黄色样式（可选，如果需要也可以改为灰色）
+    const tag = notificationItem.querySelector('.bg-blue-100, .bg-yellow-100');
+    if (tag) {
+      tag.classList.remove('bg-blue-100', 'text-blue-700', 'bg-yellow-100', 'text-yellow-700');
+      tag.classList.add('bg-gray-100', 'text-gray-600');
+    }
+
+    // 移除查看详情按钮的蓝色样式（可选）
+    const detailButton = notificationItem.querySelector('.text-blue-600');
+    if (detailButton) {
+      detailButton.classList.remove('text-blue-600', 'hover:text-blue-800');
+      detailButton.classList.add('text-gray-500', 'hover:text-gray-700');
+    }
+  }
+
+  // 更新通知计数
+  function updateNotificationCount() {
+    const unreadItems = document.querySelectorAll('#unread-items .notification-item');
+    const readItems = document.querySelectorAll('#read-items .notification-item');
+    const totalUnread = unreadItems.length;
+    const totalRead = readItems.length;
+
+    // 更新未读数量
+    document.getElementById('unread-count').textContent = totalUnread;
+    document.getElementById('unread-badge').textContent = totalUnread;
+
+    // 更新已读数量
+    document.getElementById('read-badge').textContent = totalRead;
+
+    // 如果没有通知，显示空状态
+    const emptyState = document.getElementById('empty-state');
+    const notificationList = document.getElementById('notification-list');
+
+    if (totalUnread === 0 && totalRead === 0) {
+      notificationList.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+    } else {
+      notificationList.classList.remove('hidden');
+      emptyState.classList.add('hidden');
+    }
+
+    // 如果未读部分没有通知了，隐藏未读部分
+    const unreadSection = document.getElementById('unread-section');
+    if (totalUnread === 0) {
+      unreadSection.classList.add('hidden');
+    } else {
+      unreadSection.classList.remove('hidden');
+    }
+  }
+
+  // 点击通知项查看详情
+  function openNotificationDetailPage(element) {
+    // 获取通知数据
+    const id = element.getAttribute('data-id');
+    const title = element.getAttribute('data-title');
+    const content = element.getAttribute('data-content');
+    const type = element.getAttribute('data-type');
+    const time = element.getAttribute('data-time');
+    const details = element.getAttribute('data-details');
+
+    // 获取通知类型对应的徽章样式
+    const badgeClasses = {
+      'project': 'bg-blue-100 text-blue-800',
+      'system': 'bg-yellow-100 text-yellow-800',
+      'announcement': 'bg-green-100 text-green-800',
+      'activity': 'bg-purple-100 text-purple-800',
+      'audit': 'bg-red-100 text-red-800'
+    };
+
+    const typeTexts = {
+      'project': '项目审核',
+      'system': '系统通知',
+      'announcement': '公告',
+      'activity': '活动',
+      'audit': '审核'
+    };
+
+    const badgeClass = badgeClasses[type] || 'bg-gray-100 text-gray-800';
+    const typeText = typeTexts[type] || '通知';
+
+    // 创建详情弹窗
+    const detailModal = document.createElement('div');
+    detailModal.id = 'notification-detail-modal';
+    detailModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+
+    detailModal.innerHTML = `
+      <div class="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <div class="flex items-center">
+                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium mr-2 ${badgeClass}">
+                  ${typeText}
+                </span>
+                <h3 class="text-xl font-bold text-gray-800">通知详情</h3>
+              </div>
+              <p class="text-gray-500 text-sm mt-1">${time}</p>
+            </div>
+            <button id="close-detail-modal" class="text-gray-500 hover:text-gray-700">
+              <i class="fa-solid fa-times text-xl"></i>
+            </button>
+          </div>
+
+          <div class="border-t border-gray-200 pt-4 mb-6">
+            <h4 class="text-lg font-semibold text-gray-800 mb-2">${title}</h4>
+            <div class="text-gray-700 bg-gray-50 p-4 rounded-lg mt-4">
+              ${content}
+            </div>
+          </div>
+
+          <!-- 详情内容 -->
+          <div class="space-y-4">
+            <div>
+              <h5 class="text-sm font-semibold text-gray-700 mb-2">详细信息</h5>
+              <div class="bg-blue-50 p-4 rounded-lg">
+                ${details || '暂无更多详细信息'}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(detailModal);
+
+    // 添加关闭事件
+    const closeBtn = detailModal.querySelector('#close-detail-modal');
+
+    closeBtn.addEventListener('click', () => {
+      document.body.removeChild(detailModal);
+    });
+
+    detailModal.addEventListener('click', (e) => {
+      if (e.target === detailModal) {
+        document.body.removeChild(detailModal);
+      }
+    });
+
+    // ESC键关闭
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.getElementById('notification-detail-modal')) {
+        document.body.removeChild(detailModal);
+      }
+    });
+
+    // 如果是未读通知，标记为已读
+    const dot = element.querySelector('.unread-dot');
+    if (dot) {
+      markAsRead(element);
+    }
+  }
+
+  // 将通知标记为已读的函数
+  function markAsRead(notificationItem) {
+    const id = notificationItem.getAttribute('data-id');
+
+    if (!id) return;
+
+    // 应用已读样式
+    applyReadStyle(notificationItem);
+
+    // 保存状态
+    saveNotificationStatus(id, true);
+
+    // 移动到已读列表
+    const readItems = document.getElementById('read-items');
+    const unreadItems = document.getElementById('unread-items');
+
+    if (notificationItem.parentElement === unreadItems) {
+      unreadItems.removeChild(notificationItem);
+      readItems.appendChild(notificationItem);
+    }
+
+    // 更新计数
+    updateNotificationCount();
+  }
+
+  // 标记为已读功能（点击单个通知）
+  document.querySelectorAll('.notification-item').forEach(item => {
+    item.addEventListener('click', function() {
+      const dot = this.querySelector('.unread-dot');
+      if (dot) {
+        // 标记为已读
+        markAsRead(this);
+      }
+    });
+  });
+
+  // 全部标记为已读
+  document.getElementById('mark-all-read').addEventListener('click', function() {
+    const unreadItems = document.querySelectorAll('#unread-items .notification-item');
+    const readItems = document.getElementById('read-items');
+
+    unreadItems.forEach(item => {
+      // 标记为已读
+      markAsRead(item);
+
+      // 保存状态
+      const id = item.getAttribute('data-id');
+      if (id) {
+        saveNotificationStatus(id, true);
+      }
+
+      // 移动到已读列表
+      readItems.appendChild(item);
+    });
+
+    // 更新计数
+    updateNotificationCount();
+  });
+
+  // 清空所有通知
+  document.getElementById('clear-all').addEventListener('click', function() {
+    if (confirm('确定要清空所有通知吗？此操作不可撤销。')) {
+      // 清空未读列表
+      const unreadItems = document.getElementById('unread-items');
+      unreadItems.innerHTML = '';
+
+      // 清空已读列表
+      const readItems = document.getElementById('read-items');
+      readItems.innerHTML = '';
+
+      // 清除本地存储状态
+      localStorage.removeItem(NOTIFICATION_STORAGE_KEY);
+
+      // 更新计数
+      updateNotificationCount();
+    }
+  });
+
+  // 监听来自主页面的消息
+  window.addEventListener('message', function(e) {
+    if (e.data.type === 'notificationStatusUpdated') {
+      const id = e.data.id;
+      const isRead = e.data.read;
+
+      // 找到对应的通知项
+      const notificationItem = document.querySelector(`.notification-item[data-id="${id}"]`);
+      if (notificationItem) {
+        if (isRead) {
+          // 应用已读样式
+          applyReadStyle(notificationItem);
+
+          // 移动到已读列表
+          const readItems = document.getElementById('read-items');
+          const unreadItems = document.getElementById('unread-items');
+
+          if (notificationItem.parentElement === unreadItems) {
+            unreadItems.removeChild(notificationItem);
+            readItems.appendChild(notificationItem);
+          }
+        } else {
+          // 应用未读样式（如果需要的话）
+          // 这里可以根据需要实现未读样式的恢复
+        }
+
+        // 更新计数
+        updateNotificationCount();
+      }
+    }
+  });
+
+  // 初始化计数和状态
+  document.addEventListener('DOMContentLoaded', function() {
+    updateNotificationCount();
+    initNotificationStatus();
+  });
+</script>
+</body>
+</html>

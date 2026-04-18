@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DVP库</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+    }
+    body {
+      background-color: #f5f7fa;
+      color: #333;
+      padding: 30px;
+    }
+    .main-content {
+      max-width: 1800px;
+      margin: 0 auto;
+    }
+    .page-title {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #2f4050;
+      font-weight: 600;
+    }
+    .filter-container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    .filter-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #2f4050;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e6e6e6;
+    }
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+      justify-content: flex-start;
+      margin-bottom: 10px;
+    }
+    .search-wrapper {
+      position: relative;
+      flex: 1;
+      min-width: 200px;
+      max-width: 300px;
+    }
+    .search-input {
+      width: 100%;
+      padding: 10px 15px 10px 40px;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      font-size: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: all 0.3s;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: #165DFF;
+      box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.1);
+    }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+      font-size: 16px;
+    }
+    .filter-select, .date-input {
+      padding: 10px 15px;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      font-size: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: all 0.3s;
+      min-width: 180px;
+    }
+    .filter-select:focus, .date-input:focus {
+      outline: none;
+      border-color: #165DFF;
+      box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.1);
+    }
+    .date-label {
+      font-size: 14px;
+      color: #666;
+      margin-right: 8px;
+      white-space: nowrap;
+    }
+    .date-range {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* 修改：将操作按钮组移到右下角 */
+    .filter-actions {
+      display: flex;
+      gap: 10px;
+      margin-left: auto;
+      flex-shrink: 0;
+      justify-content: flex-end;
+      width: 100%;
+      margin-top: 15px;
+    }
+    .add-btn {
+      padding: 10px 24px;
+      background-color: #00B42A;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .add-btn:hover {
+      background-color: #009922;
+    }
+    .batch-delete-btn {
+      padding: 10px 24px;
+      background-color: #F53F3F;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .batch-delete-btn:hover {
+      background-color: #d92d2d;
+    }
+    .search-btn {
+      padding: 10px 24px;
+      background-color: #165DFF;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .search-btn:hover {
+      background-color: #0D52D9;
+    }
+    .reset-btn {
+      padding: 10px 24px;
+      background-color: #f5f7fa;
+      color: #666;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .reset-btn:hover {
+      background-color: #e8eaed;
+      border-color: #d9d9d9;
+    }
+
+    /* 表格容器 - 默认隐藏 */
+    .table-container {
+      position: relative;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      display: none;
+    }
+
+    /* 修改：滚动容器高度修改为与技术标准库相同（800px） */
+    .scrollable-content {
+      overflow-x: auto;
+      overflow-y: auto;
+      max-height: 800px;
+      scrollbar-width: thin;
+      scrollbar-color: #c1c1c1 #f5f5f5;
+    }
+    .scrollable-content::-webkit-scrollbar {
+      height: 8px;
+      width: 8px;
+    }
+    .scrollable-content::-webkit-scrollbar-track {
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+    .scrollable-content::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+    .scrollable-content::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+
+    /* 表格样式 */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      min-width: 1500px;
+    }
+    .data-table thead {
+      background-color: #f8f9fa;
+      color: #2f4050;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    .data-table th, .data-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #e6e6e6;
+      font-size: 14px;
+      vertical-align: middle;
+      line-height: 1.5;
+      height: 60px;
+      min-height: 60px;
+      max-height: 60px;
+      overflow: hidden;
+    }
+    .data-table th {
+      font-weight: 600;
+      height: 48px;
+      min-height: 48px;
+    }
+    .data-table tbody tr {
+      height: 60px;
+      min-height: 60px;
+      max-height: 60px;
+    }
+    .data-table tbody tr:hover {
+      background-color: #fafbfc;
+      cursor: default;
+    }
+
+    /* 设置各列宽度 */
+    .data-table th:nth-child(1),
+    .data-table td:nth-child(1) {
+      width: 60px;
+      min-width: 60px;
+      max-width: 60px;
+      text-align: center;
+    }
+    .data-table th:nth-child(2),
+    .data-table td:nth-child(2) {
+      width: 140px;
+      min-width: 140px;
+      max-width: 140px;
+    }
+    .data-table th:nth-child(3),
+    .data-table td:nth-child(3) {
+      width: 180px;
+      min-width: 180px;
+      max-width: 180px;
+    }
+    .data-table th:nth-child(4),
+    .data-table td:nth-child(4) {
+      width: 180px;
+      min-width: 180px;
+      max-width: 180px;
+    }
+    .data-table th:nth-child(5),
+    .data-table td:nth-child(5) {
+      width: 150px;
+      min-width: 150px;
+      max-width: 150px;
+    }
+    .data-table th:nth-child(6),
+    .data-table td:nth-child(6) {
+      width: 180px;
+      min-width: 180px;
+      max-width: 180px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.5;
+    }
+    .data-table th:nth-child(7),
+    .data-table td:nth-child(7) {
+      width: 120px;
+      min-width: 120px;
+      max-width: 120px;
+    }
+    .data-table th:nth-child(8),
+    .data-table td:nth-child(8) {
+      width: 100px;
+      min-width: 100px;
+      max-width: 100px;
+      text-align: center;
+    }
+    .data-table th:nth-child(9),
+    .data-table td:nth-child(9) {
+      width: 150px;
+      min-width: 150px;
+      max-width: 150px;
+    }
+    .data-table th:nth-child(10),
+    .data-table td:nth-child(10) {
+      width: 120px;
+      min-width: 120px;
+      max-width: 120px;
+    }
+    .data-table th:nth-child(11),
+    .data-table td:nth-child(11) {
+      width: 120px;
+      min-width: 120px;
+      max-width: 120px;
+    }
+    .data-table th:nth-child(12),
+    .data-table td:nth-child(12) {
+      width: 100px;
+      min-width: 100px;
+      max-width: 100px;
+    }
+    .data-table th:nth-child(13),
+    .data-table td:nth-child(13) {
+      width: 120px;
+      min-width: 120px;
+      max-width: 120px;
+    }
+    /* 操作列 */
+    .data-table th:nth-child(14),
+    .data-table td:nth-child(14) {
+      width: 80px;
+      min-width: 80px;
+      max-width: 80px;
+      text-align: center;
+      position: sticky;
+      right: 0;
+      background-color: #fff;
+      z-index: 3;
+      border-left: 1px solid #e6e6e6;
+    }
+    .data-table thead th:nth-child(14) {
+      background-color: #f8f9fa;
+      z-index: 6;
+    }
+
+    /* 试验状态标签 */
+    .status-tag {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      display: inline-block;
+      line-height: 1.5;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    .status-tag.not-started {
+      background-color: #f0f0f0;
+      color: #666;
+    }
+    .status-tag.in-progress {
+      background-color: #e8f4ff;
+      color: #165dff;
+    }
+    .status-tag.completed {
+      background-color: #e8f8f0;
+      color: #00b42a;
+    }
+    .status-tag.delayed {
+      background-color: #fef0f0;
+      color: #f53f3f;
+    }
+    .status-tag.cancelled {
+      background-color: #f5f5f5;
+      color: #909399;
+    }
+
+    .operation-item {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-height: 36px;
+      flex-wrap: nowrap;
+    }
+    .op-btn {
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: transparent;
+      flex-shrink: 0;
+      flex: 0 0 30px;
+    }
+    .op-edit {
+      color: #165DFF;
+    }
+    .op-edit:hover {
+      background-color: #e8f4fd;
+    }
+    .op-delete {
+      color: #F53F3F;
+    }
+    .op-delete:hover {
+      background-color: #fef0f0;
+    }
+
+    /* 分页样式 - 默认隐藏 */
+    .pagination {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+      gap: 10px;
+    }
+    .pagination-btn {
+      padding: 5px 12px;
+      border: 1px solid #e6e6e6;
+      border-radius: 4px;
+      background-color: #fff;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .pagination-btn.active {
+      background-color: #165DFF;
+      color: #fff;
+      border-color: #165DFF;
+    }
+    .pagination-btn:disabled {
+      cursor: not-allowed;
+      color: #ccc;
+      border-color: #eee;
+    }
+
+    /* 弹窗样式 - 修改部分 */
+    .modal-mask {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      display: none;
+    }
+    .modal-container {
+      background-color: #fff;
+      border-radius: 8px;
+      width: 600px;
+      max-width: 90%;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+
+    /* 弹窗头部固定 */
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e6e6e6;
+      background-color: #fff;
+      flex-shrink: 0;
+    }
+
+    /* 弹窗主体可滚动 */
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      flex-grow: 1;
+      max-height: calc(85vh - 120px);
+    }
+
+    /* 弹窗底部固定 */
+    .modal-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      padding: 16px 20px;
+      border-top: 1px solid #e6e6e6;
+      background-color: #fff;
+      flex-shrink: 0;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2f4050;
+    }
+    .modal-close {
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      color: #999;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .modal-close:hover {
+      color: #333;
+    }
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    /* 表单行布局 */
+    .form-row {
+      display: flex;
+      gap: 15px;
+    }
+    .form-item {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex: 1;
+    }
+    .form-label {
+      font-size: 14px;
+      color: #666;
+      font-weight: 500;
+    }
+    .form-input, .form-select, .form-textarea {
+      padding: 10px 15px;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      font-size: 14px;
+      width: 100%;
+    }
+    .form-textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: #165DFF;
+      box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.1);
+    }
+    .form-required {
+      color: #F53F3F;
+      margin-left: 4px;
+    }
+
+    .modal-cancel {
+      padding: 8px 20px;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      background-color: #f5f7fa;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .modal-cancel:hover {
+      background-color: #e8eaed;
+    }
+    .modal-submit {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 8px;
+      background-color: #165DFF;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .modal-submit:hover {
+      background-color: #0D52D9;
+    }
+    .error-tip {
+      color: #F53F3F;
+      font-size: 12px;
+      display: none;
+    }
+    .batch-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    /* 详情弹窗也做相应调整 */
+    .detail-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      display: none;
+    }
+    .detail-content {
+      background-color: #fff;
+      border-radius: 8px;
+      width: 500px;
+      max-width: 90%;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      border-bottom: 1px solid #e6e6e6;
+      flex-shrink: 0;
+    }
+    .detail-body {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #333;
+      padding: 20px 24px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+    .detail-item {
+      margin-bottom: 15px;
+    }
+    .detail-label {
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    .detail-value {
+      color: #333;
+      word-break: break-word;
+    }
+    .detail-close {
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      color: #999;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .detail-close:hover {
+      color: #333;
+    }
+
+    .report-link {
+      color: #165DFF;
+      text-decoration: none;
+    }
+    .report-link:hover {
+      text-decoration: underline;
+    }
+
+    /* 可点击单元格样式 - 修改为与特性库相同 */
+    .clickable-cell {
+      cursor: pointer;
+      position: relative;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .clickable-cell:hover {
+      background-color: #f0f9ff !important;
+    }
+    .clickable-cell:hover::after {
+      content: '点击查看详情';
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: #165DFF;
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      opacity: 0.9;
+      z-index: 10;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    /* 省略提示 */
+    .ellipsis-cell {
+      position: relative;
+    }
+
+    /* 功能描述单元格特殊样式 */
+    .desc-cell.clickable-cell {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+    }
+    .desc-cell.clickable-cell:hover::after {
+      content: '点击查看完整描述';
+      background-color: #165DFF;
+    }
+
+    /* 操作按钮容器 - 防止点击行时触发操作按钮 */
+    .operation-item {
+      pointer-events: auto;
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 768px) {
+      .filter-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .search-wrapper {
+        max-width: 100%;
+      }
+      .filter-actions {
+        justify-content: center;
+        margin-left: 0;
+        margin-top: 10px;
+        flex-wrap: wrap;
+        width: 100%;
+      }
+      .date-range {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 5px;
+      }
+      .scrollable-content {
+        max-height: 400px;
+      }
+      .data-table {
+        min-width: 1400px;
+      }
+      .form-row {
+        flex-direction: column;
+      }
+      .modal-container {
+        width: 95%;
+        max-height: 90vh;
+      }
+      .detail-content {
+        width: 95%;
+        max-height: 90vh;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="main-content">
+  <!-- 修改：移除FMEA管理系统前缀 -->
+  <div class="page-title">DVP库</div>
+
+  <!-- 筛选区域 -->
+  <div class="filter-container">
+    <div class="filter-title">筛选条件</div>
+    <div class="filter-row">
+      <!-- 主要信息搜索 -->
+      <div class="search-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" class="search-input" id="searchKeyword" placeholder="搜索：DVP编号/试验项目/名称...">
+      </div>
+
+      <!-- 试验类型筛选 -->
+      <select class="filter-select" id="measureStatusFilter">
+        <option value="">试验类型</option>
+        <option value="性能试验">性能试验</option>
+        <option value="可靠性试验">可靠性试验</option>
+        <option value="耐久性试验">耐久性试验</option>
+        <option value="环境试验">环境试验</option>
+        <option value="安全试验">安全试验</option>
+        <option value="法规试验">法规试验</option>
+        <option value="功能试验">功能试验</option>
+        <option value="其他">其他</option>
+      </select>
+
+      <!-- 试验状态筛选 -->
+      <select class="filter-select" id="statusFilter">
+        <option value="">试验状态</option>
+        <option value="未开始">未开始</option>
+        <option value="进行中">进行中</option>
+        <option value="已完成">已完成</option>
+        <option value="已延期">已延期</option>
+        <option value="已取消">已取消</option>
+      </select>
+    </div>
+
+    <!-- 操作按钮 - 现在位于搜索部分右下角 -->
+    <div class="filter-actions">
+      <button class="add-btn" id="addDvpBtn">
+        <i class="fas fa-plus mr-1"></i> 新增DVP
+      </button>
+      <button class="batch-delete-btn" id="batchDeleteBtn">
+        <i class="fas fa-trash mr-1"></i> 批量删除
+      </button>
+      <button class="search-btn" id="searchBtn">
+        <i class="fas fa-search mr-1"></i> 搜索
+      </button>
+      <button class="reset-btn" id="resetBtn">
+        <i class="fas fa-refresh mr-1"></i> 重置
+      </button>
+    </div>
+  </div>
+
+  <!-- DVP表格 -->
+  <div class="table-container" id="tableContainer">
+    <div class="scrollable-content" id="scrollableContent">
+      <table class="data-table" id="dataTable">
+        <thead>
+        <tr>
+          <th><input type="checkbox" class="batch-checkbox" id="checkAll"></th>
+          <th>DVP编号</th>
+          <th>试验项目</th>
+          <th>试验名称</th>
+          <th>试验方法</th>
+          <th>目标要求</th>
+          <th>试验类型</th>
+          <th>样品数量</th>
+          <th>试验地址</th>
+          <th>负责人</th>
+          <th>计划开始时间</th>
+          <th>试验状态</th>
+          <th>试验报告</th>
+          <th>操作</th>
+        </tr>
+        </thead>
+        <tbody id="dataTableBody">
+        <!-- 数据表格内容由JS渲染 -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 分页 -->
+  <div class="pagination" id="paginationContainer">
+    <button class="pagination-btn" id="prevPageBtn">上一页</button>
+    <div id="pageNumberContainer">
+      <button class="pagination-btn active">1</button>
+    </div>
+    <button class="pagination-btn" id="nextPageBtn">下一页</button>
+  </div>
+</div>
+
+<!-- 新增/编辑DVP弹窗 - 结构修改 -->
+<div class="modal-mask" id="dvpModal">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modalTitle">新增DVP</h3>
+      <button class="modal-close" id="closeModalBtn">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form class="modal-form" id="dvpForm">
+        <input type="hidden" id="editDvpCode">
+        <div class="form-row">
+          <div class="form-item">
+            <label class="form-label">试验项目 <span class="form-required">*</span></label>
+            <input type="text" class="form-input" id="testProject" placeholder="请输入试验项目">
+            <div class="error-tip" id="projectError">试验项目不能为空</div>
+          </div>
+          <div class="form-item">
+            <label class="form-label">试验名称 <span class="form-required">*</span></label>
+            <input type="text" class="form-input" id="testName" placeholder="请输入试验名称">
+            <div class="error-tip" id="nameError">试验名称不能为空</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item">
+            <label class="form-label">试验类型 <span class="form-required">*</span></label>
+            <select class="form-select" id="testType">
+              <option value="">请选择试验类型</option>
+              <option value="性能试验">性能试验</option>
+              <option value="可靠性试验">可靠性试验</option>
+              <option value="耐久性试验">耐久性试验</option>
+              <option value="环境试验">环境试验</option>
+              <option value="安全试验">安全试验</option>
+              <option value="法规试验">法规试验</option>
+              <option value="功能试验">功能试验</option>
+              <option value="其他">其他</option>
+            </select>
+            <div class="error-tip" id="typeError">请选择试验类型</div>
+          </div>
+          <div class="form-item">
+            <label class="form-label">样品数量 <span class="form-required">*</span></label>
+            <input type="number" class="form-input" id="sampleQuantity" placeholder="请输入样品数量" min="1">
+            <div class="error-tip" id="quantityError">请输入有效的样品数量</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item">
+            <label class="form-label">计划开始时间 <span class="form-required">*</span></label>
+            <input type="date" class="form-input" id="planStartDate">
+            <div class="error-tip" id="timeError">请选择计划开始时间</div>
+          </div>
+          <div class="form-item">
+            <label class="form-label">试验状态 <span class="form-required">*</span></label>
+            <select class="form-select" id="testStatus">
+              <option value="">请选择试验状态</option>
+              <option value="未开始">未开始</option>
+              <option value="进行中">进行中</option>
+              <option value="已完成">已完成</option>
+              <option value="已延期">已延期</option>
+              <option value="已取消">已取消</option>
+            </select>
+            <div class="error-tip" id="testStatusError">请选择试验状态</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item">
+            <label class="form-label">试验地址</label>
+            <input type="text" class="form-input" id="testAddress" placeholder="请输入试验地址">
+          </div>
+          <div class="form-item">
+            <label class="form-label">负责人 <span class="form-required">*</span></label>
+            <input type="text" class="form-input" id="responsiblePerson" placeholder="请输入负责人姓名">
+            <div class="error-tip" id="responsiblePersonError">负责人不能为空</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item">
+            <label class="form-label">创建时间</label>
+            <input type="date" class="form-input" id="createTime" disabled>
+          </div>
+          <div class="form-item">
+            <label class="form-label">最近更新时间</label>
+            <input type="date" class="form-input" id="lastUpdateTime" disabled>
+          </div>
+        </div>
+        <div class="form-item">
+          <label class="form-label">试验方法</label>
+          <textarea class="form-textarea" id="testMethod" placeholder="请输入试验方法描述"></textarea>
+        </div>
+        <div class="form-item">
+          <label class="form-label">目标要求</label>
+          <textarea class="form-textarea" id="targetRequirement" placeholder="请输入目标要求描述"></textarea>
+        </div>
+        <div class="form-item">
+          <label class="form-label">试验报告</label>
+          <input type="text" class="form-input" id="testReport" placeholder="请输入试验报告链接或说明">
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="modal-cancel" id="cancelModalBtn">取消</button>
+      <button type="button" class="modal-submit" id="submitModalBtn">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 详情查看弹窗 - 结构修改 -->
+<div class="detail-modal" id="detailModal">
+  <div class="detail-content">
+    <div class="detail-header">
+      <h3 class="detail-title">DVP详情</h3>
+      <button class="detail-close" id="closeDetailBtn">&times;</button>
+    </div>
+    <div class="detail-body" id="detailBody">
+      <!-- 详情内容由JS动态填充 -->
+    </div>
+  </div>
+</div>
+
+<script>
+  // 全局变量
+  let dvpItems = JSON.parse(localStorage.getItem('dvpItems') || '[]');
+  let currentPage = 1;
+  const pageSize = 10;
+  let filteredItems = [...dvpItems];
+
+  // 页面加载初始化
+  document.addEventListener('DOMContentLoaded', function() {
+    renderDvpTable();
+    bindEventListeners();
+    renderPagination();
+    bindCellClickEvents();
+  });
+
+  // 生成唯一DVP编号
+  function generateDvpCode() {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const count = dvpItems.length + 1;
+    return `DVP${year%100}${month}${day}${String(count).padStart(3, '0')}`;
+  }
+
+  // 截断文本函数
+  function truncateText(text, maxLength = 25) {
+    if (!text || typeof text !== 'string') return '';
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  }
+
+  // 表单验证
+  function validateForm() {
+    let isValid = true;
+    const testProject = document.getElementById('testProject').value.trim();
+    const testName = document.getElementById('testName').value.trim();
+    const testType = document.getElementById('testType').value;
+    const sampleQuantity = document.getElementById('sampleQuantity').value;
+    const planStartDate = document.getElementById('planStartDate').value;
+    const testStatus = document.getElementById('testStatus').value;
+    const responsiblePerson = document.getElementById('responsiblePerson').value.trim();
+
+    document.querySelectorAll('.error-tip').forEach(tip => {
+      tip.style.display = 'none';
+    });
+
+    if (!testProject) {
+      document.getElementById('projectError').style.display = 'block';
+      isValid = false;
+    }
+
+    if (!testName) {
+      document.getElementById('nameError').style.display = 'block';
+      isValid = false;
+    }
+
+    if (!testType) {
+      document.getElementById('typeError').style.display = 'block';
+      isValid = false;
+    }
+
+    if (!sampleQuantity || parseInt(sampleQuantity) <= 0) {
+      document.getElementById('quantityError').style.display = 'block';
+      isValid = false;
+    }
+
+    if (!planStartDate) {
+      document.getElementById('timeError').style.display = 'block';
+      isValid = false;
+    }
+
+    if (!testStatus) {
+      document.getElementById('testStatusError').style.display = 'block';
+      isValid = false;
+    }
+
+    if (!responsiblePerson) {
+      document.getElementById('responsiblePersonError').style.display = 'block';
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  // 打开新增/编辑弹窗
+  function openModal(type, item = null) {
+    const modal = document.getElementById('dvpModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const editDvpCode = document.getElementById('editDvpCode');
+
+    document.getElementById('dvpForm').reset();
+    document.querySelectorAll('.error-tip').forEach(tip => tip.style.display = 'none');
+
+    if (type === 'add') {
+      modalTitle.textContent = '新增DVP';
+      editDvpCode.value = '';
+      document.getElementById('planStartDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('createTime').value = new Date().toISOString().split('T')[0];
+      document.getElementById('lastUpdateTime').value = new Date().toISOString().split('T')[0];
+      document.getElementById('responsiblePerson').value = '';
+    } else if (type === 'edit') {
+      modalTitle.textContent = '编辑DVP';
+      editDvpCode.value = item.dvpCode;
+      document.getElementById('testProject').value = item.testProject;
+      document.getElementById('testName').value = item.testName;
+      document.getElementById('testMethod').value = item.testMethod || '';
+      document.getElementById('targetRequirement').value = item.targetRequirement || '';
+      document.getElementById('testType').value = item.testType;
+      document.getElementById('sampleQuantity').value = item.sampleQuantity;
+      document.getElementById('testAddress').value = item.testAddress || '';
+      document.getElementById('responsiblePerson').value = item.responsiblePerson || '';
+      document.getElementById('planStartDate').value = item.PlanStartDate;
+      document.getElementById('testStatus').value = item.testStatus;
+      document.getElementById('testReport').value = item.testReport || '';
+      document.getElementById('createTime').value = item.createTime || '';
+      document.getElementById('lastUpdateTime').value = item.lastUpdateTime || '';
+    }
+
+    modal.style.display = 'flex';
+  }
+
+  // 关闭弹窗
+  function closeModal() {
+    document.getElementById('dvpModal').style.display = 'none';
+  }
+
+  // 新增DVP
+  function addDvp() {
+    const currentDate = new Date().toISOString().split('T')[0];
+    const responsiblePerson = document.getElementById('responsiblePerson').value.trim();
+
+    const newItem = {
+      dvpCode: generateDvpCode(),
+      testProject: document.getElementById('testProject').value.trim(),
+      testName: document.getElementById('testName').value.trim(),
+      testMethod: document.getElementById('testMethod').value.trim(),
+      targetRequirement: document.getElementById('targetRequirement').value.trim(),
+      testType: document.getElementById('testType').value,
+      sampleQuantity: parseInt(document.getElementById('sampleQuantity').value),
+      testAddress: document.getElementById('testAddress').value.trim(),
+      responsiblePerson: responsiblePerson,
+      planStartDate: document.getElementById('planStartDate').value,
+      testStatus: document.getElementById('testStatus').value,
+      testReport: document.getElementById('testReport').value.trim(),
+      createTime: currentDate,
+      lastUpdateTime: currentDate
+    };
+
+    dvpItems.push(newItem);
+    localStorage.setItem('dvpItems', JSON.stringify(dvpItems));
+    filteredItems = [...dvpItems];
+    closeModal();
+    renderDvpTable();
+    renderPagination();
+  }
+
+  // 编辑DVP
+  function updateDvp() {
+    const dvpCode = document.getElementById('editDvpCode').value;
+    const index = dvpItems.findIndex(p => p.dvpCode === dvpCode);
+
+    if (index !== -1) {
+      dvpItems[index] = {
+        ...dvpItems[index],
+        testProject: document.getElementById('testProject').value.trim(),
+        testName: document.getElementById('testName').value.trim(),
+        testMethod: document.getElementById('testMethod').value.trim(),
+        targetRequirement: document.getElementById('targetRequirement').value.trim(),
+        testType: document.getElementById('testType').value,
+        sampleQuantity: parseInt(document.getElementById('sampleQuantity').value),
+        testAddress: document.getElementById('testAddress').value.trim(),
+        responsiblePerson: document.getElementById('responsiblePerson').value.trim(),
+        planStartDate: document.getElementById('planStartDate').value,
+        testStatus: document.getElementById('testStatus').value,
+        testReport: document.getElementById('testReport').value.trim(),
+        lastUpdateTime: new Date().toISOString().split('T')[0]
+      };
+      localStorage.setItem('dvpItems', JSON.stringify(dvpItems));
+      filteredItems = [...dvpItems];
+      closeModal();
+      renderDvpTable();
+    }
+  }
+
+  // 显示DVP详情
+  function showDvpDetail(item) {
+    const detailModal = document.getElementById('detailModal');
+    const detailBody = document.getElementById('detailBody');
+
+    let reportHtml = '无';
+    if (item.testReport) {
+      if (item.testReport.includes('.pdf') || item.testReport.includes('http')) {
+        reportHtml = `<a href="${item.testReport}" class="report-link" target="_blank">查看报告</a>`;
+      } else {
+        reportHtml = item.testReport;
+      }
+    }
+
+    detailBody.innerHTML = `
+      <div class="detail-item">
+        <div class="detail-label">DVP编号</div>
+        <div class="detail-value">${item.dvpCode}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">试验项目</div>
+        <div class="detail-value">${item.testProject}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">试验名称</div>
+        <div class="detail-value">${item.testName}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">试验类型</div>
+        <div class="detail-value">${item.testType}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">试验方法</div>
+        <div class="detail-value">${item.testMethod || '无'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">目标要求</div>
+        <div class="detail-value">${item.targetRequirement || '无'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">样品数量</div>
+        <div class="detail-value">${item.sampleQuantity}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">试验地址</div>
+        <div class="detail-value">${item.testAddress || '未指定'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">负责人</div>
+        <div class="detail-value">${item.responsiblePerson || '未指定'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">计划开始时间</div>
+        <div class="detail-value">${item.PlanStartDate}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">试验状态</div>
+        <div class="detail-value">${item.testStatus}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">试验报告</div>
+        <div class="detail-value">${reportHtml}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">创建时间</div>
+        <div class="detail-value">${item.createTime}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">最近更新时间</div>
+        <div class="detail-value">${item.lastUpdateTime}</div>
+      </div>
+    `;
+
+    detailModal.style.display = 'flex';
+  }
+
+  // 关闭详情弹窗
+  function closeDetailModal() {
+    document.getElementById('detailModal').style.display = 'none';
+  }
+
+  // 渲染DVP表格
+  function renderDvpTable() {
+    const dataTableBody = document.getElementById('dataTableBody');
+    const tableContainer = document.getElementById('tableContainer');
+
+    dataTableBody.innerHTML = '';
+
+    if (filteredItems.length === 0) {
+      tableContainer.style.display = 'none';
+      return;
+    }
+
+    tableContainer.style.display = 'block';
+
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedItems = filteredItems.slice(startIndex, endIndex);
+
+    if (paginatedItems.length === 0) {
+      dataTableBody.innerHTML = '';
+      return;
+    }
+
+    paginatedItems.forEach((item, index) => {
+      let testStatusClass = '';
+      switch (item.testStatus) {
+        case '未开始': testStatusClass = 'not-started'; break;
+        case '进行中': testStatusClass = 'in-progress'; break;
+        case '已完成': testStatusClass = 'completed'; break;
+        case '已延期': testStatusClass = 'delayed'; break;
+        case '已取消': testStatusClass = 'cancelled'; break;
+        default: testStatusClass = '';
+      }
+
+      const truncatedMethod = truncateText(item.testMethod, 25);
+      const truncatedRequirement = truncateText(item.targetRequirement, 25);
+
+      const row = document.createElement('tr');
+      row.setAttribute('data-index', index);
+      row.setAttribute('data-dvp', item.dvpCode);
+      row.innerHTML = `
+        <td><input type="checkbox" class="batch-checkbox" data-dvp="${item.dvpCode}"></td>
+        <td class="clickable-cell">
+          ${item.dvpCode}
+        </td>
+        <td class="clickable-cell">
+          ${item.testProject}
+        </td>
+        <td class="clickable-cell">
+          ${item.testName}
+        </td>
+        <td class="clickable-cell desc-cell" title="${item.testMethod || '无'}">
+          ${truncatedMethod || '无'}
+        </td>
+        <td class="clickable-cell desc-cell" title="${item.targetRequirement || '无'}">
+          ${truncatedRequirement || '无'}
+        </td>
+        <td class="clickable-cell">
+          ${item.testType}
+        </td>
+        <td class="clickable-cell">
+          ${item.sampleQuantity}
+        </td>
+        <td class="clickable-cell">
+          ${item.testAddress || '未指定'}
+        </td>
+        <td class="clickable-cell">
+          ${item.responsiblePerson || '未指定'}
+        </td>
+        <td class="clickable-cell">
+          ${item.PlanStartDate}
+        </td>
+        <td><span class="status-tag ${testStatusClass}">${item.testStatus}</span></td>
+        <td>
+          ${item.testReport ?
+              `<a href="${item.testReport}" class="report-link" target="_blank">查看报告</a>` :
+              '无'}
+        </td>
+        <td>
+          <div class="operation-item">
+            <button class="op-btn op-edit" data-dvp="${item.dvpCode}">
+              <i class="fa-solid fa-edit"></i>
+            </button>
+            <button class="op-btn op-delete" data-dvp="${item.dvpCode}">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        </td>
+      `;
+      dataTableBody.appendChild(row);
+    });
+
+    bindOperationBtnEvents();
+    bindCheckboxEvents();
+    bindCellClickEvents();
+  }
+
+  // 绑定单元格点击事件 - 修改为与特性库相同
+  function bindCellClickEvents() {
+    document.querySelectorAll('.clickable-cell').forEach(cell => {
+      cell.onclick = null;
+      cell.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const row = this.closest('tr');
+        if (row) {
+          const dvpCode = row.getAttribute('data-dvp');
+          if (dvpCode) {
+            showDvpDetailByCode(dvpCode);
+          }
+        }
+      });
+    });
+  }
+
+  // 根据DVP编号显示详情
+  function showDvpDetailByCode(dvpCode) {
+    const item = dvpItems.find(p => p.dvpCode === dvpCode);
+    if (item) {
+      showDvpDetail(item);
+    }
+  }
+
+  // 绑定复选框事件
+  function bindCheckboxEvents() {
+    const checkAll = document.getElementById('checkAll');
+    const checkItems = document.querySelectorAll('.batch-checkbox[data-dvp]');
+
+    checkAll.addEventListener('change', function() {
+      checkItems.forEach(item => {
+        item.checked = this.checked;
+      });
+    });
+
+    checkItems.forEach(item => {
+      item.addEventListener('change', function() {
+        const allChecked = Array.from(checkItems).every(i => i.checked);
+        checkAll.checked = allChecked;
+      });
+    });
+  }
+
+  // 批量删除DVP
+  function batchDeleteItems() {
+    const checkedItems = document.querySelectorAll('.batch-checkbox[data-dvp]:checked');
+    if (checkedItems.length === 0) {
+      alert('请选择要删除的DVP！');
+      return;
+    }
+
+    if (confirm(`确认删除选中的${checkedItems.length}个DVP吗？删除后不可恢复！`)) {
+      const deleteCodes = Array.from(checkedItems).map(item => item.getAttribute('data-dvp'));
+      dvpItems = dvpItems.filter(p => !deleteCodes.includes(p.dvpCode));
+      localStorage.setItem('dvpItems', JSON.stringify(dvpItems));
+      filteredItems = [...dvpItems];
+      currentPage = 1;
+      renderDvpTable();
+      renderPagination();
+    }
+  }
+
+  // 渲染分页
+  function renderPagination() {
+    const totalPages = Math.ceil(filteredItems.length / pageSize);
+    const pageContainer = document.getElementById('pageNumberContainer');
+    const prevBtn = document.getElementById('prevPageBtn');
+    const nextBtn = document.getElementById('nextPageBtn');
+    const paginationContainer = document.getElementById('paginationContainer');
+
+    pageContainer.innerHTML = '';
+
+    if (filteredItems.length === 0) {
+      paginationContainer.style.display = 'none';
+      return;
+    }
+
+    paginationContainer.style.display = 'flex';
+
+    for (let i = 1; i <= totalPages; i++) {
+      const pageBtn = document.createElement('button');
+      pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+      pageBtn.textContent = i;
+      pageBtn.addEventListener('click', function() {
+        currentPage = i;
+        renderDvpTable();
+        renderPagination();
+      });
+      pageContainer.appendChild(pageBtn);
+    }
+
+    prevBtn.disabled = currentPage === 1;
+    nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+  }
+
+  // 绑定操作按钮事件
+  function bindOperationBtnEvents() {
+    // 编辑按钮
+    document.querySelectorAll('.op-edit').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const dvpCode = this.getAttribute('data-dvp');
+        const item = dvpItems.find(p => p.dvpCode === dvpCode);
+        if (item) {
+          openModal('edit', item);
+        }
+      });
+    });
+
+    // 删除按钮
+    document.querySelectorAll('.op-delete').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const dvpCode = this.getAttribute('data-dvp');
+        const item = dvpItems.find(p => p.dvpCode === dvpCode);
+        if (confirm(`确认删除DVP【${item.testName}】吗？删除后不可恢复！`)) {
+          dvpItems = dvpItems.filter(p => p.dvpCode !== dvpCode);
+          localStorage.setItem('dvpItems', JSON.stringify(dvpItems));
+          filteredItems = [...dvpItems];
+          const totalPages = Math.ceil(filteredItems.length / pageSize);
+          if (currentPage > totalPages && totalPages > 0) {
+            currentPage = totalPages;
+          } else if (totalPages === 0) {
+            currentPage = 1;
+          }
+          renderDvpTable();
+          renderPagination();
+        }
+      });
+    });
+  }
+
+  // 绑定所有事件监听
+  function bindEventListeners() {
+    // 搜索按钮
+    document.getElementById('searchBtn').addEventListener('click', filterItems);
+    // 搜索框回车
+    document.getElementById('searchKeyword').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') filterItems();
+    });
+    // 重置按钮
+    document.getElementById('resetBtn').addEventListener('click', resetFilters);
+    // 新增DVP按钮
+    document.getElementById('addDvpBtn').addEventListener('click', () => openModal('add'));
+    // 批量删除按钮
+    document.getElementById('batchDeleteBtn').addEventListener('click', batchDeleteItems);
+    // 关闭弹窗按钮
+    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+    document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
+    // 关闭详情弹窗按钮
+    document.getElementById('closeDetailBtn').addEventListener('click', closeDetailModal);
+    // 表单提交
+    document.getElementById('submitModalBtn').addEventListener('click', function() {
+      if (validateForm()) {
+        const editDvpCode = document.getElementById('editDvpCode').value;
+        if (editDvpCode) {
+          updateDvp();
+        } else {
+          addDvp();
+        }
+      }
+    });
+    // 分页按钮
+    document.getElementById('prevPageBtn').addEventListener('click', function() {
+      if (currentPage > 1) {
+        currentPage--;
+        renderDvpTable();
+        renderPagination();
+      }
+    });
+    document.getElementById('nextPageBtn').addEventListener('click', function() {
+      const totalPages = Math.ceil(filteredItems.length / pageSize);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderDvpTable();
+        renderPagination();
+      }
+    });
+  }
+
+  // 多条件筛选
+  function filterItems() {
+    const keyword = document.getElementById('searchKeyword').value.trim().toLowerCase();
+    const testType = document.getElementById('measureStatusFilter').value;
+    const testStatus = document.getElementById('statusFilter').value;
+
+    filteredItems = dvpItems.filter(item => {
+      const matchKeyword = keyword === '' ||
+              item.dvpCode.toLowerCase().includes(keyword) ||
+              item.testProject.toLowerCase().includes(keyword) ||
+              item.testName.toLowerCase().includes(keyword) ||
+              (item.testMethod && item.testMethod.toLowerCase().includes(keyword)) ||
+              (item.targetRequirement && item.targetRequirement.toLowerCase().includes(keyword)) ||
+              (item.responsiblePerson && item.responsiblePerson.toLowerCase().includes(keyword));
+
+      const matchTestType = testType === '' || item.testType === testType;
+
+      const matchTestStatus = testStatus === '' || item.testStatus === testStatus;
+
+      return matchKeyword && matchTestType && matchTestStatus;
+    });
+
+    currentPage = 1;
+    renderDvpTable();
+    renderPagination();
+  }
+
+  // 重置筛选条件
+  function resetFilters() {
+    document.getElementById('searchKeyword').value = '';
+    document.getElementById('measureStatusFilter').value = '';
+    document.getElementById('statusFilter').value = '';
+    filteredItems = [...dvpItems];
+    currentPage = 1;
+    renderDvpTable();
+    renderPagination();
+  }
+</script>
+</body>
+</html>

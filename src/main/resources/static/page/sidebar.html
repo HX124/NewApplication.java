@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .sidebar-item-active {
+        @apply bg-[#1ab394] text-white;
+      }
+      .menu-item {
+        @apply px-5 py-3 cursor-pointer transition-colors text-white text-sm;
+      }
+      .menu-item:hover:not(.sidebar-item-active) {
+        @apply bg-[#384858];
+      }
+    }
+  </style>
+</head>
+<!-- 关键修改：body 改为 flex 布局，垂直列，占满视口高度 -->
+<body class="bg-[#2f4050] text-white flex flex-col h-screen">
+<!-- 系统logo -->
+<div class="h-auto py-3 text-center border-b border-[#444] mb-5">
+  <span class="text-white text-lg font-bold">FMEA管理系统</span>
+</div>
+
+<!-- 导航菜单：flex-1 占满中间剩余空间，保持滚动 -->
+<nav class="flex-1 overflow-y-auto">
+  <ul class="space-y-0">
+    <!-- 首页 -->
+    <li>
+      <a href="javascript:;" data-page="home.html" class="sidebar-item-active menu-item flex items-center">
+        <i class="fa-solid fa-house w-5 h-5 mr-3"></i>
+        首页
+      </a>
+    </li>
+    <!-- 项目管理 -->
+    <li>
+      <a href="javascript:;" data-page="seek FMEA.html" class="menu-item flex items-center">
+        <i class="fa-solid fa-list-check w-5 h-5 mr-3"></i>
+        项目管理
+      </a>
+    </li>
+    <!-- 模板库 - 已注释掉 -->
+    <!--
+    <li>
+      <a href="javascript:;" data-page="pages/templateLibrary.html" class="menu-item flex items-center">
+        <i class="fa-solid fa-layer-group w-5 h-5 mr-3"></i>
+        模板库
+      </a>
+    </li>
+    -->
+    <!-- 知识库 -->
+    <li>
+      <a href="javascript:;" data-page="knowledge base main.html" class="menu-item flex items-center">
+        <i class="fa-solid fa-book w-5 h-5 mr-3"></i>
+        知识库
+      </a>
+    </li>
+    <!-- 评分规则 -->
+    <li>
+      <a href="javascript:;" data-page="scoring rules.html" class="menu-item flex items-center">
+        <i class="fa-solid fa-star w-5 h-5 mr-3"></i>
+        评分规则
+      </a>
+    </li>
+  </ul>
+</nav>
+
+<!-- 用户信息部分：添加下拉菜单 -->
+<div class="p-4 border-t border-[#444] mt-auto relative">
+  <!-- 用户头像和名称（点击可展开/收起菜单） -->
+  <div class="flex items-center cursor-pointer" id="user-menu-toggle">
+    <img src="https://picsum.photos/40/40" alt="用户头像" class="w-10 h-10 rounded-full mr-3">
+    <div class="flex-1">
+      <p class="text-sm font-medium text-white"></p>
+      <p class="text-xs text-gray-300">系统管理员</p>
+    </div>
+    <i class="fa-solid fa-chevron-up text-gray-400 text-xs transition-transform duration-200" id="user-menu-icon"></i>
+  </div>
+
+  <!-- 用户菜单（向上展开，默认隐藏） -->
+  <div id="user-menu" class="absolute left-0 right-0 bottom-full mb-2 bg-[#384858] rounded-lg overflow-hidden shadow-lg hidden transform transition-all duration-200 origin-bottom">
+    <!--
+      系统设置 - 暂时注释掉，等待后续设计
+      <a href="javascript:;" id="sidebar-system-settings" class="flex items-center px-4 py-3 text-sm text-gray-200 hover:bg-[#2f4050] transition-colors border-b border-[#2f4050]">
+        <i class="fa-solid fa-gear w-4 h-4 mr-3"></i>
+        系统设置
+      </a>
+    -->
+
+    <!-- 联系我们 -->
+    <a href="javascript:;" id="sidebar-contact-us" class="flex items-center px-4 py-3 text-sm text-gray-200 hover:bg-[#2f4050] transition-colors border-b border-[#2f4050]">
+      <i class="fa-solid fa-phone w-4 h-4 mr-3"></i>
+      联系我们
+    </a>
+
+    <!-- 退出登录 -->
+    <a href="javascript:;" class="flex items-center px-4 py-3 text-sm text-red-300 hover:bg-[#2f4050] transition-colors" id="logout-btn">
+      <i class="fa-solid fa-right-from-bracket w-4 h-4 mr-3"></i>
+      退出登录
+    </a>
+  </div>
+</div>
+
+<script>
+  let currentUserName = '加载中...';
+
+  // 从父页面获取用户ID并获取用户信息
+  async function fetchCurrentUser() {
+    try {
+      // 从父页面的URL获取用户ID
+      const urlParams = new URLSearchParams(window.parent.location.search);
+      const userId = urlParams.get('userId');
+
+      if (!userId) {
+        console.log('未找到用户ID');
+        document.querySelector('p.text-sm.font-medium.text-white').textContent = '未登录';
+        return;
+      }
+
+      const response = await fetch(`http://localhost:8088/user/${userId}`);
+      const result = await response.json();
+
+      if (result.code === 200 && result.data) {
+        const user = result.data;
+        currentUserName = user.userName;
+        // 更新用户名显示
+        const userNameEl = document.querySelector('p.text-sm.font-medium.text-white');
+        if (userNameEl) {
+          userNameEl.textContent = user.userName;
+        }
+      }
+    } catch (error) {
+      console.error('获取用户信息失败:', error);
+      const userNameEl = document.querySelector('p.text-sm.font-medium.text-white');
+      if (userNameEl) {
+        userNameEl.textContent = '张三';
+      }
+    }
+  }
+
+  // 监听来自父页面的消息
+  window.addEventListener('message', function(e) {
+    if (e.data.type === 'refreshUserData') {
+      fetchCurrentUser();
+    }
+
+    if (e.data.type === 'switchPage' || e.data.type === 'activateMenu' || e.data.type === 'projectOpened') {
+      // 确定要激活的页面
+      let targetPage = 'seek FMEA.html';
+      if (e.data.type === 'switchPage' || e.data.type === 'activateMenu') {
+        targetPage = e.data.page;
+      }
+
+      // 高亮对应的菜单
+      const targetMenu = document.querySelector(`.menu-item[data-page="${targetPage}"]`);
+      if (targetMenu) {
+        document.querySelectorAll('.menu-item').forEach(link => {
+          link.classList.remove('sidebar-item-active');
+        });
+        targetMenu.classList.add('sidebar-item-active');
+      }
+    }
+  });
+
+  // 菜单点击逻辑
+  document.querySelectorAll('.menu-item').forEach(item => {
+    item.addEventListener('click', function() {
+      document.querySelectorAll('.menu-item').forEach(link => {
+        link.classList.remove('sidebar-item-active');
+      });
+      this.classList.add('sidebar-item-active');
+      const pageUrl = this.getAttribute('data-page');
+      window.parent.postMessage({ type: 'switchPage', page: pageUrl }, '*');
+    });
+  });
+
+  // 用户菜单功能
+  const userMenuToggle = document.getElementById('user-menu-toggle');
+  const userMenu = document.getElementById('user-menu');
+  const userMenuIcon = document.getElementById('user-menu-icon');
+  const logoutBtn = document.getElementById('logout-btn');
+
+  // 切换用户菜单显示/隐藏
+  userMenuToggle.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const isHidden = userMenu.classList.contains('hidden');
+
+    if (isHidden) {
+      userMenu.classList.remove('hidden');
+      setTimeout(() => {
+        userMenu.classList.remove('opacity-0', 'scale-y-0');
+      }, 10);
+      userMenuIcon.style.transform = 'rotate(180deg)';
+    } else {
+      userMenu.classList.add('opacity-0', 'scale-y-0');
+      setTimeout(() => {
+        userMenu.classList.add('hidden');
+      }, 200);
+      userMenuIcon.style.transform = 'rotate(0deg)';
+    }
+  });
+
+  // 点击页面其他地方关闭用户菜单
+  document.addEventListener('click', function(e) {
+    if (!userMenuToggle.contains(e.target) && !userMenu.contains(e.target)) {
+      userMenu.classList.add('opacity-0', 'scale-y-0');
+      setTimeout(() => {
+        userMenu.classList.add('hidden');
+      }, 200);
+      userMenuIcon.style.transform = 'rotate(0deg)';
+    }
+  });
+
+  // 点击菜单项关闭菜单
+  document.querySelectorAll('#user-menu a').forEach(item => {
+    item.addEventListener('click', function() {
+      userMenu.classList.add('opacity-0', 'scale-y-0');
+      setTimeout(() => {
+        userMenu.classList.add('hidden');
+      }, 200);
+      userMenuIcon.style.transform = 'rotate(0deg)';
+    });
+  });
+
+  // 退出登录按钮
+  logoutBtn.addEventListener('click', function() {
+    if (confirm('确定要退出登录吗？')) {
+      window.top.location.href = 'login.html';
+    }
+  });
+
+  // 联系我们功能
+  const sidebarContactUsBtn = document.getElementById('sidebar-contact-us');
+
+  sidebarContactUsBtn.addEventListener('click', function() {
+    window.parent.postMessage({
+      type: 'openContactModal'
+    }, '*');
+
+    userMenu.classList.add('opacity-0', 'scale-y-0');
+    setTimeout(() => {
+      userMenu.classList.add('hidden');
+    }, 200);
+    userMenuIcon.style.transform = 'rotate(0deg)';
+  });
+
+  // 页面加载时获取用户信息
+  document.addEventListener('DOMContentLoaded', function() {
+    fetchCurrentUser();
+  });
+
+</script>
+</body>
+</html>

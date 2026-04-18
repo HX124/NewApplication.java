@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>DFMEA风险分析与改进措施</title>
+    <link rel="stylesheet" href="../css/modal-form-common.css">
+    <link rel="stylesheet" href="../css/DFMEA-page-8.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="dfmea-container">
+        <div class="edit-container" style="display: flex; justify-content: flex-end;">
+            <div class="edit-actions">
+                <button class="action-btn primary" onclick="exportData()">
+                    <i class="fas fa-paper-plane"></i> 导出
+                </button>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table id="dfmea-table">
+                <thead>
+                    <tr>
+                        <th colspan="10">优化（步骤六）</th>
+                    </tr>
+                    <tr>
+                        <!-- 风险分析列 -->
+                        <th>优化预防控制（PC）</th>
+                        <th>更新频度（O）</th>
+                        <th>优化探测控制（DC）</th>
+                        <th>更新探测度（D）</th>
+                        <th>更新AP</th>
+                        <th>严重度（S）</th>
+                        <th>负责人</th>
+                        <th>目标日期</th>
+                        <th>措施状态</th>
+                        <th>完成日期</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 右键菜单 -->
+    <div id="context-menu">
+        <div id="context-menu-content">
+            <!-- 动态菜单内容 -->
+        </div>
+    </div>
+
+    <!-- 修改预防措施模态框 -->
+    <div id="preventive-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑预防措施（频度）</h3>
+                <button class="modal-close" onclick="closePreventiveModal()">&times;</button>
+            </div>
+            <div class="modal-two-column">
+                <div class="standard-panel">
+                    <div class="standard-header">
+                        <h4><i class="fas fa-book"></i> 更新频度（O）标准</h4>
+                        <button class="edit-standard-btn" onclick="editStandard('occurrence')">
+                            <i class="fas fa-edit"></i> 编辑
+                        </button>
+                    </div>
+                    <div class="standard-content" id="preventive-standard-content">
+                        <!-- 频度标准内容将通过JS动态加载 -->
+                    </div>
+                </div>
+                <div class="form-panel">
+                    <form id="preventive-form">
+                        <div class="form-group">
+                            <label for="pc-description">预防措施描述：</label>
+                            <textarea id="pc-description" class="modal-textarea" placeholder="请输入预防措施描述..." required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="pc-occurrence">更新频度（O）：</label>
+                            <select id="pc-occurrence" class="modal-input" required>
+                                <option value="">请选择频度等级</option>
+                                <option value="1">1 - 极低</option>
+                                <option value="2">2 - 非常低</option>
+                                <option value="3">3 - 低</option>
+                                <option value="4">4 - 中等偏低</option>
+                                <option value="5">5 - 中</option>
+                                <option value="6">6 - 中等偏高</option>
+                                <option value="7">7 - 高</option>
+                                <option value="8">8 - 非常高</option>
+                                <option value="9">9 - 极高</option>
+                                <option value="10">10 - 几乎必然</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="pc-responsible">负责人：</label>
+                            <input type="text" id="pc-responsible" class="modal-input" placeholder="请输入负责人姓名" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pc-target-date">目标日期：</label>
+                            <input type="date" id="pc-target-date" class="modal-input" required>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="modal-cancel" onclick="closePreventiveModal()">取消</button>
+                            <button type="submit" class="modal-submit">确认</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改探测措施模态框 -->
+    <div id="detective-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑探测措施（探测度）</h3>
+                <button class="modal-close" onclick="closeDetectiveModal()">&times;</button>
+            </div>
+            <div class="modal-two-column">
+                <div class="standard-panel">
+                    <div class="standard-header">
+                        <h4><i class="fas fa-book"></i> 更新探测度（D）标准</h4>
+                        <button class="edit-standard-btn" onclick="editStandard('detection')">
+                            <i class="fas fa-edit"></i> 编辑
+                        </button>
+                    </div>
+                    <div class="standard-content" id="detective-standard-content">
+                        <!-- 探测度标准内容将通过JS动态加载 -->
+                    </div>
+                </div>
+                <div class="form-panel">
+                    <form id="detective-form">
+                        <div class="form-group">
+                            <label for="dc-description">探测措施描述：</label>
+                            <textarea id="dc-description" class="modal-textarea" placeholder="请输入探测措施描述..." required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="dc-detection">更新探测度（D）：</label>
+                            <select id="dc-detection" class="modal-input" required>
+                                <option value="">请选择探测度等级</option>
+                                <option value="1">1 - 非常高</option>
+                                <option value="2">2 - 高</option>
+                                <option value="3">3 - 中高</option>
+                                <option value="4">4 - 中</option>
+                                <option value="5">5 - 中等偏低</option>
+                                <option value="6">6 - 低</option>
+                                <option value="7">7 - 很低</option>
+                                <option value="8">8 - 极低</option>
+                                <option value="9">9 - 非常低</option>
+                                <option value="10">10 - 几乎无法检测</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="dc-responsible">负责人：</label>
+                            <input type="text" id="dc-responsible" class="modal-input" placeholder="请输入负责人姓名" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dc-target-date">目标日期：</label>
+                            <input type="date" id="dc-target-date" class="modal-input" required>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="modal-cancel" onclick="closeDetectiveModal()">取消</button>
+                            <button type="submit" class="modal-submit">确认</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 措施状态模态框 -->
+    <div id="complete-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>措施状态</h3>
+                <button class="modal-close" onclick="closeCompleteModal()">&times;</button>
+            </div>
+            <form id="complete-form">
+                <div class="form-group">
+                    <label for="complete-status">措施状态：</label>
+                    <select id="complete-status" class="modal-input" required>
+                        <option value="">请选择措施状态</option>
+                        <option value="不执行">不执行</option>
+                        <option value="尚未确认">尚未确认</option>
+                        <option value="尚未决策">尚未决策</option>
+                        <option value="尚未完成">尚未完成</option>
+                        <option value="已完成">已完成</option>
+                    </select>
+                </div>
+                <div class="form-group" id="complete-date-container" style="display: none;">
+                    <label for="actual-complete-date">完成日期：</label>
+                    <input type="date" id="actual-complete-date" class="modal-input">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="modal-cancel" onclick="closeCompleteModal()">取消</button>
+                    <button type="submit" class="modal-submit">确认</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/DFMEA-page-8.js"></script>
+</body>
+</html>

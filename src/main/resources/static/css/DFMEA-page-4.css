@@ -1,0 +1,98 @@
+/* ===== 基础样式 ===== */
+body {
+  font-family: "Microsoft YaHei", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f7fa;
+  color: #333;
+  height: 100vh;
+  overflow-y: scroll;         /* 确保滚动区域 */
+}
+
+body::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari, Edge新版 */
+}
+
+/* 页面标题 */
+.page-title {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #2f4050;
+  font-weight: 600;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+/* ===== 布局样式 ===== */
+/* 内容区域 */
+.content-box {
+  flex: 1;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  -ms-overflow-style: none;  /* IE and Edge 隐藏滚动条 */
+  scrollbar-width: none;      /* Firefox 隐藏滚动条 */
+}
+
+.content-box::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+  width: 0;
+  height: 0;
+}
+
+#chart-container {
+  flex: 1;
+  width: 100%;
+  position: relative;
+  min-height: 600px;
+}
+
+/* ===== 特殊组件样式 ===== */
+/* 表格样式补充（覆盖公共样式中的特定设置） */
+#table-container td {
+  font-weight: normal;
+}
+
+/* 页面4专用的模态框表格样式（与页面6保持一致） */
+.modal-form .modal-item-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.modal-form .modal-grid-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.modal-form .modal-grid-label {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.modal-form .modal-grid-required {
+  color: #F53F3F;
+  margin-left: 4px;
+}
+
+/* 页面4模态框表单验证错误样式 */
+.modal-form input:invalid + .error-tip,
+.modal-form select:invalid + .error-tip {
+  display: block;
+}
+
+/* ===== 响应式调整 ===== */
+@media (max-width: 768px) {
+  .modal-form .modal-item-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}

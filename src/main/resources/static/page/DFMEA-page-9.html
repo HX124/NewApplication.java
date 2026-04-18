@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>DFMEA汇总表格</title>
+    <link rel="stylesheet" href="../css/DFMEA-page-9.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+
+        <!-- 操作按钮 -->
+        <div class="edit-controls">
+            <div class="view-tabs">
+                <button class="tab-btn active" id="dfmea-tab" onclick="switchView('dfmea')">
+                    <i class="fas fa-table"></i> DFMEA表格
+                </button>
+                <button class="tab-btn" id="dvp-tab" onclick="switchView('dvp')">
+                    <i class="fas fa-clipboard-check"></i> DVP
+                </button>
+                    <button class="tab-btn" id="characteristic-tab" onclick="switchView('characteristic')">
+                    <i class="fas fa-list-alt"></i> 特性清单
+                </button>
+            </div>
+            <div class="action-buttons">
+                <button class="action-btn tertiary" id="dvp-edit-btn" onclick="toggleDVPEditMode()">
+                    <i class="fas fa-edit"></i> 编辑
+                </button>
+                <button class="action-btn primary" onclick="exportToExcel()">
+                    <i class="fas fa-file-excel"></i> 导出Excel
+                </button>
+                <button class="action-btn secondary" onclick="exportToPDF()">
+                    <i class="fas fa-file-pdf"></i> 导出PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- DFMEA页面标题和头部信息 -->
+        <div class="page-header" id="dfmea-header">
+            <div class="header-row">
+                <div class="header-item">
+                    <label>公司名称：</label>
+                    <span id="company-name">示例公司</span>
+                </div>
+                <div class="header-item">
+                    <label>项目：</label>
+                    <span id="project-name">手机保护壳DFMEA分析</span>
+                </div>
+            </div>
+            <div class="header-row">
+                <div class="header-item">
+                    <label>设计地点：</label>
+                    <span id="design-location">xx研发中心</span>
+                </div>
+                <div class="header-item">
+                    <label>开始日期：</label>
+                    <span id="plan-start-date">2024-01-15</span>
+                </div>
+            </div>
+            <div class="header-row">
+                <div class="header-item">
+                    <label>顾客名称：</label>
+                    <span id="customer-name">手机制造商</span>
+                </div>
+                <div class="header-item">
+                    <label>修订日期：</label>
+                    <span id="revision-date">2024-02-28</span>
+                </div>
+            </div>
+            <div class="header-row">
+                <div class="header-item">
+                    <label>车型年/平台：</label>
+                    <span id="platform"></span>
+                </div>
+                <div class="header-item">
+                    <label>职能小组：</label>
+                    <span id="team">产品设计部</span>
+                </div>
+            </div>
+            <div class="header-row">
+                <div class="header-item">
+                    <label>系统/子系统/组件/部件：</label>
+                    <span id="system">手机保护壳系统</span>
+                </div>
+                <div class="header-item">
+                    <label>DFMEA编号：</label>
+                    <span id="dfmea-code">DFMEA-2024-001</span>
+                </div>
+            </div>
+            <div class="header-row">
+                <div class="header-item">
+                    <label>责任人：</label>
+                    <span id="responsible-person">张三</span>
+                </div>
+                <div class="header-item">
+                    <label>保密级别：</label>
+                    <span id="security-level">内部使用</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- DVP页面标题和头部信息 -->
+        <div class="page-header" id="dvp-header" style="display: none;">
+            <div class="header-row">
+                <div class="header-item">
+                    <label>公司名称：</label>
+                    <span id="dvp-company-name">示例公司</span>
+                </div>
+                <div class="header-item">
+                    <label>项目：</label>
+                    <span id="dvp-project-name">手机保护壳DVP&R</span>
+                </div>
+            </div>
+            <div class="header-row">
+                <div class="header-item">
+                    <label>设计地点：</label>
+                    <span id="dvp-design-location">xx研发中心</span>
+                </div>
+                <div class="header-item">
+                    <label>开始日期：</label>
+                    <span id="dvp-plan-start-date">2024-01-15</span>
+                </div>
+            </div>
+            <div class="header-row">
+                <div class="header-item">
+                    <label>顾客名称：</label>
+                    <span id="dvp-customer-name">手机制造商</span>
+                </div>
+                <div class="header-item">
+                    <label>修订日期：</label>
+                    <span id="dvp-revision-date">2024-02-28</span>
+                </div>
+            </div>
+            <div class="header-row">
+                <div class="header-item">
+                    <label>车型年/平台：</label>
+                    <span id="dvp-platform"></span>
+                </div>
+                <div class="header-item">
+                    <label>职能小组：</label>
+                    <span id="dvp-team">测试验证部</span>
+                </div>
+            </div>
+            <div class="header-row">
+                <div class="header-item">
+                    <label>系统/子系统/组件/部件：</label>
+                    <span id="dvp-system">手机保护壳系统</span>
+                </div>
+                <div class="header-item">
+                    <label>DVP编号：</label>
+                    <span id="dvp-id">DVP-2024-001</span>
+                </div>
+            </div>
+            <div class="header-row">
+                <div class="header-item">
+                    <label>责任人：</label>
+                    <span id="dvp-responsible-person">测试工程师</span>
+                </div>
+                <div class="header-item">
+                    <label>保密级别：</label>
+                    <span id="dvp-security-level">内部使用</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- DFMEA表格容器 -->
+        <div class="table-container" id="dfmea-table-container">
+            <table id="dfmea-summary-table">
+                <thead>
+                    <!-- 表格标题行 -->
+                    <tr>
+                        <th colspan="4" style="font-weight: bold; font-size: 14px;">
+                            结构分析
+                        </th>
+                        <th colspan="3" style="font-weight: bold; font-size: 14px;">
+                            功能分析
+                        </th>
+                        <th colspan="4" style="font-weight: bold; font-size: 14px;">
+                            失效分析
+                        </th>
+                        <th colspan="6" style="font-weight: bold; font-size: 14px;">
+                            风险分析
+                        </th>
+                        <th colspan="11" style="font-weight: bold; font-size: 14px;">
+                            优化
+                        </th>
+                    </tr>
+
+                    <!-- 列标题行 -->
+                    <tr>
+                        <!-- 序号列 -->
+                        <th style="min-width: 30px;">序号</th>
+
+                        <!-- 结构分析列 -->
+                        <th>系统</th>
+                        <th>子系统</th>
+                        <th>零部件</th>
+
+                        <!-- 功能分析列 -->
+                        <th>上一较高级别要素的功能</th>
+                        <th>关注要素功能和产品特性</th>
+                        <th>下一较低级别要素或特性</th>
+
+                        <!-- 失效分析列 -->
+                        <th>对于上一较高级别要素和/或最终用户的失效影响（FE）</th>
+                        <th>失效影响的严重度（S）</th>
+                        <th>关注要素的失效模式（FM）</th>
+                        <th>下一较低级别要素的失效起因（FC）</th>
+
+                        <!-- 风险分析列 -->
+                        <th>对失效起因的当前预防控制（PC）</th>
+                        <th>失效起因的频度（O）</th>
+                        <th>对失效起因或失效模式的当前探测控制（DC）</th>
+                        <th>失效起因/失效模式的探测度（D）</th>
+                        <th>AP(行动优先级)</th>
+                        <th>特殊特性</th>
+
+                        <!-- 优化列 -->
+                        <th>优化预防措施</th>
+                        <th>优化探测措施</th>
+                        <th>负责人</th>
+                        <th>目标完成日期</th>
+                        <th>措施状态</th>
+                        <th>实际完成日期</th>
+
+                        <!-- 结果列 -->
+                        <th>严重度（S）</th>
+                        <th>更新发生度（O）</th>
+                        <th>更新探测度（D）</th>
+                        <th>更新AP</th>
+                        <th>备注</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- 数据将通过JavaScript动态填充 -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- DVP表格容器 -->
+        <div class="table-container" id="dvp-table-container" style="display: none;">
+            <table id="dvp-table">
+                <thead>
+                    <!-- DVP表格标题行 -->
+                    <tr>
+                        <th colspan="11" style="font-weight: bold; font-size: 14px; text-align: center;">
+                            设计验证计划(DVP)
+                        </th>
+                    </tr>
+
+                    <!-- DVP列标题行 -->
+                    <tr>
+                        <th>序号</th>
+                        <th>试验项目</th>
+                        <th>试验名称</th>
+                        <th>试验方法</th>
+                        <th>目标要求</th>
+                        <th>实验类型</th>
+                        <th>样品数量</th>
+                        <th>计划开始日期</th>
+                        <th>试验状态</th>
+                        <th>实验报告</th>
+                        <th>实际完成日期</th>
+                    </tr>
+                </thead>
+                <tbody id="dvp-table-body">
+                    <!-- DVP数据将通过JavaScript动态填充 -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 特性清单表格容器 -->
+        <div class="table-container" id="characteristic-table-container" style="display: none;">
+            <table id="characteristic-table">
+                <thead>
+                    <!-- 特性清单表格标题行 -->
+                    <tr>
+                        <th colspan="8" style="font-weight: bold; font-size: 14px; text-align: center;">
+                            特性清单
+                        </th>
+                    </tr>
+
+                    <!-- 特性清单列标题行 -->
+                    <tr>
+                        <th>序号</th>
+                        <th>零件名称</th>
+                        <th>特性编号</th>
+                        <th>特性描述</th>
+                        <th>特性分类</th>
+                        <th>所属子系统</th>
+                        <th>所属系统</th>
+                        <th>备注</th>
+                    </tr>
+                </thead>
+                <tbody id="characteristic-table-body">
+                    <!-- 特性清单数据将通过JavaScript动态填充 -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- DFMEA页脚信息 -->
+        <div class="page-footer" id="dfmea-footer">
+            <div class="footer-info">
+                <p>制作人：<span id="creator">李四</span> | 审核人：<span id="reviewer">王五</span> | 批准人：<span id="approver">赵六</span></p>
+                <p>版本：<span id="version">V1.0</span> | 最后更新：<span id="last-update">2024-02-28</span></p>
+            </div>
+        </div>
+
+        <!-- DVP页脚信息 -->
+        <div class="page-footer" id="dvp-footer" style="display: none;">
+            <div class="footer-info">
+                <p>制作人：<span id="dvp-creator">测试员A</span> | 审核人：<span id="dvp-reviewer">测试经理</span> | 批准人：<span id="dvp-approver">质量总监</span></p>
+                <p>版本：<span id="dvp-version">V1.0</span> | 最后更新：<span id="dvp-last-update">2024-02-28</span></p>
+            </div>
+        </div>
+
+        <!-- 特性清单页脚信息 -->
+        <div class="page-footer" id="characteristic-footer" style="display: none;">
+            <div class="footer-info">
+                <p>制作人：<span id="characteristic-creator">李四</span> | 审核人：<span id="characteristic-reviewer">王五</span> | 批准人：<span id="characteristic-approver">赵六</span></p>
+                <p>版本：<span id="characteristic-version">V1.0</span> | 最后更新：<span id="characteristic-last-update">2024-02-28</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/DFMEA-page-9.js"></script>
+    <!-- Excel导出库 -->
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <!-- PDF导出库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- html2canvas for screenshot -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <!-- DVP编辑功能 -->
+    <script src="../js/DFMEA-page-9-dvp-edit.js"></script>
+</body>
+</html>

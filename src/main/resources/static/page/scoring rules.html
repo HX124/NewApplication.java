@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FMEA评分规则管理</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+    }
+    body {
+      background-color: #f5f7fa;
+      color: #333;
+      padding: 30px;
+    }
+    .main-content {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .page-title {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #2f4050;
+      font-weight: 600;
+    }
+    .filter-container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    .filter-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #2f4050;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e6e6e6;
+    }
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+      justify-content: flex-start;
+      margin-bottom: 10px;
+    }
+    .search-wrapper {
+      position: relative;
+      flex: 1;
+      min-width: 200px;
+      max-width: 300px;
+    }
+    .search-input {
+      width: 100%;
+      padding: 10px 15px 10px 40px;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      font-size: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: all 0.3s;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: #165DFF;
+      box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.1);
+    }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+      font-size: 16px;
+    }
+    .filter-select {
+      padding: 10px 15px;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      font-size: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: all 0.3s;
+      min-width: 180px;
+    }
+    .filter-select:focus {
+      outline: none;
+      border-color: #165DFF;
+      box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.1);
+    }
+    .filter-actions {
+      display: flex;
+      gap: 10px;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    .search-btn {
+      padding: 10px 24px;
+      background-color: #165DFF;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .search-btn:hover {
+      background-color: #0D52D9;
+    }
+    .reset-btn {
+      padding: 10px 24px;
+      background-color: #f5f7fa;
+      color: #666;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .reset-btn:hover {
+      background-color: #e8eaed;
+      border-color: #d9d9d9;
+    }
+    /* 修改：表格容器默认隐藏 */
+    .table-container {
+      position: relative;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      display: none; /* 默认隐藏 */
+    }
+    .table-content {
+      overflow-x: auto;
+      overflow-y: auto;
+      max-height: 600px;
+    }
+    .project-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .project-table thead {
+      background-color: #f8f9fa;
+      color: #2f4050;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    .project-table th, .project-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #e6e6e6;
+      font-size: 14px;
+    }
+    .project-table th {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .project-table tbody tr:hover {
+      background-color: #fafbfc;
+      cursor: default;
+    }
+    .status-tag {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .status-tag.processing {
+      background-color: #fff7e6;
+      color: #ff7d00;
+    }
+    .status-tag.completed {
+      background-color: #e8f8f0;
+      color: #00b42a;
+    }
+    .status-tag.paused {
+      background-color: #fef0f0;
+      color: #f53f3f;
+    }
+    .status-tag.pending {
+      background-color: #f5f5f5;
+      color: #909399;
+    }
+    .operation-cell {
+      width: 140px;
+    }
+    .operation-item {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+    }
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+    .tooltip .tooltip-text {
+      visibility: hidden;
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-bottom: 5px;
+      padding: 2px 8px;
+      background-color: #333;
+      color: #fff;
+      font-size: 12px;
+      border-radius: 4px;
+      white-space: nowrap;
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .tooltip:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+    .op-btn {
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      border: none;
+      border-radius: 3px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: transparent;
+    }
+    .op-severity {
+      color: #722ED1;
+    }
+    .op-severity:hover {
+      background-color: #f9f0ff;
+    }
+    .op-view {
+      color: #00B42A;
+    }
+    .op-view:hover {
+      background-color: #e8f8f0;
+    }
+    .op-export {
+      color: #666;
+    }
+    .op-export:hover {
+      color: #333;
+      background-color: #f5f5f5;
+    }
+    /* 修改：分页默认隐藏 */
+    .pagination {
+      display: none; /* 默认隐藏 */
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+      gap: 10px;
+    }
+    .pagination-btn {
+      padding: 5px 12px;
+      border: 1px solid #e6e6e6;
+      border-radius: 4px;
+      background-color: #fff;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .pagination-btn.active {
+      background-color: #165DFF;
+      color: #fff;
+      border-color: #165DFF;
+    }
+    .pagination-btn:disabled {
+      cursor: not-allowed;
+      color: #ccc;
+      border-color: #eee;
+    }
+    .responsible-person {
+      color: #165DFF;
+      font-weight: 500;
+    }
+
+    /* 模态框样式 - 优化滚动和固定按钮 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      width: 95%;
+      max-width: 1200px;
+      max-height: 90vh;
+      overflow: hidden;
+      transform: translateY(-20px);
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #e6e6e6;
+      flex-shrink: 0;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2f4050;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-close {
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: none;
+      background-color: transparent;
+      color: #666;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+      z-index: 10;
+    }
+
+    .modal-close:hover {
+      background-color: #f5f5f5;
+      color: #333;
+    }
+
+    .modal-body {
+      padding: 0;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    /* SOD查看样式 - 优化滚动和布局 */
+    .sod-view-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+    }
+
+    /* 极简选项卡 */
+    .sod-tabs {
+      display: flex;
+      background-color: #f5f5f5;
+      border-bottom: 1px solid #e6e6e6;
+      flex-shrink: 0;
+    }
+
+    .sod-tab {
+      padding: 12px 20px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+      border: none;
+      background: transparent;
+      transition: all 0.3s;
+      border-right: 1px solid #e6e6e6;
+      flex: 1;
+      text-align: center;
+    }
+
+    .sod-tab:last-child {
+      border-right: none;
+    }
+
+    .sod-tab.active {
+      background-color: #fff;
+      color: #165DFF;
+      border-bottom: 2px solid #165DFF;
+    }
+
+    /* 评分表内容区域 - 可滚动 */
+    .sod-content {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+      padding: 0;
+    }
+
+    /* 极简表格样式 */
+    .compact-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .compact-table th, .compact-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border: 1px solid #e6e6e6;
+      font-size: 14px;
+      vertical-align: top;
+      line-height: 1.5;
+    }
+
+    .compact-table th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+      color: #2f4050;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .compact-table tbody tr:nth-child(even) {
+      background-color: #fafbfc;
+    }
+
+    .compact-table tbody tr:hover {
+      background-color: #f0f7ff;
+    }
+
+    /* 分数列样式 - 只显示数字 */
+    .score-column {
+      width: 70px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .score-number {
+      font-size: 16px;
+      color: #165DFF;
+      font-weight: 700;
+    }
+
+    /* 描述列样式 */
+    .description-column {
+      min-width: 400px;
+    }
+
+    /* 示例列样式 */
+    .example-column {
+      min-width: 400px;
+    }
+
+    .empty-example {
+      color: #999;
+      font-style: italic;
+    }
+
+    .no-data-modal {
+      text-align: center;
+      padding: 60px;
+      color: #999;
+      font-size: 14px;
+    }
+
+    /* 表格滚动容器 */
+    .table-container-modal {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: auto;
+    }
+
+    /* 滚动条样式 */
+    .table-container-modal::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    .table-container-modal::-webkit-scrollbar-track {
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+
+    .table-container-modal::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+
+    .table-container-modal::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+
+    /* 固定底部按钮区域 */
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #e6e6e6;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      background-color: #fff;
+      flex-shrink: 0;
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+    }
+
+    .btn-modal {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+    }
+
+    .btn-edit {
+      background-color: #165DFF;
+      color: #fff;
+    }
+
+    .btn-edit:hover {
+      background-color: #0D52D9;
+    }
+
+    .btn-close {
+      background-color: #f5f7fa;
+      color: #666;
+      border: 1px solid #e6e6e6;
+    }
+
+    .btn-close:hover {
+      background-color: #e8eaed;
+      border-color: #d9d9d9;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+      }
+      .filter-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .search-wrapper {
+        max-width: 100%;
+      }
+      .filter-actions {
+        justify-content: center;
+        margin-left: 0;
+        margin-top: 10px;
+      }
+      .table-content {
+        max-height: 400px;
+      }
+      .modal-content {
+        width: 98%;
+        max-height: 95vh;
+      }
+      .modal-body {
+        max-height: calc(95vh - 140px);
+      }
+      .sod-tab {
+        padding: 10px 12px;
+        font-size: 13px;
+      }
+      .compact-table th, .compact-table td {
+        padding: 10px 12px;
+        font-size: 13px;
+      }
+      .score-column {
+        width: 60px;
+      }
+      .score-number {
+        font-size: 15px;
+      }
+      .description-column,
+      .example-column {
+        min-width: 300px;
+      }
+      .btn-modal {
+        padding: 8px 16px;
+        font-size: 13px;
+      }
+      .modal-footer {
+        padding: 12px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="main-content">
+  <!-- 添加标题：评分规则 -->
+  <div class="page-title">评分规则</div>
+
+  <!-- 筛选区域 -->
+  <div class="filter-container">
+    <div class="filter-title">筛选条件</div>
+    <div class="filter-row">
+      <!-- 主要信息搜索 -->
+      <div class="search-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" class="search-input" id="searchKeyword" placeholder="搜索：FMEA名称/编号/责任人...">
+      </div>
+
+      <!-- 任务状态筛选 -->
+      <select class="filter-select" id="statusFilter">
+        <option value="">全部状态</option>
+        <option value="进行中">进行中</option>
+        <option value="已完成">已完成</option>
+        <option value="暂停">暂停</option>
+        <option value="待启动">待启动</option>
+      </select>
+
+      <!-- 操作按钮（搜索+重置） -->
+      <div class="filter-actions">
+        <button class="search-btn" id="searchBtn">
+          <i class="fas fa-search mr-1"></i> 搜索
+        </button>
+        <button class="reset-btn" id="resetBtn">
+          <i class="fas fa-refresh mr-1"></i> 重置
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 项目表格 -->
+  <div class="table-container" id="tableContainer">
+    <div class="table-content" id="tableContent">
+      <table class="project-table" id="projectTable">
+        <thead>
+        <tr>
+          <th>FMEA名称</th>
+          <th>FMEA编号</th>
+          <th>类型</th>
+          <th>状态</th>
+          <th>责任人</th>
+          <th>计划开始时间</th>
+          <th class="operation-cell">操作</th>
+        </tr>
+        </thead>
+        <tbody id="projectTableBody">
+        <!-- 表格内容由JS渲染 -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 分页 -->
+  <div class="pagination" id="paginationContainer">
+    <button class="pagination-btn" id="prevPageBtn">上一页</button>
+    <div id="pageNumberContainer">
+      <button class="pagination-btn active">1</button>
+    </div>
+    <button class="pagination-btn" id="nextPageBtn">下一页</button>
+  </div>
+</div>
+
+<!-- SOD评分表查看模态框 -->
+<div class="modal-overlay" id="viewScoreModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title">SOD评分表</div>
+      <button class="modal-close" id="closeModalBtn">
+        <i class="fa-solid fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body" id="modalBody">
+      <!-- 模态框内容由JS动态生成 -->
+    </div>
+    <div class="modal-footer" id="modalFooter">
+      <!-- 底部按钮由JS动态生成 -->
+    </div>
+  </div>
+</div>
+
+<script>
+  // 全局变量 - 与seek FMEA.html共享相同的数据源
+  const STORAGE_KEY = 'fmeaProjects'; // 与seek FMEA.html保持一致
+  const SOD_STORAGE_PREFIX = 'sodData_'; // SOD数据前缀
+
+  let fmeaProjects = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  let currentPage = 1; // 当前页码
+  const pageSize = 5; // 每页显示条数
+  let filteredProjects = [...fmeaProjects]; // 筛选后的项目列表
+  let currentModalProject = null; // 当前模态框中显示的项目
+
+  // 维度列标题
+  const columnTitles = {
+    S: {
+      col1: "失效影响描述",
+      col2: "设备/安全关联示例"
+    },
+    O: {
+      col1: "发生概率描述",
+      col2: "典型失效原因"
+    },
+    D: {
+      col1: "检测能力描述",
+      col2: "典型失效示例"
+    }
+  };
+
+  // SOD模板数据（与seek FMEA.html中相同）
+  const templateData = {
+    S: [
+      {score: 10, description: "导致减速器完全失效，引发人员伤亡或设备损毁", example: "箱体结构开裂，导致整机解体；齿轮断裂失效碎片飞出，击穿箱体或伤人。"},
+      {score: 9, description: "违反安全法规要求", example: "箱体结构损坏（如砂眼、缩孔）未检出，违反设备安全标准。"},
+      {score: 8, description: "设备紧急停机，造成生产线重大中断或严重影响维修成本", example: "传动轴疲劳断裂失效，起重机无法起吊，导致港口装卸作业完全中断。"},
+      {score: 7, description: "减速器故障后下降，需立即停机检修", example: "轮齿断裂失效或齿面严重点蚀/胶合，导致传动卡滞、异响巨大。"},
+      {score: 6, description: "减速器故障引发设备运行不稳定", example: "传动轴弯曲变形，或轴承异常磨损，导致起重机起升、变幅动作抖动、不平稳。"},
+      {score: 5, description: "轻微振动加剧，导致旋转部件异常磨损", example: "齿面粘着磨损（胶合）初期，或密封失效导致漏油，增加摩擦阻力。"},
+      {score: 4, description: "需额外人工干预才能维持正常功能", example: "润滑系统异常或油脂泄漏，需额外手动清洁滤芯或补油。"},
+      {score: 3, description: "仅影响设备维护便利性", example: "密封件老化导致轻微渗油，需缩短维护周期。"},
+      {score: 2, description: "仅产生可忽略的噪音或振动", example: "齿面轻微磨损，产生噪声于背景的、稳定的运行噪音。"},
+      {score: 1, description: "无实际影响（外观瑕疵）", example: "箱体表面涂层划伤。"}
+    ],
+    O: [
+      {score: 10, description: "几乎必然（2次/周）", example: "港口多尘环境，未有效过滤，导致润滑油污染，引起持续的磨粒磨损。"},
+      {score: 9, description: "极高（1次/月 ~ 1次/周）", example: "润滑管理不当，导致齿面胶合或轴承异常磨损。"},
+      {score: 8, description: "高（1次/年 ~ 1次/月）", example: "轴端密封失效，导致齿面漏气、盐雾进入，加速腐蚀与磨损。"},
+      {score: 7, description: "中等偏高（1次/3年 ~ 1次/年）", example: "频繁起吊冲击载荷，超出设计余量，导致传动轴疲劳裂纹萌生或轮齿过载断裂风险增加。"},
+      {score: 6, description: "中等（1次/5年 ~ 1次/3年）", example: "安装过程中不良长期存在，导致传动轴弯曲变形及轴承偏磨损伤。"},
+      {score: 5, description: "中等偏低（1次/10年 ~ 1次/5年）", example: "轴承保持架结构损坏，在长期运行后显现。"},
+      {score: 4, description: "低（1次/20年 ~ 1次/10年）", example: "箱体结构局部缺陷在交变应力下扩展为疲劳裂纹。"},
+      {score: 3, description: "极低（1次/设备寿命周期）", example: "材料本身存在极端恶劣的原始缺陷，导致早期轮齿断裂失效。"},
+      {score: 2, description: "几乎不可能", example: "在规范操作和完好维护下，发生箱体结构开裂。"},
+      {score: 1, description: "不可能", example: "设计、制造、安装、维护全流程受控下，发生传动轴疲劳断裂。"}
+    ],
+    D: [
+      {score: 10, description: "几乎无法检测", example: "箱体内部锈蚀缺陷在扩展为表面裂纹前。"},
+      {score: 9, description: "极难检测", example: "传动轴内部微观疲劳裂纹的萌生阶段（长度<1mm）。"},
+      {score: 8, description: "较难检测", example: "齿面胶合的初始阶段，未引起明显振动或温度变化时。"},
+      {score: 7, description: "中等难度检测", example: "轴承保持架的早期轻微变形或裂纹。"},
+      {score: 6, description: "需专项检测", example: "传动轴轻微弯曲变形，需激光对中仪检测。"},
+      {score: 5, description: "常规检测可实现", example: "轮齿断裂失效，通过日常停机目视检查或振动冲击信号可发现。"},
+      {score: 4, description: "自动监测覆盖", example: "润滑系统异常或油脂泄漏，通过在线油液监测传感器可预警。"},
+      {score: 3, description: "实时报警系统", example: "箱体表面涂层划伤，通过设备状态监测系统实时报警。"},
+      {score: 2, description: "多重冗余检测", example: "箱体结构局部缺陷在交变应力下扩展为疲劳裂纹。"},
+      {score: 1, description: "失效自锁机制", example: "设计上，当发生极端超载时，安全离合器打开，防止轮齿或轴断裂。"}
+    ]
+  };
+
+  // 页面加载初始化
+  document.addEventListener('DOMContentLoaded', function() {
+    // 清理孤立数据（确保数据一致性）
+    cleanupOrphanedSODData();
+
+    renderProjectTable(); // 渲染表格（带分页）
+    bindEventListeners(); // 绑定所有事件
+    renderPagination(); // 渲染分页
+    updateTableVisibility(); // 更新表格可见性
+
+    // 初始化模态框事件
+    const modal = document.getElementById('viewScoreModal');
+    const closeBtn = document.getElementById('closeModalBtn');
+
+    // 点击关闭按钮关闭模态框
+    closeBtn.addEventListener('click', function() {
+      closeModal();
+    });
+
+    // 点击模态框外部关闭
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
+
+    // ESC键关闭模态框
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && modal.classList.contains('active')) {
+        closeModal();
+      }
+    });
+  });
+
+  // 清理孤立的SOD数据（确保数据一致性）
+  function cleanupOrphanedSODData() {
+    const allProjects = fmeaProjects;
+    const projectCodes = allProjects.map(p => p.fmeaCode);
+
+    // 遍历所有 localStorage 中的 SOD 数据
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith(SOD_STORAGE_PREFIX)) {
+        const projectCode = key.replace(SOD_STORAGE_PREFIX, '');
+
+        // 如果项目已不存在，但 SOD 数据还在，清理它
+        if (!projectCodes.includes(projectCode)) {
+          localStorage.removeItem(key);
+          console.log(`清理了孤立项目的 SOD 数据: ${projectCode}`);
+        }
+      }
+    }
+  }
+
+  // 关闭模态框
+  function closeModal() {
+    const modal = document.getElementById('viewScoreModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = 'auto';
+  }
+
+  // 渲染项目表格
+  function renderProjectTable() {
+    const tableBody = document.getElementById('projectTableBody');
+    const tableContainer = document.getElementById('tableContainer');
+
+    tableBody.innerHTML = '';
+
+    // 检查是否有数据
+    if (filteredProjects.length === 0) {
+      // 没有数据，隐藏表格
+      tableContainer.style.display = 'none';
+      return;
+    }
+
+    // 有数据，显示表格容器
+    tableContainer.style.display = 'block';
+
+    // 计算分页数据
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedProjects = filteredProjects.slice(startIndex, endIndex);
+
+    paginatedProjects.forEach((project) => {
+      // 为所有字段设置默认值，避免undefined
+      const fmeaName = project.fmeaName || '未命名';
+      const fmeaCode = project.fmeaCode || '无编号';
+      const projectType = project.projectType || '未知类型';
+      const projectStatus = project.projectStatus || '未知状态';
+      const responsiblePerson = project.responsiblePerson || '未指定';
+      const planStartDate = project.planStartDate || '未设置';
+
+      // 状态样式类
+      let statusClass = '';
+      switch (projectStatus) {
+        case '进行中': statusClass = 'processing'; break;
+        case '已完成': statusClass = 'completed'; break;
+        case '暂停': statusClass = 'paused'; break;
+        case '待启动': statusClass = 'pending'; break;
+        default: statusClass = '';
+      }
+
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${fmeaName}</td>
+        <td>${fmeaCode}</td>
+        <td>${projectType}</td>
+        <td><span class="status-tag ${statusClass}">${projectStatus}</span></td>
+        <td><span class="responsible-person">${responsiblePerson}</span></td>
+        <td>${planStartDate}</td>
+        <td class="operation-cell">
+          <div class="operation-item">
+            <div class="tooltip">
+              <button class="op-btn op-severity" data-fmea="${fmeaCode}">
+                <i class="fa-solid fa-chart-bar"></i>
+              </button>
+              <span class="tooltip-text">SOD评分表</span>
+            </div>
+            <div class="tooltip">
+              <button class="op-btn op-view" data-fmea="${fmeaCode}">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+              <span class="tooltip-text">查看评分表</span>
+            </div>
+            <div class="tooltip">
+              <button class="op-btn op-export" data-fmea="${fmeaCode}">
+                <i class="fa-solid fa-file-export"></i>
+              </button>
+              <span class="tooltip-text">导出</span>
+            </div>
+          </div>
+        </td>
+      `;
+      tableBody.appendChild(row);
+    });
+
+    bindOperationBtnEvents(); // 绑定操作按钮事件
+  }
+
+  // 更新表格可见性
+  function updateTableVisibility() {
+    const tableContainer = document.getElementById('tableContainer');
+    const paginationContainer = document.getElementById('paginationContainer');
+    const pageTitle = document.querySelector('.page-title');
+
+    if (filteredProjects.length === 0) {
+      tableContainer.style.display = 'none';
+      paginationContainer.style.display = 'none';
+    } else {
+      tableContainer.style.display = 'block';
+      // 确保页面标题显示
+      if (pageTitle) {
+        pageTitle.style.display = 'block';
+      }
+      renderPagination();
+    }
+  }
+
+  // 渲染分页
+  function renderPagination() {
+    const totalPages = Math.ceil(filteredProjects.length / pageSize);
+    const pageContainer = document.getElementById('pageNumberContainer');
+    const prevBtn = document.getElementById('prevPageBtn');
+    const nextBtn = document.getElementById('nextPageBtn');
+    const paginationContainer = document.getElementById('paginationContainer');
+
+    // 检查是否有数据
+    if (filteredProjects.length === 0) {
+      paginationContainer.style.display = 'none';
+      return;
+    }
+
+    // 有数据，显示分页容器
+    paginationContainer.style.display = 'flex';
+    pageContainer.innerHTML = '';
+
+    // 如果只有一页或没有数据，隐藏分页
+    if (totalPages <= 1) {
+      paginationContainer.style.display = 'none';
+      return;
+    }
+
+    // 生成页码按钮
+    if (totalPages > 0) {
+      for (let i = 1; i <= totalPages; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+        pageBtn.textContent = i;
+        pageBtn.addEventListener('click', function() {
+          currentPage = i;
+          renderProjectTable();
+          renderPagination();
+        });
+        pageContainer.appendChild(pageBtn);
+      }
+    }
+
+    // 禁用/启用上一页/下一页
+    prevBtn.disabled = currentPage === 1 || totalPages === 0;
+    nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+  }
+
+  // 绑定操作按钮事件（SOD评分表/查看/导出）
+  function bindOperationBtnEvents() {
+    // SOD评分表按钮 - 跳转到SOD评分表编辑页面
+    document.querySelectorAll('.op-severity').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const fmeaCode = this.getAttribute('data-fmea');
+        const project = fmeaProjects.find(p => p.fmeaCode === fmeaCode);
+        if (project) {
+          // 跳转到SOD评分表编辑页面
+          window.location.href = `SOD score.html?code=${encodeURIComponent(fmeaCode)}`;
+        } else {
+          alert('FMEA项目数据不存在！');
+        }
+      });
+    });
+
+    // 查看评分表按钮 - 打开模态框显示SOD评分表
+    document.querySelectorAll('.op-view').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const fmeaCode = this.getAttribute('data-fmea');
+        openSODViewModal(fmeaCode);
+      });
+    });
+
+    // 导出按钮
+    document.querySelectorAll('.op-export').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const fmeaCode = this.getAttribute('data-fmea');
+        const project = fmeaProjects.find(p => p.fmeaCode === fmeaCode);
+        if (project) {
+          exportProject(project);
+        } else {
+          alert('FMEA项目数据不存在！');
+        }
+      });
+    });
+  }
+
+  // 打开SOD评分表查看模态框
+  function openSODViewModal(fmeaCode) {
+    const project = fmeaProjects.find(p => p.fmeaCode === fmeaCode);
+    if (!project) {
+      alert('FMEA项目数据不存在！');
+      return;
+    }
+
+    currentModalProject = project;
+    const modal = document.getElementById('viewScoreModal');
+    const modalBody = document.getElementById('modalBody');
+    const modalFooter = document.getElementById('modalFooter');
+
+    // 生成极简SOD评分表内容
+    modalBody.innerHTML = generateSODViewHTML();
+    modalFooter.innerHTML = generateModalFooter();
+
+    // 显示模态框
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    // 绑定模态框内事件
+    setTimeout(() => {
+      bindModalEvents();
+    }, 100);
+  }
+
+  // 生成SOD查看HTML - 优化滚动和布局
+  function generateSODViewHTML() {
+    return `
+      <div class="sod-view-container">
+        <!-- 极简选项卡 -->
+        <div class="sod-tabs" id="sodTabsModal">
+          <button class="sod-tab active" data-type="S">S</button>
+          <button class="sod-tab" data-type="O">O</button>
+          <button class="sod-tab" data-type="D">D</button>
+        </div>
+
+        <!-- 表格内容区域 - 可滚动 -->
+        <div class="sod-content">
+          <div class="table-container-modal">
+            <table class="compact-table" id="scoreTableModal">
+              <thead>
+                <tr>
+                  <th class="score-column">分数</th>
+                  <th class="description-column" id="tableCol1Modal">描述</th>
+                  <th class="example-column" id="tableCol2Modal">示例</th>
+                </tr>
+              </thead>
+              <tbody id="scoreTableBodyModal">
+                <!-- 评分表内容会在这里动态生成 -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // 生成模态框底部按钮
+  function generateModalFooter() {
+    return `
+      <button class="btn-modal btn-close" id="closeBtnModal">
+        <i class="fas fa-times"></i> 关闭
+      </button>
+      <button class="btn-modal btn-edit" id="editBtnModal">
+        <i class="fas fa-edit"></i> 编辑
+      </button>
+    `;
+  }
+
+  // 获取SOD数据
+  function getSODData(fmeaCode) {
+    const storedData = JSON.parse(localStorage.getItem(`${SOD_STORAGE_PREFIX}${fmeaCode}`) || '{}');
+
+    // 如果没有存储的数据，使用模板数据
+    if (!storedData.S || storedData.S.length === 0) {
+      return {
+        S: JSON.parse(JSON.stringify(templateData.S)),
+        O: JSON.parse(JSON.stringify(templateData.O)),
+        D: JSON.parse(JSON.stringify(templateData.D))
+      };
+    }
+
+    return {
+      S: storedData.S || [],
+      O: storedData.O || [],
+      D: storedData.D || []
+    };
+  }
+
+  // 绑定模态框内事件
+  function bindModalEvents() {
+    // SOD选项卡切换
+    document.querySelectorAll('#sodTabsModal .sod-tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        const type = this.getAttribute('data-type');
+        switchModalDimension(type);
+      });
+    });
+
+    // 编辑按钮
+    document.getElementById('editBtnModal').addEventListener('click', function() {
+      if (currentModalProject) {
+        // 跳转到编辑页面
+        window.location.href = `SOD score.html?code=${encodeURIComponent(currentModalProject.fmeaCode)}`;
+      }
+    });
+
+    // 关闭按钮
+    document.getElementById('closeBtnModal').addEventListener('click', closeModal);
+
+    // 初始渲染第一个维度
+    switchModalDimension('S');
+  }
+
+  // 切换模态框维度
+  function switchModalDimension(type) {
+    if (!currentModalProject) return;
+
+    // 更新选项卡状态
+    document.querySelectorAll('#sodTabsModal .sod-tab').forEach(tab => {
+      tab.classList.remove('active');
+      if (tab.getAttribute('data-type') === type) {
+        tab.classList.add('active');
+      }
+    });
+
+    // 更新表头
+    const titles = columnTitles[type];
+    const col1 = document.getElementById('tableCol1Modal');
+    const col2 = document.getElementById('tableCol2Modal');
+
+    if (col1) col1.textContent = titles.col1;
+    if (col2) col2.textContent = titles.col2;
+
+    // 渲染评分表
+    renderModalScoreTable(type);
+  }
+
+  // 渲染模态框评分表 - 只显示数据，不显示描述
+  function renderModalScoreTable(type) {
+    if (!currentModalProject) return;
+
+    const tbody = document.getElementById('scoreTableBodyModal');
+    const sodData = getSODData(currentModalProject.fmeaCode);
+    const data = sodData[type];
+
+    tbody.innerHTML = '';
+
+    if (!data || data.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="3" class="no-data-modal">暂无数据</td>
+        </tr>
+      `;
+      return;
+    }
+
+    // 按分数降序排列（10分到1分）
+    const sortedData = [...data].sort((a, b) => b.score - a.score);
+
+    sortedData.forEach(item => {
+      const row = document.createElement('tr');
+
+      row.innerHTML = `
+        <td class="score-column">
+          <div class="score-number">${item.score}</div>
+        </td>
+        <td class="description-column">${item.description || ''}</td>
+        <td class="example-column ${!item.example ? 'empty-example' : ''}">
+          ${item.example || ''}
+        </td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+
+  // 绑定所有事件监听
+  function bindEventListeners() {
+    // 搜索按钮
+    document.getElementById('searchBtn').addEventListener('click', filterProjects);
+    // 搜索框回车
+    document.getElementById('searchKeyword').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') filterProjects();
+    });
+    // 重置按钮
+    document.getElementById('resetBtn').addEventListener('click', resetFilters);
+    // 分页按钮
+    document.getElementById('prevPageBtn').addEventListener('click', function() {
+      if (currentPage > 1) {
+        currentPage--;
+        renderProjectTable();
+        renderPagination();
+        updateTableVisibility();
+      }
+    });
+    document.getElementById('nextPageBtn').addEventListener('click', function() {
+      const totalPages = Math.ceil(filteredProjects.length / pageSize);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderProjectTable();
+        renderPagination();
+        updateTableVisibility();
+      }
+    });
+  }
+
+  // 导出项目
+  function exportProject(project) {
+    alert(`正在导出FMEA项目：${project.fmeaName || '未命名'}（${project.fmeaCode || '无编号'}）
+支持PDF/Excel格式导出
+导出成功！`);
+  }
+
+  // 多条件筛选
+  function filterProjects() {
+    const keyword = document.getElementById('searchKeyword').value.trim().toLowerCase();
+    const status = document.getElementById('statusFilter').value;
+
+    filteredProjects = fmeaProjects.filter(project => {
+      const fmeaName = (project.fmeaName || '').toLowerCase();
+      const fmeaCode = (project.fmeaCode || '').toLowerCase();
+      const responsiblePerson = (project.responsiblePerson || '').toLowerCase();
+      const projectType = (project.projectType || '').toLowerCase();
+      const projectStatus = project.projectStatus || '';
+
+      const matchKeyword = keyword === '' ||
+        fmeaName.includes(keyword) ||
+        fmeaCode.includes(keyword) ||
+        responsiblePerson.includes(keyword) ||
+        projectType.includes(keyword);
+
+      const matchStatus = status === '' || projectStatus === status;
+
+      return matchKeyword && matchStatus;
+    });
+
+    currentPage = 1;
+    renderProjectTable();
+    renderPagination();
+    updateTableVisibility();
+  }
+
+  // 重置筛选条件
+  function resetFilters() {
+    document.getElementById('searchKeyword').value = '';
+    document.getElementById('statusFilter').value = '';
+    filteredProjects = [...fmeaProjects];
+    currentPage = 1;
+    renderProjectTable();
+    renderPagination();
+    updateTableVisibility();
+  }
+</script>
+</body>
+</html>

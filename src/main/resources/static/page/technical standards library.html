@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>技术标准库</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+    }
+    body {
+      background-color: #f5f7fa;
+      color: #333;
+      padding: 30px;
+    }
+    .main-content {
+      max-width: 1800px;
+      margin: 0 auto;
+    }
+    .page-title {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #2f4050;
+      font-weight: 600;
+    }
+    .filter-container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .filter-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #2f4050;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e6e6e6;
+    }
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+      justify-content: flex-start;
+      margin-bottom: 10px;
+    }
+    .search-wrapper {
+      position: relative;
+      flex: 1;
+      min-width: 200px;
+      max-width: 350px;
+    }
+    .search-input {
+      width: 100%;
+      padding: 10px 15px 10px 40px;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      font-size: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: all 0.3s;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: #165DFF;
+      box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.1);
+    }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+      font-size: 16px;
+    }
+    .filter-select {
+      padding: 10px 15px;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      font-size: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: all 0.3s;
+      min-width: 150px;
+    }
+    .filter-select:focus {
+      outline: none;
+      border-color: #165DFF;
+      box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.1);
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 15px;
+      flex-shrink: 0;
+    }
+    .add-btn {
+      padding: 10px 24px;
+      background-color: #00B42A;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .add-btn:hover {
+      background-color: #009922;
+    }
+    .batch-delete-btn {
+      padding: 10px 24px;
+      background-color: #F53F3F;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .batch-delete-btn:hover {
+      background-color: #d92d2d;
+    }
+    .search-btn {
+      padding: 10px 24px;
+      background-color: #165DFF;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .search-btn:hover {
+      background-color: #0D52D9;
+    }
+    .reset-btn {
+      padding: 10px 24px;
+      background-color: #f5f7fa;
+      color: #666;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .reset-btn:hover {
+      background-color: #e8eaed;
+      border-color: #d9d9d9;
+    }
+
+    /* 修改：表格容器默认隐藏 */
+    .table-container {
+      position: relative;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      display: none; /* 默认隐藏 */
+    }
+
+    .scrollable-content {
+      overflow-x: auto;
+      overflow-y: auto;
+      max-height: 600px;
+      scrollbar-width: thin;
+      scrollbar-color: #c1c1c1 #f5f5f5;
+    }
+    .scrollable-content::-webkit-scrollbar {
+      height: 8px;
+      width: 8px;
+    }
+    .scrollable-content::-webkit-scrollbar-track {
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+    .scrollable-content::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+    .scrollable-content::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      min-width: 2000px;
+    }
+    .data-table thead {
+      background-color: #f8f9fa;
+      color: #2f4050;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    .data-table th, .data-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #e6e6e6;
+      font-size: 14px;
+      vertical-align: middle;
+      line-height: 1.5;
+      height: 60px;
+      min-height: 60px;
+      max-height: 60px;
+      overflow: hidden;
+    }
+    .data-table th {
+      font-weight: 600;
+      height: 48px;
+      min-height: 48px;
+    }
+    .data-table tbody tr {
+      height: 60px;
+      min-height: 60px;
+      max-height: 60px;
+    }
+    .data-table tbody tr:hover {
+      background-color: #fafbfc;
+      cursor: default;
+    }
+
+    .data-table th:nth-child(1),
+    .data-table td:nth-child(1) {
+      width: 60px;
+      min-width: 60px;
+      max-width: 60px;
+      text-align: center;
+    }
+    .data-table th:nth-child(2),
+    .data-table td:nth-child(2) {
+      width: 100px;
+      min-width: 100px;
+      max-width: 100px;
+    }
+    .data-table th:nth-child(3),
+    .data-table td:nth-child(3) {
+      width: 100px;
+      min-width: 100px;
+      max-width: 100px;
+    }
+    .data-table th:nth-child(4),
+    .data-table td:nth-child(4) {
+      width: 140px;
+      min-width: 140px;
+      max-width: 140px;
+    }
+    .data-table th:nth-child(5),
+    .data-table td:nth-child(5) {
+      width: 160px;
+      min-width: 160px;
+      max-width: 160px;
+    }
+    .data-table th:nth-child(6),
+    .data-table td:nth-child(6) {
+      width: 80px;
+      min-width: 80px;
+      max-width: 80px;
+      text-align: center;
+    }
+    .data-table th:nth-child(7),
+    .data-table td:nth-child(7) {
+      width: 120px;
+      min-width: 120px;
+      max-width: 120px;
+    }
+    .data-table th:nth-child(8),
+    .data-table td:nth-child(8) {
+      width: 120px;
+      min-width: 120px;
+      max-width: 120px;
+    }
+    .data-table th:nth-child(9),
+    .data-table td:nth-child(9) {
+      width: 180px;
+      min-width: 180px;
+      max-width: 180px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .data-table th:nth-child(10),
+    .data-table td:nth-child(10) {
+      width: 150px;
+      min-width: 150px;
+      max-width: 150px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .data-table th:nth-child(11),
+    .data-table td:nth-child(11) {
+      width: 200px;
+      min-width: 200px;
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .data-table th:nth-child(12),
+    .data-table td:nth-child(12) {
+      width: 120px;
+      min-width: 120px;
+      max-width: 120px;
+    }
+    .data-table th:nth-child(13),
+    .data-table td:nth-child(13) {
+      width: 120px;
+      min-width: 120px;
+      max-width: 120px;
+    }
+    .data-table th:nth-child(14),
+    .data-table td:nth-child(14) {
+      width: 100px;
+      min-width: 100px;
+      max-width: 100px;
+      text-align: center;
+      position: sticky;
+      right: 0;
+      background-color: #fff;
+      z-index: 3;
+      border-left: 1px solid #e6e6e6;
+      box-shadow: -2px 0 4px rgba(0, 0, 0, 0.05);
+    }
+    .data-table thead th:nth-child(14) {
+      background-color: #f8f9fa;
+      z-index: 6;
+    }
+    .data-table tbody tr:hover td:nth-child(14) {
+      background-color: #fafbfc;
+    }
+
+    /* 操作按钮样式 */
+    .operation-item {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-height: 36px;
+      flex-wrap: nowrap;
+      pointer-events: auto;
+    }
+    .op-btn {
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: transparent;
+      flex-shrink: 0;
+    }
+    .op-edit {
+      color: #165DFF;
+    }
+    .op-edit:hover {
+      background-color: #e8f4fd;
+    }
+    .op-delete {
+      color: #F53F3F;
+    }
+    .op-delete:hover {
+      background-color: #fef0f0;
+    }
+
+    /* 修改：分页默认隐藏 */
+    .pagination {
+      display: none; /* 默认隐藏 */
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+      gap: 10px;
+    }
+    .pagination-btn {
+      padding: 5px 12px;
+      border: 1px solid #e6e6e6;
+      border-radius: 4px;
+      background-color: #fff;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .pagination-btn.active {
+      background-color: #165DFF;
+      color: #fff;
+      border-color: #165DFF;
+    }
+    .pagination-btn:disabled {
+      cursor: not-allowed;
+      color: #ccc;
+      border-color: #eee;
+    }
+
+    /* 弹窗样式 */
+    .modal-mask {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      display: none;
+    }
+    .modal-container {
+      background-color: #fff;
+      border-radius: 8px;
+      width: 900px;
+      max-width: 95%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e6e6e6;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2f4050;
+    }
+    .modal-close {
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      color: #999;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .modal-close:hover {
+      color: #333;
+    }
+    .modal-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    .form-item {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .form-item.full-width {
+      grid-column: span 2;
+    }
+    .form-label {
+      font-size: 14px;
+      color: #666;
+      font-weight: 500;
+    }
+    .form-input, .form-select, .form-textarea {
+      padding: 10px 15px;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .form-textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: #165DFF;
+      box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.1);
+    }
+    .form-required {
+      color: #F53F3F;
+      margin-left: 4px;
+    }
+    .modal-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 1px solid #e6e6e6;
+      grid-column: span 2;
+    }
+    .modal-cancel {
+      padding: 8px 20px;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      background-color: #f5f7fa;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .modal-cancel:hover {
+      background-color: #e8eaed;
+    }
+    .modal-submit {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 8px;
+      background-color: #165DFF;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .modal-submit:hover {
+      background-color: #0D52D9;
+    }
+    .error-tip {
+      color: #F53F3F;
+      font-size: 12px;
+      display: none;
+    }
+    .batch-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    /* 详情查看弹窗 */
+    .detail-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      display: none;
+    }
+    .detail-content {
+      background-color: #fff;
+      border-radius: 8px;
+      width: 800px;
+      max-width: 95%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    .detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e6e6e6;
+    }
+    .detail-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2f4050;
+    }
+    .detail-close {
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      color: #999;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .detail-close:hover {
+      color: #333;
+    }
+    .detail-body {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #333;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    .detail-item {
+      margin-bottom: 15px;
+    }
+    .detail-item.full-width {
+      grid-column: span 2;
+    }
+    .detail-label {
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    .detail-value {
+      color: #333;
+      word-break: break-word;
+    }
+
+    /* 可点击单元格样式 - 和特性库相同 */
+    .clickable-cell {
+      cursor: pointer;
+      position: relative;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .clickable-cell:hover {
+      background-color: #f0f9ff !important;
+    }
+    .clickable-cell:hover::after {
+      content: '点击查看详情';
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: #165DFF;
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      opacity: 0.9;
+      z-index: 10;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    /* 描述单元格特殊样式 */
+    .desc-cell.clickable-cell {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .desc-cell.clickable-cell:hover::after {
+      content: '点击查看完整描述';
+      background-color: #165DFF;
+    }
+
+    /* 移除原有的desc-cell悬停样式，避免冲突 */
+    .desc-cell:hover::before {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .filter-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .search-wrapper {
+        max-width: 100%;
+      }
+      .filter-actions {
+        justify-content: center;
+        margin-left: 0;
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+      .scrollable-content {
+        max-height: 400px;
+      }
+      .data-table {
+        min-width: 2000px;
+      }
+      .modal-form {
+        grid-template-columns: 1fr;
+      }
+      .form-item.full-width {
+        grid-column: span 1;
+      }
+      .modal-footer {
+        grid-column: span 1;
+      }
+      .detail-body {
+        grid-template-columns: 1fr;
+      }
+      .detail-item.full-width {
+        grid-column: span 1;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="main-content">
+  <div class="page-title">技术标准库</div>
+
+  <!-- 筛选区域 -->
+  <div class="filter-container">
+    <div class="filter-title">筛选条件</div>
+    <div class="filter-row">
+      <!-- 主要信息搜索 - 包含客户名称搜索 -->
+      <div class="search-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" class="search-input" id="searchKeyword" placeholder="搜索：标准编号/名称/客户/试验编号/项目...">
+      </div>
+
+      <!-- 标准类型筛选 -->
+      <select class="filter-select" id="typeFilter">
+        <option value="">标准类型</option>
+        <option value="国家标准">国家标准</option>
+        <option value="行业标准">行业标准</option>
+        <option value="企业标准">企业标准</option>
+        <option value="国际标准">国际标准</option>
+        <option value="客户标准">客户标准</option>
+        <option value="测试标准">测试标准</option>
+      </select>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="filter-actions">
+      <button class="add-btn" id="addStandardBtn">
+        <i class="fas fa-plus mr-1"></i> 新增技术标准
+      </button>
+      <button class="batch-delete-btn" id="batchDeleteBtn">
+        <i class="fas fa-trash mr-1"></i> 批量删除
+      </button>
+      <button class="search-btn" id="searchBtn">
+        <i class="fas fa-search mr-1"></i> 搜索
+      </button>
+      <button class="reset-btn" id="resetBtn">
+        <i class="fas fa-refresh mr-1"></i> 重置
+      </button>
+    </div>
+  </div>
+
+  <!-- 技术标准表格 -->
+  <div class="table-container" id="tableContainer">
+    <div class="scrollable-content" id="scrollableContent">
+      <table class="data-table" id="dataTable">
+        <thead>
+        <tr>
+          <th><input type="checkbox" class="batch-checkbox" id="checkAll"></th>
+          <th>标准序号</th>
+          <th>标准类型</th>
+          <th>标准编号</th>
+          <th>标准名称</th>
+          <th>版本号</th>
+          <th>客户</th>
+          <th>试验编号</th>
+          <th>试验/检测项目</th>
+          <th>检测方法</th>
+          <th>标准要求</th>
+          <th>对应章节编号</th>
+          <th>最近更新时间</th>
+          <th>操作</th>
+        </tr>
+        </thead>
+        <tbody id="dataTableBody">
+        <!-- 数据表格内容由JS渲染 -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 分页 -->
+  <div class="pagination" id="paginationContainer">
+    <button class="pagination-btn" id="prevPageBtn">上一页</button>
+    <div id="pageNumberContainer"></div>
+    <button class="pagination-btn" id="nextPageBtn">下一页</button>
+  </div>
+</div>
+
+<!-- 新增/编辑技术标准弹窗 -->
+<div class="modal-mask" id="standardModal">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modalTitle">新增技术标准</h3>
+      <button class="modal-close" id="closeModalBtn">&times;</button>
+    </div>
+    <form class="modal-form" id="standardForm">
+      <input type="hidden" id="editStandardId">
+      <div class="form-item">
+        <label class="form-label">标准类型 <span class="form-required">*</span></label>
+        <select class="form-select" id="standardType">
+          <option value="">请选择标准类型</option>
+          <option value="国家标准">国家标准</option>
+          <option value="行业标准">行业标准</option>
+          <option value="企业标准">企业标准</option>
+          <option value="国际标准">国际标准</option>
+          <option value="客户标准">客户标准</option>
+          <option value="测试标准">测试标准</option>
+        </select>
+        <div class="error-tip" id="typeError">请选择标准类型</div>
+      </div>
+      <div class="form-item">
+        <label class="form-label">标准编号 <span class="form-required">*</span></label>
+        <input type="text" class="form-input" id="standardCode" placeholder="请输入标准编号">
+        <div class="error-tip" id="codeError">标准编号不能为空</div>
+      </div>
+      <div class="form-item">
+        <label class="form-label">标准名称 <span class="form-required">*</span></label>
+        <input type="text" class="form-input" id="standardName" placeholder="请输入标准名称">
+        <div class="error-tip" id="nameError">标准名称不能为空</div>
+      </div>
+      <div class="form-item">
+        <label class="form-label">版本号 <span class="form-required">*</span></label>
+        <input type="text" class="form-input" id="version" placeholder="如：V1.0、V2.1">
+        <div class="error-tip" id="versionError">版本号不能为空</div>
+      </div>
+      <div class="form-item">
+        <label class="form-label">客户</label>
+        <input type="text" class="form-input" id="customer" placeholder="请输入客户名称">
+      </div>
+      <div class="form-item">
+        <label class="form-label">试验编号</label>
+        <input type="text" class="form-input" id="testCode" placeholder="请输入试验编号">
+      </div>
+      <div class="form-item full-width">
+        <label class="form-label">试验/检测项目 <span class="form-required">*</span></label>
+        <textarea class="form-textarea" id="testItem" placeholder="请输入试验/检测项目"></textarea>
+        <div class="error-tip" id="testItemError">试验/检测项目不能为空</div>
+      </div>
+      <div class="form-item">
+        <label class="form-label">检测方法</label>
+        <input type="text" class="form-input" id="testMethod" placeholder="请输入检测方法">
+      </div>
+      <div class="form-item">
+        <label class="form-label">对应章节编号</label>
+        <input type="text" class="form-input" id="chapterCode" placeholder="请输入对应章节编号">
+      </div>
+      <div class="form-item full-width">
+        <label class="form-label">标准要求</label>
+        <textarea class="form-textarea" id="standardRequirement" placeholder="请输入标准要求"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="modal-cancel" id="cancelModalBtn">取消</button>
+        <button type="submit" class="modal-submit">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 详情查看弹窗 -->
+<div class="detail-modal" id="detailModal">
+  <div class="detail-content">
+    <div class="detail-header">
+      <h3 class="detail-title">技术标准详情</h3>
+      <button class="detail-close" id="closeDetailBtn">&times;</button>
+    </div>
+    <div class="detail-body" id="detailBody">
+      <!-- 详情内容由JS动态填充 -->
+    </div>
+  </div>
+</div>
+
+<script>
+  // 全局变量
+  let technicalStandards = JSON.parse(localStorage.getItem('technicalStandards') || '[]');
+  let currentPage = 1;
+  const pageSize = 10;
+  let filteredStandards = [...technicalStandards];
+
+  // 页面加载初始化
+  document.addEventListener('DOMContentLoaded', function() {
+    renderStandardTable();
+    bindEventListeners();
+    updateTableVisibility();
+  });
+
+  // 生成唯一标准ID
+  function generateStandardId() {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const count = technicalStandards.length + 1;
+    return `TS${year%100}${month}${day}${String(count).padStart(4, '0')}`;
+  }
+
+  // 生成标准序号
+  function generateSerialNo() {
+    const count = technicalStandards.length + 1;
+    return String(count).padStart(3, '0');
+  }
+
+  // 截断文本函数
+  function truncateText(text, maxLength = 25) {
+    if (!text || typeof text !== 'string') return '';
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  }
+
+  // 表单验证
+  function validateForm() {
+    let isValid = true;
+    const standardType = document.getElementById('standardType').value;
+    const standardCode = document.getElementById('standardCode').value.trim();
+    const standardName = document.getElementById('standardName').value.trim();
+    const version = document.getElementById('version').value.trim();
+    const testItem = document.getElementById('testItem').value.trim();
+
+    document.querySelectorAll('.error-tip').forEach(tip => {
+      tip.style.display = 'none';
+    });
+
+    if (!standardType) {
+      document.getElementById('typeError').style.display = 'block';
+      isValid = false;
+    }
+
+    if (!standardCode) {
+      document.getElementById('codeError').style.display = 'block';
+      isValid = false;
+    }
+
+    if (!standardName) {
+      document.getElementById('nameError').style.display = 'block';
+      isValid = false;
+    }
+
+    if (!version) {
+      document.getElementById('versionError').style.display = 'block';
+      isValid = false;
+    }
+
+    if (!testItem) {
+      document.getElementById('testItemError').style.display = 'block';
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  // 打开新增/编辑弹窗
+  function openModal(type, standard = null) {
+    const modal = document.getElementById('standardModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const editStandardId = document.getElementById('editStandardId');
+
+    document.getElementById('standardForm').reset();
+    document.querySelectorAll('.error-tip').forEach(tip => tip.style.display = 'none');
+
+    if (type === 'add') {
+      modalTitle.textContent = '新增技术标准';
+      editStandardId.value = '';
+      document.getElementById('customer').value = '';
+    } else if (type === 'edit') {
+      modalTitle.textContent = '编辑技术标准';
+      editStandardId.value = standard.id;
+      document.getElementById('standardType').value = standard.standardType;
+      document.getElementById('standardCode').value = standard.standardCode;
+      document.getElementById('standardName').value = standard.standardName;
+      document.getElementById('version').value = standard.version;
+      document.getElementById('customer').value = standard.customer || '';
+      document.getElementById('testCode').value = standard.testCode || '';
+      document.getElementById('testItem').value = standard.testItem || '';
+      document.getElementById('testMethod').value = standard.testMethod || '';
+      document.getElementById('chapterCode').value = standard.chapterCode || '';
+      document.getElementById('standardRequirement').value = standard.standardRequirement || '';
+    }
+
+    modal.style.display = 'flex';
+  }
+
+  // 关闭弹窗
+  function closeModal() {
+    document.getElementById('standardModal').style.display = 'none';
+  }
+
+  // 新增技术标准
+  function addStandard() {
+    const currentDate = new Date().toISOString().split('T')[0];
+    const newStandard = {
+      serialNo: generateSerialNo(),
+      standardType: document.getElementById('standardType').value,
+      standardCode: document.getElementById('standardCode').value.trim(),
+      standardName: document.getElementById('standardName').value.trim(),
+      version: document.getElementById('version').value.trim(),
+      customer: document.getElementById('customer').value.trim() || '',
+      testCode: document.getElementById('testCode').value.trim(),
+      testItem: document.getElementById('testItem').value.trim(),
+      testMethod: document.getElementById('testMethod').value.trim(),
+      standardRequirement: document.getElementById('standardRequirement').value.trim(),
+      chapterCode: document.getElementById('chapterCode').value.trim(),
+      createTime: currentDate,
+      lastUpdateTime: currentDate,
+      id: generateStandardId()
+    };
+
+    technicalStandards.push(newStandard);
+    localStorage.setItem('technicalStandards', JSON.stringify(technicalStandards));
+    filteredStandards = [...technicalStandards];
+    closeModal();
+    renderStandardTable();
+    updateTableVisibility();
+  }
+
+  // 编辑技术标准
+  function updateStandard() {
+    const standardId = document.getElementById('editStandardId').value;
+    const index = technicalStandards.findIndex(s => s.id === standardId);
+
+    if (index !== -1) {
+      technicalStandards[index] = {
+        ...technicalStandards[index],
+        standardType: document.getElementById('standardType').value,
+        standardCode: document.getElementById('standardCode').value.trim(),
+        standardName: document.getElementById('standardName').value.trim(),
+        version: document.getElementById('version').value.trim(),
+        customer: document.getElementById('customer').value.trim() || '',
+        testCode: document.getElementById('testCode').value.trim(),
+        testItem: document.getElementById('testItem').value.trim(),
+        testMethod: document.getElementById('testMethod').value.trim(),
+        standardRequirement: document.getElementById('standardRequirement').value.trim(),
+        chapterCode: document.getElementById('chapterCode').value.trim(),
+        lastUpdateTime: new Date().toISOString().split('T')[0]
+      };
+      localStorage.setItem('technicalStandards', JSON.stringify(technicalStandards));
+      filteredStandards = [...technicalStandards];
+      closeModal();
+      renderStandardTable();
+    }
+  }
+
+  // 显示技术标准详情
+  function showStandardDetail(standard) {
+    const detailModal = document.getElementById('detailModal');
+    const detailBody = document.getElementById('detailBody');
+
+    detailBody.innerHTML = `
+      <div class="detail-item">
+        <div class="detail-label">标准序号</div>
+        <div class="detail-value">${standard.serialNo}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">标准类型</div>
+        <div class="detail-value">${standard.standardType}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">标准编号</div>
+        <div class="detail-value">${standard.standardCode}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">标准名称</div>
+        <div class="detail-value">${standard.standardName}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">版本号</div>
+        <div class="detail-value">${standard.version}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">客户</div>
+        <div class="detail-value">${standard.customer || '未填写'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">试验编号</div>
+        <div class="detail-value">${standard.testCode || '无'}</div>
+      </div>
+      <div class="detail-item full-width">
+        <div class="detail-label">试验/检测项目</div>
+        <div class="detail-value">${standard.testItem || '无'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">检测方法</div>
+        <div class="detail-value">${standard.testMethod || '无'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">对应章节编号</div>
+        <div class="detail-value">${standard.chapterCode || '无'}</div>
+      </div>
+      <div class="detail-item full-width">
+        <div class="detail-label">标准要求</div>
+        <div class="detail-value">${standard.standardRequirement || '无'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">创建时间</div>
+        <div class="detail-value">${standard.createTime}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">最近更新时间</div>
+        <div class="detail-value">${standard.lastUpdateTime}</div>
+      </div>
+    `;
+
+    detailModal.style.display = 'flex';
+  }
+
+  // 关闭详情弹窗
+  function closeDetailModal() {
+    document.getElementById('detailModal').style.display = 'none';
+  }
+
+  // 渲染技术标准表格
+  function renderStandardTable() {
+    const dataTableBody = document.getElementById('dataTableBody');
+    const tableContainer = document.getElementById('tableContainer');
+    const paginationContainer = document.getElementById('paginationContainer');
+
+    dataTableBody.innerHTML = '';
+
+    // 检查是否有数据
+    if (filteredStandards.length === 0) {
+      // 没有数据，隐藏表格和分页
+      tableContainer.style.display = 'none';
+      paginationContainer.style.display = 'none';
+      return;
+    }
+
+    // 有数据，显示表格容器
+    tableContainer.style.display = 'block';
+
+    // 计算分页数据
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedStandards = filteredStandards.slice(startIndex, endIndex);
+
+    paginatedStandards.forEach((standard, index) => {
+      const truncatedTestItem = truncateText(standard.testItem, 25);
+      const truncatedTestMethod = truncateText(standard.testMethod, 20);
+      const truncatedRequirement = truncateText(standard.standardRequirement, 30);
+
+      const row = document.createElement('tr');
+      row.setAttribute('data-index', index);
+      row.setAttribute('data-standard', standard.id);
+      row.innerHTML = `
+        <td><input type="checkbox" class="batch-checkbox" data-standard="${standard.id}"></td>
+        <td class="clickable-cell" onclick="showStandardDetailById('${standard.id}')">
+          ${standard.serialNo}
+        </td>
+        <td class="clickable-cell" onclick="showStandardDetailById('${standard.id}')">
+          ${standard.standardType}
+        </td>
+        <td class="clickable-cell" onclick="showStandardDetailById('${standard.id}')">
+          ${standard.standardCode}
+        </td>
+        <td class="clickable-cell" onclick="showStandardDetailById('${standard.id}')">
+          ${standard.standardName}
+        </td>
+        <td class="clickable-cell" onclick="showStandardDetailById('${standard.id}')">
+          ${standard.version}
+        </td>
+        <td class="clickable-cell" onclick="showStandardDetailById('${standard.id}')">
+          ${standard.customer || '未填写'}
+        </td>
+        <td class="clickable-cell" onclick="showStandardDetailById('${standard.id}')">
+          ${standard.testCode || '无'}
+        </td>
+        <td class="clickable-cell desc-cell" onclick="showStandardDetailById('${standard.id}')">
+          ${truncatedTestItem || '无'}
+        </td>
+        <td class="clickable-cell desc-cell" onclick="showStandardDetailById('${standard.id}')">
+          ${truncatedTestMethod || '无'}
+        </td>
+        <td class="clickable-cell desc-cell" onclick="showStandardDetailById('${standard.id}')">
+          ${truncatedRequirement || '无'}
+        </td>
+        <td class="clickable-cell" onclick="showStandardDetailById('${standard.id}')">
+          ${standard.chapterCode || '无'}
+        </td>
+        <td class="clickable-cell" onclick="showStandardDetailById('${standard.id}')">
+          ${standard.lastUpdateTime}
+        </td>
+        <td>
+          <div class="operation-item">
+            <!-- 编辑按钮 -->
+            <button class="op-btn op-edit" data-standard="${standard.id}">
+              <i class="fa-solid fa-edit"></i>
+            </button>
+            <!-- 删除按钮 -->
+            <button class="op-btn op-delete" data-standard="${standard.id}">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        </td>
+      `;
+      dataTableBody.appendChild(row);
+    });
+
+    bindOperationBtnEvents();
+    bindCheckboxEvents();
+    renderPagination();
+  }
+
+  // 根据标准ID显示详情
+  function showStandardDetailById(standardId) {
+    const standard = technicalStandards.find(s => s.id === standardId);
+    if (standard) {
+      showStandardDetail(standard);
+    }
+  }
+
+  // 更新表格可见性
+  function updateTableVisibility() {
+    const tableContainer = document.getElementById('tableContainer');
+    const paginationContainer = document.getElementById('paginationContainer');
+
+    if (filteredStandards.length === 0) {
+      tableContainer.style.display = 'none';
+      paginationContainer.style.display = 'none';
+    } else {
+      tableContainer.style.display = 'block';
+      renderPagination();
+    }
+  }
+
+  // 绑定复选框事件
+  function bindCheckboxEvents() {
+    const checkAll = document.getElementById('checkAll');
+    const checkItems = document.querySelectorAll('.batch-checkbox[data-standard]');
+
+    checkAll.addEventListener('change', function() {
+      checkItems.forEach(item => {
+        item.checked = this.checked;
+      });
+    });
+
+    checkItems.forEach(item => {
+      item.addEventListener('change', function() {
+        const allChecked = Array.from(checkItems).every(i => i.checked);
+        checkAll.checked = allChecked;
+      });
+    });
+  }
+
+  // 批量删除技术标准
+  function batchDeleteStandards() {
+    const checkedItems = document.querySelectorAll('.batch-checkbox[data-standard]:checked');
+    if (checkedItems.length === 0) {
+      alert('请选择要删除的技术标准！');
+      return;
+    }
+
+    if (confirm(`确认删除选中的${checkedItems.length}个技术标准吗？删除后不可恢复！`)) {
+      const deleteIds = Array.from(checkedItems).map(item => item.getAttribute('data-standard'));
+      technicalStandards = technicalStandards.filter(s => !deleteIds.includes(s.id));
+      localStorage.setItem('technicalStandards', JSON.stringify(technicalStandards));
+      filteredStandards = [...technicalStandards];
+      currentPage = 1;
+      renderStandardTable();
+      updateTableVisibility();
+    }
+  }
+
+  // 渲染分页
+  function renderPagination() {
+    const totalPages = Math.ceil(filteredStandards.length / pageSize);
+    const pageContainer = document.getElementById('pageNumberContainer');
+    const prevBtn = document.getElementById('prevPageBtn');
+    const nextBtn = document.getElementById('nextPageBtn');
+    const paginationContainer = document.getElementById('paginationContainer');
+
+    // 检查是否有数据
+    if (filteredStandards.length === 0) {
+      paginationContainer.style.display = 'none';
+      return;
+    }
+
+    // 有数据，显示分页容器
+    paginationContainer.style.display = 'flex';
+    pageContainer.innerHTML = '';
+
+    // 如果只有一页或没有数据，隐藏分页
+    if (totalPages <= 1) {
+      paginationContainer.style.display = 'none';
+      return;
+    }
+
+    for (let i = 1; i <= totalPages; i++) {
+      const pageBtn = document.createElement('button');
+      pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+      pageBtn.textContent = i;
+      pageBtn.addEventListener('click', function() {
+        currentPage = i;
+        renderStandardTable();
+        renderPagination();
+      });
+      pageContainer.appendChild(pageBtn);
+    }
+
+    prevBtn.disabled = currentPage === 1;
+    nextBtn.disabled = currentPage === totalPages;
+  }
+
+  // 绑定操作按钮事件
+  function bindOperationBtnEvents() {
+    document.querySelectorAll('.op-edit').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const standardId = this.getAttribute('data-standard');
+        const standard = technicalStandards.find(s => s.id === standardId);
+        if (standard) {
+          openModal('edit', standard);
+        }
+      });
+    });
+
+    document.querySelectorAll('.op-delete').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const standardId = this.getAttribute('data-standard');
+        const standard = technicalStandards.find(s => s.id === standardId);
+        if (confirm(`确认删除技术标准【${standard.standardName}】吗？删除后不可恢复！`)) {
+          technicalStandards = technicalStandards.filter(s => s.id !== standardId);
+          localStorage.setItem('technicalStandards', JSON.stringify(technicalStandards));
+          filteredStandards = [...technicalStandards];
+          const totalPages = Math.ceil(filteredStandards.length / pageSize);
+          if (currentPage > totalPages && totalPages > 0) {
+            currentPage = totalPages;
+          } else if (totalPages === 0) {
+            currentPage = 1;
+          }
+          renderStandardTable();
+          updateTableVisibility();
+        }
+      });
+    });
+  }
+
+  // 多条件筛选
+  function filterStandards() {
+    const keyword = document.getElementById('searchKeyword').value.trim().toLowerCase();
+    const type = document.getElementById('typeFilter').value;
+
+    filteredStandards = technicalStandards.filter(standard => {
+      const matchKeyword = keyword === '' ||
+              standard.standardCode.toLowerCase().includes(keyword) ||
+              standard.standardName.toLowerCase().includes(keyword) ||
+              (standard.customer && standard.customer.toLowerCase().includes(keyword)) ||
+              (standard.testCode && standard.testCode.toLowerCase().includes(keyword)) ||
+              (standard.testItem && standard.testItem.toLowerCase().includes(keyword)) ||
+              (standard.testMethod && standard.testMethod.toLowerCase().includes(keyword)) ||
+              (standard.standardRequirement && standard.standardRequirement.toLowerCase().includes(keyword));
+
+      const matchType = type === '' || standard.standardType === type;
+
+      return matchKeyword && matchType;
+    });
+
+    currentPage = 1;
+    renderStandardTable();
+    updateTableVisibility();
+  }
+
+  // 重置筛选条件
+  function resetFilters() {
+    document.getElementById('searchKeyword').value = '';
+    document.getElementById('typeFilter').value = '';
+    filteredStandards = [...technicalStandards];
+    currentPage = 1;
+    renderStandardTable();
+    updateTableVisibility();
+  }
+
+  // 绑定所有事件监听
+  function bindEventListeners() {
+    document.getElementById('searchBtn').addEventListener('click', filterStandards);
+    document.getElementById('searchKeyword').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') filterStandards();
+    });
+    document.getElementById('resetBtn').addEventListener('click', resetFilters);
+    document.getElementById('addStandardBtn').addEventListener('click', () => openModal('add'));
+    document.getElementById('batchDeleteBtn').addEventListener('click', batchDeleteStandards);
+    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+    document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
+    document.getElementById('closeDetailBtn').addEventListener('click', closeDetailModal);
+
+    document.getElementById('standardForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (validateForm()) {
+        const editStandardId = document.getElementById('editStandardId').value;
+        if (editStandardId) {
+          updateStandard();
+        } else {
+          addStandard();
+        }
+      }
+    });
+
+    document.getElementById('prevPageBtn').addEventListener('click', function() {
+      if (currentPage > 1) {
+        currentPage--;
+        renderStandardTable();
+        renderPagination();
+      }
+    });
+
+    document.getElementById('nextPageBtn').addEventListener('click', function() {
+      const totalPages = Math.ceil(filteredStandards.length / pageSize);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderStandardTable();
+        renderPagination();
+      }
+    });
+  }
+</script>
+</body>
+</html>
