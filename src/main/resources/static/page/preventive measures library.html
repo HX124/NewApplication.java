@@ -23,9 +23,64 @@
     }
     .page-title {
       font-size: 24px;
-      margin-bottom: 20px;
+      margin-bottom: 8px;
       color: #2f4050;
       font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .page-subtitle {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 18px 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      border: 1px solid #e6e6e6;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .stat-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      transform: translateY(-1px);
+    }
+    .stat-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .stat-icon.total { background: #eef2ff; color: #165DFF; }
+    .stat-icon.category { background: #ecfdf5; color: #059669; }
+    .stat-icon.today { background: #fff7ed; color: #ea580c; }
+    .stat-info h4 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #2f4050;
+      line-height: 1.2;
+    }
+    .stat-info p {
+      font-size: 13px;
+      color: #666;
     }
     .filter-container {
       background-color: #fff;
@@ -93,21 +148,9 @@
       border-color: #165DFF;
       box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.1);
     }
-    .date-label {
-      font-size: 14px;
-      color: #666;
-      margin-right: 8px;
-      white-space: nowrap;
-    }
-    .date-range {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
     .filter-actions {
       display: flex;
       gap: 10px;
-      margin-left: auto;
       margin-top: 10px;
       flex-shrink: 0;
       justify-content: flex-end;
@@ -176,7 +219,6 @@
       border-color: #d9d9d9;
     }
 
-    /* 表格容器新布局 - 改为单一表格，默认隐藏 */
     .table-container {
       position: relative;
       background-color: #fff;
@@ -185,8 +227,6 @@
       overflow: hidden;
       display: none;
     }
-
-    /* 滚动容器 */
     .scrollable-content {
       overflow-x: auto;
       overflow-y: auto;
@@ -210,12 +250,11 @@
       background: #a8a8a8;
     }
 
-    /* 单一表格样式 - 确保行高绝对一致 */
     .data-table {
       width: 100%;
       border-collapse: collapse;
       table-layout: fixed;
-      min-width: 700px;
+      min-width: 800px;
     }
     .data-table thead {
       background-color: #f8f9fa;
@@ -232,90 +271,38 @@
       vertical-align: middle;
       line-height: 1.5;
       height: 60px;
-      min-height: 60px;
-      max-height: 60px;
       overflow: hidden;
     }
     .data-table th {
       font-weight: 600;
       height: 48px;
-      min-height: 48px;
     }
     .data-table tbody tr {
       height: 60px;
-      min-height: 60px;
-      max-height: 60px;
     }
     .data-table tbody tr:hover {
       background-color: #fafbfc;
-      cursor: default;
     }
 
-    /* 重新设置各列宽度 */
-    .data-table th:nth-child(1),
-    .data-table td:nth-child(1) {
-      width: 60px;
-      min-width: 60px;
-      max-width: 60px;
-      text-align: center;
-    }
-    .data-table th:nth-child(2),
-    .data-table td:nth-child(2) {
-      width: 140px;
-      min-width: 140px;
-      max-width: 140px;
-    }
-    .data-table th:nth-child(3),
-    .data-table td:nth-child(3) {
-      width: 350px;
-      min-width: 350px;
-      max-width: 350px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      line-height: 1.5;
-    }
-    .data-table th:nth-child(4),
-    .data-table td:nth-child(4) {
-      width: 140px;
-      min-width: 140px;
-      max-width: 140px;
-    }
-    /* 操作列 - 完全与探测措施库相同 */
-    .data-table th:nth-child(5),
-    .data-table td:nth-child(5) {
-      width: 80px;
-      min-width: 80px;
-      max-width: 80px;
-      text-align: center;
-      position: sticky;
-      right: 0;
-      background-color: #fff;
-      z-index: 3;
-      border-left: 1px solid #e6e6e6;
-    }
-    .data-table thead th:nth-child(5) {
-      background-color: #f8f9fa;
-      z-index: 6;
-    }
+    .data-table th:nth-child(1), .data-table td:nth-child(1) { width: 60px; text-align: center; }
+    .data-table th:nth-child(2), .data-table td:nth-child(2) { width: 130px; }
+    .data-table th:nth-child(3), .data-table td:nth-child(3) { width: 100px; }
+    .data-table th:nth-child(4), .data-table td:nth-child(4) { width: 300px; }
+    .data-table th:nth-child(5), .data-table td:nth-child(5) { width: 140px; }
+    .data-table th:nth-child(6), .data-table td:nth-child(6) { width: 80px; text-align: center; position: sticky; right: 0; background: #fff; border-left: 1px solid #e6e6e6; }
+    .data-table thead th:nth-child(6) { background: #f8f9fa; z-index: 6; }
 
-    /* 操作按钮容器 - 完全与探测措施库相同 */
     .operation-item {
       display: flex;
-      gap: 4px; /* 按钮间距与探测库相同 */
+      gap: 4px;
       align-items: center;
       justify-content: center;
       height: 100%;
-      min-height: 36px;
-      flex-wrap: nowrap;
-      pointer-events: auto; /* 防止点击行时触发操作按钮 */
+      pointer-events: auto;
     }
-
-    /* 操作按钮 - 完全与探测措施库相同 */
     .op-btn {
       width: 26px;
       height: 26px;
-      padding: 0;
       border: none;
       border-radius: 4px;
       font-size: 14px;
@@ -325,240 +312,22 @@
       align-items: center;
       justify-content: center;
       background-color: transparent;
-      flex-shrink: 0;
-      flex: 0 0 26px;
     }
-    .op-edit {
-      color: #165DFF;
-    }
-    .op-edit:hover {
-      background-color: #e8f4fd;
-    }
-    .op-delete {
-      color: #F53F3F;
-    }
-    .op-delete:hover {
-      background-color: #fef0f0;
-    }
+    .op-edit { color: #165DFF; }
+    .op-edit:hover { background-color: #e8f4fd; }
+    .op-delete { color: #F53F3F; }
+    .op-delete:hover { background-color: #fef0f0; }
 
-    /* 分页样式 - 默认隐藏 */
-    .pagination {
-      display: none;
-      justify-content: center;
-      align-items: center;
-      margin-top: 20px;
-      gap: 10px;
-    }
-    .pagination-btn {
-      padding: 5px 12px;
-      border: 1px solid #e6e6e6;
-      border-radius: 4px;
-      background-color: #fff;
-      color: #666;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .pagination-btn.active {
-      background-color: #165DFF;
-      color: #fff;
-      border-color: #165DFF;
-    }
-    .pagination-btn:disabled {
-      cursor: not-allowed;
-      color: #ccc;
-      border-color: #eee;
-    }
-
-    /* 弹窗样式 */
-    .modal-mask {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      display: none;
-    }
-    .modal-container {
-      background-color: #fff;
-      border-radius: 8px;
-      width: 600px;
-      max-width: 90%;
-      padding: 20px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #e6e6e6;
-    }
-    .modal-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: #2f4050;
-    }
-    .modal-close {
-      background: transparent;
-      border: none;
-      font-size: 20px;
-      color: #999;
-      cursor: pointer;
-      transition: color 0.3s;
-    }
-    .modal-close:hover {
-      color: #333;
-    }
-    .modal-form {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-    .form-item {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-    .form-label {
-      font-size: 14px;
-      color: #666;
-      font-weight: 500;
-    }
-    .form-input, .form-select, .form-textarea {
-      padding: 10px 15px;
-      border: 1px solid #e6e6e6;
-      border-radius: 8px;
-      font-size: 14px;
-    }
-    .form-textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-    .form-input:focus, .form-select:focus, .form-textarea:focus {
-      outline: none;
-      border-color: #165DFF;
-      box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.1);
-    }
-    .form-required {
-      color: #F53F3F;
-      margin-left: 4px;
-    }
-    .modal-footer {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      margin-top: 20px;
-      padding-top: 10px;
-      border-top: 1px solid #e6e6e6;
-    }
-    .modal-cancel {
-      padding: 8px 20px;
-      border: 1px solid #e6e6e6;
-      border-radius: 8px;
-      background-color: #f5f7fa;
-      color: #666;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .modal-cancel:hover {
-      background-color: #e8eaed;
-    }
-    .modal-submit {
-      padding: 8px 20px;
-      border: none;
-      border-radius: 8px;
-      background-color: #165DFF;
-      color: #fff;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    .modal-submit:hover {
-      background-color: #0D52D9;
-    }
-    .error-tip {
-      color: #F53F3F;
+    .category-tag {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
       font-size: 12px;
-      display: none;
-    }
-    .batch-checkbox {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
+      font-weight: 500;
+      background: #f0f0f0;
+      color: #555;
     }
 
-    /* 详情查看弹窗 */
-    .detail-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-      display: none;
-    }
-    .detail-content {
-      background-color: #fff;
-      border-radius: 8px;
-      width: 600px;
-      max-width: 90%;
-      padding: 24px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-    .detail-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #e6e6e6;
-    }
-    .detail-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: #2f4050;
-    }
-    .detail-close {
-      background: transparent;
-      border: none;
-      font-size: 20px;
-      color: #999;
-      cursor: pointer;
-      transition: color 0.3s;
-    }
-    .detail-close:hover {
-      color: #333;
-    }
-    .detail-body {
-      font-size: 14px;
-      line-height: 1.6;
-      color: #333;
-    }
-    .detail-item {
-      margin-bottom: 15px;
-    }
-    .detail-label {
-      font-weight: 600;
-      color: #666;
-      margin-bottom: 5px;
-    }
-    .detail-value {
-      color: #333;
-      word-break: break-word;
-    }
-
-    /* 可点击单元格样式 - 与探测库相同 */
     .clickable-cell {
       cursor: pointer;
       position: relative;
@@ -586,110 +355,175 @@
       pointer-events: none;
     }
 
-    /* 功能描述单元格特殊样式 */
-    .desc-cell.clickable-cell {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 350px;
+    .no-data-guide {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
     }
-    .desc-cell.clickable-cell:hover::after {
-      content: '点击查看完整描述';
-      background-color: #165DFF;
+    .no-data-guide i {
+      font-size: 48px;
+      margin-bottom: 16px;
+      color: #ccc;
     }
 
+    .pagination {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+      gap: 10px;
+    }
+    .pagination-btn {
+      padding: 5px 12px;
+      border: 1px solid #e6e6e6;
+      border-radius: 4px;
+      background-color: #fff;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .pagination-btn.active { background-color: #165DFF; color: #fff; border-color: #165DFF; }
+    .pagination-btn:disabled { cursor: not-allowed; color: #ccc; border-color: #eee; }
+
+    .modal-mask {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;
+      display: none;
+    }
+    .modal-container {
+      background: #fff; border-radius: 8px; width: 600px; max-width: 90%; padding: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #e6e6e6; }
+    .modal-title { font-size: 18px; font-weight: 600; color: #2f4050; }
+    .modal-close { background: transparent; border: none; font-size: 20px; color: #999; cursor: pointer; }
+    .modal-form { display: flex; flex-direction: column; gap: 15px; }
+    .form-item { display: flex; flex-direction: column; gap: 5px; }
+    .form-label { font-size: 14px; color: #666; font-weight: 500; }
+    .form-input, .form-select, .form-textarea { padding: 10px 15px; border: 1px solid #e6e6e6; border-radius: 8px; font-size: 14px; }
+    .form-textarea { min-height: 100px; resize: vertical; }
+    .form-required { color: #F53F3F; }
+    .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; padding-top: 10px; border-top: 1px solid #e6e6e6; }
+    .modal-cancel { padding: 8px 20px; border: 1px solid #e6e6e6; border-radius: 8px; background: #f5f7fa; color: #666; cursor: pointer; }
+    .modal-submit { padding: 8px 20px; border: none; border-radius: 8px; background: #165DFF; color: #fff; cursor: pointer; }
+    .error-tip { color: #F53F3F; font-size: 12px; display: none; }
+    .batch-checkbox { width: 18px; height: 18px; }
+
+    .detail-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000; display: none; }
+    .detail-content { background: #fff; border-radius: 8px; width: 600px; max-width: 90%; padding: 24px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
+    .detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #e6e6e6; }
+    .detail-title { font-size: 18px; font-weight: 600; color: #2f4050; }
+    .detail-close { background: transparent; border: none; font-size: 20px; color: #999; cursor: pointer; }
+    .detail-body { font-size: 14px; line-height: 1.6; color: #333; }
+    .detail-item { margin-bottom: 15px; }
+    .detail-label { font-weight: 600; color: #666; margin-bottom: 5px; }
+    .detail-value { color: #333; word-break: break-word; }
+
     @media (max-width: 768px) {
-      .filter-row {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .search-wrapper {
-        max-width: 100%;
-      }
-      .filter-actions {
-        justify-content: center;
-        margin-left: 0;
-        margin-top: 10px;
-        flex-wrap: wrap;
-      }
-      .date-range {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 5px;
-      }
-      .scrollable-content {
-        max-height: 500px;
-      }
-      .data-table {
-        min-width: 600px;
-      }
+      body { padding: 15px; }
+      .filter-row { flex-direction: column; align-items: stretch; }
+      .search-wrapper { max-width: 100%; }
+      .filter-actions { justify-content: center; }
+      .scrollable-content { max-height: 500px; }
     }
   </style>
 </head>
 <body>
 <div class="main-content">
-  <!-- 修改：移除FMEA管理系统前缀 -->
-  <div class="page-title">预防措施库</div>
+  <div class="page-title">
+    <i class="fa-solid fa-shield-halved" style="color:#165DFF;"></i> 预防措施库
+  </div>
+  <div class="page-subtitle">
+    <i class="fa-solid fa-circle-info" style="color:#165DFF;"></i> 管理FMEA中的预防控制措施，支持按分类快速检索与引用
+  </div>
+
+  <!-- 统计卡片 -->
+  <div class="stats-row" id="statsRow">
+    <div class="stat-card" onclick="filterByCategory('all')" title="点击查看全部措施">
+      <div class="stat-icon total"><i class="fa-solid fa-clipboard-list"></i></div>
+      <div class="stat-info">
+        <h4 id="totalCount">0</h4>
+        <p>措施总数</p>
+      </div>
+    </div>
+    <div class="stat-card" onclick="filterByCategory('all')" title="点击查看全部措施">
+      <div class="stat-icon category"><i class="fa-solid fa-tags"></i></div>
+      <div class="stat-info">
+        <h4 id="categoryCount">0</h4>
+        <p>已启用分类</p>
+      </div>
+    </div>
+    <div class="stat-card" title="今日新增措施">
+      <div class="stat-icon today"><i class="fa-solid fa-calendar-plus"></i></div>
+      <div class="stat-info">
+        <h4 id="todayNew">0</h4>
+        <p>今日新增</p>
+      </div>
+    </div>
+  </div>
 
   <!-- 筛选区域 -->
   <div class="filter-container">
     <div class="filter-title">筛选条件</div>
     <div class="filter-row">
-      <!-- 主要信息搜索 -->
       <div class="search-wrapper">
         <i class="fas fa-search search-icon"></i>
         <input type="text" class="search-input" id="searchKeyword" placeholder="搜索：措施编号/描述...">
       </div>
-    </div>
-
-    <!-- 按钮区域 - 放在右下角 -->
-    <div class="filter-actions">
-      <button class="add-btn" id="addMeasureBtn">
-        <i class="fas fa-plus mr-1"></i> 新增预防措施
-      </button>
-      <button class="batch-delete-btn" id="batchDeleteBtn">
-        <i class="fas fa-trash mr-1"></i> 批量删除
-      </button>
-      <button class="search-btn" id="searchBtn">
-        <i class="fas fa-search mr-1"></i> 搜索
-      </button>
-      <button class="reset-btn" id="resetBtn">
-        <i class="fas fa-refresh mr-1"></i> 重置
-      </button>
+      <select class="filter-select" id="categoryFilter">
+        <option value="all">全部分类</option>
+        <option value="设计预防">设计预防</option>
+        <option value="过程预防">过程预防</option>
+        <option value="检测预防">检测预防</option>
+        <option value="管理措施">管理措施</option>
+        <option value="其他">其他</option>
+      </select>
+      <div class="filter-actions">
+        <button class="add-btn" id="addMeasureBtn"><i class="fas fa-plus"></i> 新增预防措施</button>
+        <button class="batch-delete-btn" id="batchDeleteBtn"><i class="fas fa-trash"></i> 批量删除</button>
+        <button class="search-btn" id="searchBtn"><i class="fas fa-search"></i> 搜索</button>
+        <button class="reset-btn" id="resetBtn"><i class="fas fa-redo"></i> 重置</button>
+      </div>
     </div>
   </div>
 
-  <!-- 预防措施表格 - 单一表格布局 -->
+  <!-- 无数据引导 -->
+  <div class="no-data-guide" id="noDataGuide" style="display: none;">
+    <i class="fa-solid fa-box-open"></i>
+    <h3 style="color:#2f4050; margin-bottom:8px;">暂无预防措施</h3>
+    <p style="color:#999;">点击"新增预防措施"按钮添加第一条预防控制措施</p>
+  </div>
+
+  <!-- 表格 -->
   <div class="table-container" id="tableContainer">
-    <div class="scrollable-content" id="scrollableContent">
-      <table class="data-table" id="dataTable">
+    <div class="scrollable-content">
+      <table class="data-table">
         <thead>
         <tr>
           <th><input type="checkbox" class="batch-checkbox" id="checkAll"></th>
           <th>措施编号</th>
+          <th>分类</th>
           <th>措施描述</th>
           <th>最近更新时间</th>
           <th>操作</th>
         </tr>
         </thead>
-        <tbody id="dataTableBody">
-        <!-- 数据表格内容由JS渲染 -->
-        </tbody>
+        <tbody id="dataTableBody"></tbody>
       </table>
     </div>
   </div>
 
-  <!-- 分页 -->
   <div class="pagination" id="paginationContainer">
     <button class="pagination-btn" id="prevPageBtn">上一页</button>
-    <div id="pageNumberContainer">
-      <button class="pagination-btn active">1</button>
-    </div>
+    <div id="pageNumberContainer"></div>
     <button class="pagination-btn" id="nextPageBtn">下一页</button>
   </div>
 </div>
 
-<!-- 新增/编辑预防措施弹窗 -->
+<!-- 新增/编辑弹窗 -->
 <div class="modal-mask" id="measureModal">
   <div class="modal-container">
     <div class="modal-header">
@@ -698,6 +532,18 @@
     </div>
     <form class="modal-form" id="measureForm">
       <input type="hidden" id="editMeasureCode">
+      <div class="form-item">
+        <label class="form-label">措施分类 <span class="form-required">*</span></label>
+        <select class="form-select" id="measureCategory">
+          <option value="">请选择分类</option>
+          <option value="设计预防">设计预防</option>
+          <option value="过程预防">过程预防</option>
+          <option value="检测预防">检测预防</option>
+          <option value="管理措施">管理措施</option>
+          <option value="其他">其他</option>
+        </select>
+        <div class="error-tip" id="categoryError">请选择措施分类</div>
+      </div>
       <div class="form-item">
         <label class="form-label">措施描述 <span class="form-required">*</span></label>
         <textarea class="form-textarea" id="measureDescription" placeholder="请输入预防措施的详细描述..."></textarea>
@@ -711,422 +557,385 @@
   </div>
 </div>
 
-<!-- 详情查看弹窗 - 样式调整为与特性库相同 -->
+<!-- 详情弹窗 -->
 <div class="detail-modal" id="detailModal">
   <div class="detail-content">
     <div class="detail-header">
       <h3 class="detail-title">预防措施详情</h3>
       <button class="detail-close" id="closeDetailBtn">&times;</button>
     </div>
-    <div class="detail-body" id="detailBody">
-      <!-- 详情内容由JS动态填充 -->
-    </div>
+    <div class="detail-body" id="detailBody"></div>
   </div>
 </div>
 
 <script>
-  // 全局变量
-  let preventiveMeasures = JSON.parse(localStorage.getItem('preventiveMeasures') || '[]');
+  // ========== 后端 API 地址 ==========
+  const API_BASE = 'http://localhost:8088/library/preventive-measure';
+
+  // ========== 全局数据（从后端获取） ==========
+  let preventiveMeasures = [];
   let currentPage = 1;
   const pageSize = 10;
-  let filteredMeasures = [...preventiveMeasures];
+  let filteredMeasures = [];
 
-  // 页面加载初始化
-  document.addEventListener('DOMContentLoaded', function() {
-    renderMeasureTable();
-    bindEventListeners();
-    renderPagination();
-    bindCellClickEvents();
-  });
+  // ========== 从后端获取全部数据 ==========
+  async function fetchMeasures() {
+    try {
+      const res = await fetch(`${API_BASE}/list`);
+      const result = await res.json();
+      preventiveMeasures = result.code === 200 ? (result.data || []) : [];
+      filteredMeasures = [...preventiveMeasures];
+    } catch (err) {
+      console.error('获取预防措施失败:', err);
+    }
+  }
 
-  // 生成唯一措施编号
+  // ========== 编号生成 ==========
   function generateMeasureCode() {
-    const date = new Date();
+    const d = new Date();
+    const y = d.getFullYear().toString().slice(-2);
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const count = preventiveMeasures.length + 1;
+    return `PC${y}${m}${day}${String(count).padStart(4, '0')}`;
+  }
+
+  // ========== 文本截断 ==========
+  function truncateText(text, maxLen = 35) {
+    if (!text) return '';
+    return text.length > maxLen ? text.slice(0, maxLen) + '...' : text;
+  }
+
+  // ========== 日期时间格式化 ==========
+  function formatDateTime(dateTimeStr) {
+    if (!dateTimeStr) return '暂无数据';
+    const date = new Date(dateTimeStr);
+    if (isNaN(date.getTime())) return dateTimeStr;
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    const count = preventiveMeasures.length + 1;
-    return `PC${year%100}${month}${day}${String(count).padStart(4, '0')}`;
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}`;
   }
 
-  // 截断文本函数
-  function truncateText(text, maxLength = 40) {
-    if (!text || typeof text !== 'string') return '';
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
+  // ========== 统计卡片 ==========
+  function updateStats() {
+    const total = preventiveMeasures.length;
+    const categories = new Set(preventiveMeasures.map(m => m.category));
+    const today = new Date().toISOString().split('T')[0];
+    const todayCount = preventiveMeasures.filter(m => {
+      if (!m.createTime) return false;
+      return m.createTime.toString().startsWith(today);
+    }).length;
+
+    document.getElementById('totalCount').textContent = total;
+    document.getElementById('categoryCount').textContent = categories.size;
+    document.getElementById('todayNew').textContent = todayCount;
   }
 
-  // 表单验证
+  function filterByCategory(cat) {
+    document.getElementById('categoryFilter').value = cat === 'all' ? 'all' : cat;
+    filterMeasures();
+  }
+
+  // ========== 表单验证 ==========
   function validateForm() {
-    let isValid = true;
-    const measureDescription = document.getElementById('measureDescription').value.trim();
-
-    document.querySelectorAll('.error-tip').forEach(tip => {
-      tip.style.display = 'none';
-    });
-
-    if (!measureDescription) {
+    let valid = true;
+    document.querySelectorAll('.error-tip').forEach(el => el.style.display = 'none');
+    if (!document.getElementById('measureDescription').value.trim()) {
       document.getElementById('descriptionError').style.display = 'block';
-      isValid = false;
+      valid = false;
     }
-
-    return isValid;
+    if (!document.getElementById('measureCategory').value) {
+      document.getElementById('categoryError').style.display = 'block';
+      valid = false;
+    }
+    return valid;
   }
 
-  // 打开新增/编辑弹窗
+  // ========== 弹窗 ==========
   function openModal(type, measure = null) {
     const modal = document.getElementById('measureModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const editMeasureCode = document.getElementById('editMeasureCode');
-
     document.getElementById('measureForm').reset();
-    document.querySelectorAll('.error-tip').forEach(tip => tip.style.display = 'none');
-
+    document.querySelectorAll('.error-tip').forEach(el => el.style.display = 'none');
     if (type === 'add') {
-      modalTitle.textContent = '新增预防措施';
-      editMeasureCode.value = '';
-    } else if (type === 'edit') {
-      modalTitle.textContent = '编辑预防措施';
-      editMeasureCode.value = measure.measureCode;
+      document.getElementById('modalTitle').textContent = '新增预防措施';
+      document.getElementById('editMeasureCode').value = '';
+    } else {
+      document.getElementById('modalTitle').textContent = '编辑预防措施';
+      document.getElementById('editMeasureCode').value = measure.measureCode;
+      document.getElementById('measureCategory').value = measure.category || '未分类';
       document.getElementById('measureDescription').value = measure.measureDescription || '';
     }
-
     modal.style.display = 'flex';
   }
 
-  // 关闭弹窗
   function closeModal() {
     document.getElementById('measureModal').style.display = 'none';
   }
 
-  // 新增预防措施
-  function addMeasure() {
-    const currentDate = new Date().toISOString().split('T')[0];
-
-    const newMeasure = {
-      measureDescription: document.getElementById('measureDescription').value.trim(),
-      createTime: currentDate,
-      lastUpdateTime: currentDate,
-      measureCode: generateMeasureCode()
+  // ========== 新增（调用后端 POST） ==========
+  async function addMeasure() {
+    const body = {
+      measureCode: generateMeasureCode(),
+      category: document.getElementById('measureCategory').value,
+      measureDescription: document.getElementById('measureDescription').value.trim()
     };
-
-    preventiveMeasures.push(newMeasure);
-    localStorage.setItem('preventiveMeasures', JSON.stringify(preventiveMeasures));
-    filteredMeasures = [...preventiveMeasures];
-    closeModal();
-    renderMeasureTable();
-    renderPagination();
-  }
-
-  // 编辑预防措施
-  function updateMeasure() {
-    const measureCode = document.getElementById('editMeasureCode').value;
-    const index = preventiveMeasures.findIndex(m => m.measureCode === measureCode);
-
-    if (index !== -1) {
-      preventiveMeasures[index] = {
-        ...preventiveMeasures[index],
-        measureDescription: document.getElementById('measureDescription').value.trim(),
-        lastUpdateTime: new Date().toISOString().split('T')[0]
-      };
-      localStorage.setItem('preventiveMeasures', JSON.stringify(preventiveMeasures));
-      filteredMeasures = [...preventiveMeasures];
-      closeModal();
-      renderMeasureTable();
+    try {
+      const res = await fetch(API_BASE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const result = await res.json();
+      if (result.code === 200) {
+        await fetchMeasures();
+        closeModal();
+        renderMeasureTable();
+        updateStats();
+      } else {
+        alert('新增失败：' + result.message);
+      }
+    } catch (err) {
+      console.error('新增失败:', err);
+      alert('网络错误');
     }
   }
 
-  // 显示预防措施详情
-  function showMeasureDetail(measure) {
-    const detailModal = document.getElementById('detailModal');
-    const detailBody = document.getElementById('detailBody');
+  // ========== 编辑（调用后端 PUT） ==========
+  async function updateMeasure() {
+    const code = document.getElementById('editMeasureCode').value;
+    const measure = preventiveMeasures.find(m => m.measureCode === code);
+    if (!measure) return;
 
-    detailBody.innerHTML = `
-      <div class="detail-item">
-        <div class="detail-label">措施编号</div>
-        <div class="detail-value">${measure.measureCode}</div>
-      </div>
-      <div class="detail-item">
-        <div class="detail-label">措施描述</div>
-        <div class="detail-value">${measure.measureDescription || '暂无描述'}</div>
-      </div>
-      <div class="detail-item">
-        <div class="detail-label">创建时间</div>
-        <div class="detail-value">${measure.createTime}</div>
-      </div>
-      <div class="detail-item">
-        <div class="detail-label">最近更新时间</div>
-        <div class="detail-value">${measure.lastUpdateTime}</div>
-      </div>
+    const body = {
+      measureCode: measure.measureCode,
+      category: document.getElementById('measureCategory').value,
+      measureDescription: document.getElementById('measureDescription').value.trim()
+    };
+    try {
+      const res = await fetch(`${API_BASE}/${measure.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const result = await res.json();
+      if (result.code === 200) {
+        await fetchMeasures();
+        closeModal();
+        renderMeasureTable();
+        updateStats();
+      } else {
+        alert('编辑失败：' + result.message);
+      }
+    } catch (err) {
+      console.error('编辑失败:', err);
+      alert('网络错误');
+    }
+  }
+
+  // ========== 详情 ==========
+  function showDetail(measure) {
+    document.getElementById('detailBody').innerHTML = `
+      <div class="detail-item"><div class="detail-label">措施编号</div><div class="detail-value">${measure.measureCode}</div></div>
+      <div class="detail-item"><div class="detail-label">措施分类</div><div class="detail-value">${measure.category || '未分类'}</div></div>
+      <div class="detail-item"><div class="detail-label">措施描述</div><div class="detail-value">${measure.measureDescription || '暂无描述'}</div></div>
+      <div class="detail-item"><div class="detail-label">创建时间</div><div class="detail-value">${formatDateTime(measure.createTime)}</div></div>
+      <div class="detail-item"><div class="detail-label">最近更新</div><div class="detail-value">${formatDateTime(measure.updateTime)}</div></div>
     `;
-
-    detailModal.style.display = 'flex';
+    document.getElementById('detailModal').style.display = 'flex';
   }
 
-  // 关闭详情弹窗
-  function closeDetailModal() {
-    document.getElementById('detailModal').style.display = 'none';
+
+  function showDetailByCode(code) {
+    const m = preventiveMeasures.find(m => m.measureCode === code);
+    if (m) showDetail(m);
   }
 
-  // 渲染预防措施表格
+  // ========== 表格渲染 ==========
   function renderMeasureTable() {
-    const dataTableBody = document.getElementById('dataTableBody');
-    dataTableBody.innerHTML = '';
-    const tableContainer = document.getElementById('tableContainer');
-
+    const tbody = document.getElementById('dataTableBody');
+    tbody.innerHTML = '';
+    const container = document.getElementById('tableContainer');
+    const noData = document.getElementById('noDataGuide');
     if (filteredMeasures.length === 0) {
-      tableContainer.style.display = 'none';
+      container.style.display = 'none';
+      noData.style.display = 'block';
       return;
     }
+    noData.style.display = 'none';
+    container.style.display = 'block';
 
-    tableContainer.style.display = 'block';
-
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const paginatedMeasures = filteredMeasures.slice(startIndex, endIndex);
-
-    paginatedMeasures.forEach((measure, index) => {
-      const truncatedDesc = truncateText(measure.measureDescription, 40);
-
+    const start = (currentPage - 1) * pageSize;
+    const page = filteredMeasures.slice(start, start + pageSize);
+    page.forEach(measure => {
       const row = document.createElement('tr');
-      row.setAttribute('data-index', index);
       row.setAttribute('data-measure', measure.measureCode);
+      row.setAttribute('data-id', measure.id);
       row.innerHTML = `
         <td><input type="checkbox" class="batch-checkbox" data-measure="${measure.measureCode}"></td>
-        <td class="clickable-cell">
-          ${measure.measureCode}
-        </td>
-        <td class="clickable-cell desc-cell" title="${measure.measureDescription || '暂无描述'}">
-          ${truncatedDesc || '暂无描述'}
-        </td>
-        <td class="clickable-cell">
-          ${measure.lastUpdateTime}
-        </td>
+        <td class="clickable-cell">${measure.measureCode}</td>
+        <td><span class="category-tag">${measure.category || '未分类'}</span></td>
+        <td class="clickable-cell desc-cell" title="${measure.measureDescription || ''}">${truncateText(measure.measureDescription, 35)}</td>
+        <td class="clickable-cell">${formatDateTime(measure.updateTime)}</td>
         <td>
           <div class="operation-item">
-            <button class="op-btn op-edit" data-measure="${measure.measureCode}">
-              <i class="fa-solid fa-edit"></i>
-            </button>
-            <button class="op-btn op-delete" data-measure="${measure.measureCode}">
-              <i class="fa-solid fa-trash-can"></i>
-            </button>
+            <button class="op-btn op-edit" data-measure="${measure.measureCode}"><i class="fa-solid fa-edit"></i></button>
+            <button class="op-btn op-delete" data-measure="${measure.measureCode}"><i class="fa-solid fa-trash-can"></i></button>
           </div>
         </td>
       `;
-      dataTableBody.appendChild(row);
+      tbody.appendChild(row);
     });
-
-    bindOperationBtnEvents();
-    bindCheckboxEvents();
-    bindCellClickEvents();
+    bindRowEvents();
+    renderPagination();
   }
 
-  // 绑定单元格点击事件 - 修改为与特性库相同
-  function bindCellClickEvents() {
+  // ========== 行事件绑定 ==========
+  function bindRowEvents() {
     document.querySelectorAll('.clickable-cell').forEach(cell => {
-      cell.onclick = null;
       cell.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const row = this.closest('tr');
-        if (row) {
-          const measureCode = row.getAttribute('data-measure');
-          if (measureCode) {
-            showMeasureDetailByCode(measureCode);
-          }
-        }
+        const code = this.closest('tr').dataset.measure;
+        if (code) showDetailByCode(code);
       });
     });
-  }
-
-  // 根据措施编号显示详情
-  function showMeasureDetailByCode(measureCode) {
-    const measure = preventiveMeasures.find(m => m.measureCode === measureCode);
-    if (measure) {
-      showMeasureDetail(measure);
-    }
-  }
-
-  // 绑定复选框事件
-  function bindCheckboxEvents() {
-    const checkAll = document.getElementById('checkAll');
-    const checkItems = document.querySelectorAll('.batch-checkbox[data-measure]');
-
-    checkAll.addEventListener('change', function() {
-      checkItems.forEach(item => {
-        item.checked = this.checked;
-      });
-    });
-
-    checkItems.forEach(item => {
-      item.addEventListener('change', function() {
-        const allChecked = Array.from(checkItems).every(i => i.checked);
-        checkAll.checked = allChecked;
-      });
-    });
-  }
-
-  // 批量删除预防措施
-  function batchDeleteMeasures() {
-    const checkedItems = document.querySelectorAll('.batch-checkbox[data-measure]:checked');
-    if (checkedItems.length === 0) {
-      alert('请选择要删除的预防措施！');
-      return;
-    }
-
-    if (confirm(`确认删除选中的${checkedItems.length}个预防措施吗？删除后不可恢复！`)) {
-      const deleteCodes = Array.from(checkedItems).map(item => item.getAttribute('data-measure'));
-      preventiveMeasures = preventiveMeasures.filter(m => !deleteCodes.includes(m.measureCode));
-      localStorage.setItem('preventiveMeasures', JSON.stringify(preventiveMeasures));
-      filteredMeasures = [...preventiveMeasures];
-      currentPage = 1;
-      renderMeasureTable();
-      renderPagination();
-    }
-  }
-
-  // 渲染分页
-  function renderPagination() {
-    const totalPages = Math.ceil(filteredMeasures.length / pageSize);
-    const pageContainer = document.getElementById('pageNumberContainer');
-    const prevBtn = document.getElementById('prevPageBtn');
-    const nextBtn = document.getElementById('nextPageBtn');
-    const paginationContainer = document.getElementById('paginationContainer');
-
-    if (filteredMeasures.length === 0) {
-      paginationContainer.style.display = 'none';
-      return;
-    }
-
-    paginationContainer.style.display = 'flex';
-    pageContainer.innerHTML = '';
-
-    for (let i = 1; i <= totalPages; i++) {
-      const pageBtn = document.createElement('button');
-      pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
-      pageBtn.textContent = i;
-      pageBtn.addEventListener('click', function() {
-        currentPage = i;
-        renderMeasureTable();
-        renderPagination();
-      });
-      pageContainer.appendChild(pageBtn);
-    }
-
-    prevBtn.disabled = currentPage === 1;
-    nextBtn.disabled = currentPage === totalPages || totalPages === 0;
-  }
-
-  // 绑定操作按钮事件
-  function bindOperationBtnEvents() {
-    // 编辑按钮
     document.querySelectorAll('.op-edit').forEach(btn => {
       btn.addEventListener('click', function(e) {
         e.stopPropagation();
-        const measureCode = this.getAttribute('data-measure');
-        const measure = preventiveMeasures.find(m => m.measureCode === measureCode);
-        if (measure) {
-          openModal('edit', measure);
-        }
+        const code = this.dataset.measure;
+        const measure = preventiveMeasures.find(m => m.measureCode === code);
+        if (measure) openModal('edit', measure);
       });
     });
-
-    // 删除按钮
     document.querySelectorAll('.op-delete').forEach(btn => {
-      btn.addEventListener('click', function(e) {
+      btn.addEventListener('click', async function(e) {
         e.stopPropagation();
-        const measureCode = this.getAttribute('data-measure');
-        const measure = preventiveMeasures.find(m => m.measureCode === measureCode);
-        if (confirm(`确认删除预防措施【${measure.measureCode}】吗？删除后不可恢复！`)) {
-          preventiveMeasures = preventiveMeasures.filter(m => m.measureCode !== measureCode);
-          localStorage.setItem('preventiveMeasures', JSON.stringify(preventiveMeasures));
-          filteredMeasures = [...preventiveMeasures];
-          const totalPages = Math.ceil(filteredMeasures.length / pageSize);
-          if (currentPage > totalPages && totalPages > 0) {
-            currentPage = totalPages;
-          } else if (totalPages === 0) {
-            currentPage = 1;
+        const code = this.dataset.measure;
+        const measure = preventiveMeasures.find(m => m.measureCode === code);
+        if (!measure) return;
+        if (confirm(`确定删除措施【${measure.measureCode}】吗？`)) {
+          try {
+            const res = await fetch(`${API_BASE}/${measure.id}`, { method: 'DELETE' });
+            const result = await res.json();
+            if (result.code === 200) {
+              await fetchMeasures();
+              if (currentPage > Math.ceil(filteredMeasures.length / pageSize) && filteredMeasures.length > 0) currentPage--;
+              renderMeasureTable();
+              updateStats();
+            } else {
+              alert('删除失败：' + result.message);
+            }
+          } catch (err) {
+            console.error('删除失败:', err);
+            alert('网络错误');
           }
-          renderMeasureTable();
-          renderPagination();
         }
       });
     });
+    document.getElementById('checkAll').addEventListener('change', function() {
+      document.querySelectorAll('.batch-checkbox[data-measure]').forEach(cb => cb.checked = this.checked);
+    });
   }
 
-  // 多条件筛选
-  function filterMeasures() {
-    const keyword = document.getElementById('searchKeyword').value.trim().toLowerCase();
+  // ========== 批量删除（调用后端 DELETE /batch） ==========
+  async function batchDelete() {
+    const checked = document.querySelectorAll('.batch-checkbox[data-measure]:checked');
+    if (checked.length === 0) return alert('请选择要删除的措施');
+    if (!confirm(`确定删除选中的 ${checked.length} 条措施吗？`)) return;
+    const ids = Array.from(checked).map(cb => Number(cb.closest('tr').dataset.id));
+    try {
+      const res = await fetch(`${API_BASE}/batch`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(ids)
+      });
+      const result = await res.json();
+      if (result.code === 200) {
+        await fetchMeasures();
+        currentPage = 1;
+        renderMeasureTable();
+        updateStats();
+      } else {
+        alert('批量删除失败：' + result.message);
+      }
+    } catch (err) {
+      console.error('批量删除失败:', err);
+      alert('网络错误');
+    }
+  }
 
-    filteredMeasures = preventiveMeasures.filter(measure => {
-      const matchKeyword = keyword === '' ||
-              measure.measureCode.toLowerCase().includes(keyword) ||
-              measure.measureDescription.toLowerCase().includes(keyword);
+  // ========== 分页 ==========
+  function renderPagination() {
+    const total = Math.ceil(filteredMeasures.length / pageSize);
+    const container = document.getElementById('pageNumberContainer');
+    container.innerHTML = '';
+    document.getElementById('paginationContainer').style.display = total > 1 ? 'flex' : 'none';
+    for (let i = 1; i <= total; i++) {
+      const btn = document.createElement('button');
+      btn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+      btn.textContent = i;
+      btn.onclick = () => { currentPage = i; renderMeasureTable(); };
+      container.appendChild(btn);
+    }
+    document.getElementById('prevPageBtn').disabled = currentPage === 1;
+    document.getElementById('nextPageBtn').disabled = currentPage === total;
+  }
 
-      return matchKeyword;
-    });
+  // ========== 搜索（调用后端 /search） ==========
+  async function filterMeasures() {
+    const keyword = document.getElementById('searchKeyword').value.trim();
+    const cat = document.getElementById('categoryFilter').value;
 
+    if (!keyword && cat === 'all') {
+      await fetchMeasures();
+    } else {
+      try {
+        const params = new URLSearchParams();
+        if (keyword) params.append('keyword', keyword);
+        if (cat !== 'all') params.append('category', cat);
+        const res = await fetch(`${API_BASE}/search?${params.toString()}`);
+        const result = await res.json();
+        filteredMeasures = result.code === 200 ? (result.data || []) : [];
+      } catch (err) {
+        console.error('搜索失败:', err);
+      }
+    }
     currentPage = 1;
     renderMeasureTable();
-    renderPagination();
   }
 
-  // 重置筛选条件
-  function resetFilters() {
+  // ========== 重置 ==========
+  async function resetFilters() {
     document.getElementById('searchKeyword').value = '';
-    filteredMeasures = [...preventiveMeasures];
+    document.getElementById('categoryFilter').value = 'all';
+    await fetchMeasures();
     currentPage = 1;
     renderMeasureTable();
-    renderPagination();
   }
 
-  // 绑定所有事件监听
-  function bindEventListeners() {
-    // 搜索按钮
+  // ========== 页面初始化 ==========
+  document.addEventListener('DOMContentLoaded', async () => {
+    await fetchMeasures();
+    updateStats();
+    renderMeasureTable();
     document.getElementById('searchBtn').addEventListener('click', filterMeasures);
-    // 搜索框回车
-    document.getElementById('searchKeyword').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') filterMeasures();
-    });
-    // 重置按钮
+    document.getElementById('searchKeyword').addEventListener('keydown', e => e.key === 'Enter' && filterMeasures());
     document.getElementById('resetBtn').addEventListener('click', resetFilters);
-    // 新增预防措施按钮
     document.getElementById('addMeasureBtn').addEventListener('click', () => openModal('add'));
-    // 批量删除按钮
-    document.getElementById('batchDeleteBtn').addEventListener('click', batchDeleteMeasures);
-    // 关闭弹窗按钮
-    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
-    document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
-    // 关闭详情弹窗按钮
-    document.getElementById('closeDetailBtn').addEventListener('click', closeDetailModal);
-    // 表单提交
-    document.getElementById('measureForm').addEventListener('submit', function(e) {
+    document.getElementById('batchDeleteBtn').addEventListener('click', batchDelete);
+    document.getElementById('measureForm').addEventListener('submit', e => {
       e.preventDefault();
       if (validateForm()) {
-        const editMeasureCode = document.getElementById('editMeasureCode').value;
-        if (editMeasureCode) {
-          updateMeasure();
-        } else {
-          addMeasure();
-        }
+        document.getElementById('editMeasureCode').value ? updateMeasure() : addMeasure();
       }
     });
-    // 分页按钮
-    document.getElementById('prevPageBtn').addEventListener('click', function() {
-      if (currentPage > 1) {
-        currentPage--;
-        renderMeasureTable();
-        renderPagination();
-      }
-    });
-    document.getElementById('nextPageBtn').addEventListener('click', function() {
-      const totalPages = Math.ceil(filteredMeasures.length / pageSize);
-      if (currentPage < totalPages) {
-        currentPage++;
-        renderMeasureTable();
-        renderPagination();
-      }
-    });
-  }
+    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+    document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
+    document.getElementById('closeDetailBtn').addEventListener('click', () => document.getElementById('detailModal').style.display = 'none');
+    document.getElementById('prevPageBtn').addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderMeasureTable(); } });
+    document.getElementById('nextPageBtn').addEventListener('click', () => { if (currentPage < Math.ceil(filteredMeasures.length / pageSize)) { currentPage++; renderMeasureTable(); } });
+  });
 </script>
 </body>
 </html>
